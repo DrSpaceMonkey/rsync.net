@@ -54,7 +54,7 @@ namespace NetSync.FileSystem
 			{
 				string[] args = path.Split(':');
 
-				string[] dirs = args[1].Replace(":", "").Split('/');
+				string[] dirs = args[1].Replace(":", String.Empty).Split('/');
 				string newpath = args[0]+":";
 				for(int i=1; i<dirs.Length; i++)
 				{
@@ -74,14 +74,14 @@ namespace NetSync.FileSystem
 			if (path != null)
 			{
 				string[] dirs = path.Split('/');
-				string dirName="";
+				string dirName=String.Empty;
 				if (dirs.Length>2)
 				{
 					dirName = path.Substring(0, path.Length-dirs[dirs.Length-1].Length-1);
 				}
 				return dirName;
 			}
-			return "";
+			return String.Empty;
 		}
 		public static void Delete(string path)
 		{

@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.IO;
 using Win32;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -38,11 +39,11 @@ namespace NetSync
 
 		public string FNameTo()
 		{
-			string fullName = "";		
+			string fullName = String.Empty;		
 	
-			if(baseName == null || baseName.CompareTo("") == 0)
+			if(baseName == null || baseName.CompareTo(String.Empty) == 0)
 				baseName = null;
-			if(dirName == null || dirName.CompareTo("") == 0)
+			if(dirName == null || dirName.CompareTo(String.Empty) == 0)
 				dirName = null;
 								
 			if(dirName != null && baseName != null)			
@@ -56,19 +57,24 @@ namespace NetSync
 		}		
 	}
 
-	public class FileStructComparer : IComparer  
+	public class FileStructComparer : IComparer<FileStruct>, IComparer  
 	{
 		int IComparer.Compare( Object x, Object y )  
 		{
-			return FileList.fileCompare((FileStruct)x,(FileStruct)y);
+            return FileList.fileCompare((FileStruct)x, (FileStruct)y);
 		}
-	}
+
+        public int Compare(FileStruct x, FileStruct y)
+        {
+            return FileList.fileCompare(x, y);
+        }
+    }
 
 	public class FileList
 	{
-		private string lastDir = "";
-		private string fileListDir = "";
-		private string lastName = "";
+		private string lastDir = String.Empty;
+		private string fileListDir = String.Empty;
+		private string lastName = String.Empty;
 		private UInt32 mode = 0;
 		private DateTime modTime = DateTime.Now;							
 		private Options options;
@@ -79,27 +85,27 @@ namespace NetSync
 			options = opt;
 			checkSum = new CheckSum(options);
 		}
-		
-		public ArrayList sendFileList(ClientInfo cInfo, string[] argv)
+
+        public List<FileStruct> sendFileList(ClientInfo cInfo, string[] argv)
 		{
 			IOStream f = null;
 			if(cInfo != null)
 				f = cInfo.IoStream;
 
-			string dir ="", olddir =""; 
-			string lastPath = "";
-			string fileName = "";
+			string dir =String.Empty, olddir =String.Empty; 
+			string lastPath = String.Empty;
+			string fileName = String.Empty;
 			bool useFFFD = false;
 			if(showFileListP() && f != null)
 				startFileListProgress("building file list");
 			Int64 startWrite = Options.stats.totalWritten;
-			ArrayList fileList = new ArrayList();			
+            List<FileStruct> fileList = new List<FileStruct>();			
 			if(f != null)
 			{
 				f.IOStartBufferingOut();
 				if(Options.filesFromFD != null)
 				{					
-					if(argv[0] != null && argv[0].CompareTo("") != 0 && !Util.pushDir(argv[0]))
+					if(argv[0] != null && argv[0].CompareTo(String.Empty) != 0 && !Util.pushDir(argv[0]))
 					{						
 						MainClass.Exit("pushDir "+ Util.fullFileName(argv[0]) +" failed", cInfo);
 					}
@@ -132,7 +138,7 @@ namespace NetSync
 				}		
 
 				dir = null;
-				olddir = "";
+				olddir = String.Empty;
 
 				if(options.relativePaths == 0)
 				{
@@ -178,7 +184,7 @@ namespace NetSync
 						}
 					}
 				}
-				if(dir != null && dir != "")
+				if(dir != null && dir != String.Empty)
 				{
 					olddir = Util.currDir;
 					if(!Util.pushDir(dir))
@@ -192,7 +198,7 @@ namespace NetSync
 						fileListDir = lastDir = dir;
 				}
 				sendFileName( f, fileList, fileName, options.recurse, Options.XMIT_TOP_DIR);
-				if(olddir != null && olddir != "")
+				if(olddir != null && olddir != String.Empty)
 				{
 					fileListDir = null;
 					if(Util.popDir(olddir))
@@ -222,10 +228,10 @@ namespace NetSync
 			return fileList;
 		}
 
-		public ArrayList receiveFileList(ClientInfo cInfo)
+        public List<FileStruct> receiveFileList(ClientInfo cInfo)
 		{
-			IOStream f = cInfo.IoStream;			
-			ArrayList fileList = new ArrayList();
+			IOStream f = cInfo.IoStream;
+            List<FileStruct> fileList = new List<FileStruct>();
 
 			if(showFileListP())
 				startFileListProgress("receiving file list");
@@ -241,10 +247,10 @@ namespace NetSync
 				if(file == null)
 					continue;
 				fileList.Add(file);
-				Options.stats.totalSize += ((FileStruct)fileList[fileList.Count-1]).length;
+				Options.stats.totalSize += (fileList[fileList.Count-1]).length;
 				mayBeEmitFileListProgress(fileList);
 				if(options.verbose > 2)
-					Log.WriteLine("receiveFileName(" + ((FileStruct)fileList[fileList.Count-1]).FNameTo() + ")");
+					Log.WriteLine("receiveFileName(" + (fileList[fileList.Count-1]).FNameTo() + ")");
 			}
 			receiveFileEntry(0, null);
 
@@ -265,7 +271,7 @@ namespace NetSync
 				outputFileList(fileList);
 			if(options.listOnly)
 				for(int i = 0; i < fileList.Count; i++)
-					listFileEntry((FileStruct)fileList[i]);
+					listFileEntry(fileList[i]);
 			if(options.verbose > 2)
 				Log.WriteLine("receiveFileList done");
 
@@ -295,18 +301,18 @@ namespace NetSync
 			if(s2.Length == i)
 				return (int)s1[i];			
 			return (int)s1[i] - (int)s2[i];
-		}		
+		}
 
-		public static int fileListFind(ArrayList fileList, FileStruct file)
+        public static int fileListFind(List<FileStruct> fileList, FileStruct file)
 		{
 			int low = 0, high = fileList.Count - 1;
-			while(high >= 0 && ((FileStruct)fileList[high]).baseName == null) high--;
+			while(high >= 0 && (fileList[high]).baseName == null) high--;
 			if (high < 0)
 				return -1;
 			while(low != high)
 			{
 				int mid = (low + high) / 2;
-				int ret = fileCompare((FileStruct)fileList[fileListUp(fileList, mid)],file);
+				int ret = fileCompare(fileList[fileListUp(fileList, mid)],file);
 				if(ret == 0)
 					return fileListUp(fileList,mid);
 				if(ret > 0)
@@ -315,23 +321,23 @@ namespace NetSync
 					low = mid + 1;
 			}
 
-			if(fileCompare((FileStruct)fileList[fileListUp(fileList, low)],file) == 0)
+			if(fileCompare(fileList[fileListUp(fileList, low)],file) == 0)
 				return fileListUp(fileList, low);
 			return -1;
 		}
 
-		static int fileListUp(ArrayList fileList, int i)
+        static int fileListUp(List<FileStruct> fileList, int i)
 		{
-			while (((FileStruct)fileList[i]).baseName == null) i++;
+			while ((fileList[i]).baseName == null) i++;
 			return i;
-		} 
+		}
 
-		public void outputFileList(ArrayList fileList)
+        public void outputFileList(List<FileStruct> fileList)
 		{
-			string uid = "", gid = "";
+			string uid = String.Empty, gid = String.Empty;
 			for(int i = 0; i< fileList.Count; i++)
 			{
-				FileStruct file = (FileStruct)fileList[i];
+				FileStruct file = fileList[i];
 				if((options.amRoot || options.amSender) && options.preserveUID)
 					uid = " uid=" + file.uid;
 				if( options.preserveGID && file.gid != Options.GID_NONE )
@@ -342,13 +348,13 @@ namespace NetSync
 			}
 		}
 
-		public void sendFileName(IOStream f, ArrayList fileList, string fileName, bool recursive, UInt32 baseFlags)
+        public void sendFileName(IOStream f, List<FileStruct> fileList, string fileName, bool recursive, UInt32 baseFlags)
 		{
 			FileStruct file = makeFile(fileName, fileList, f == null && options.deleteExcluded ? Options.SERVER_EXCLUDES : Options.ALL_EXCLUDES);
 			if(file == null)
 				return;
 			mayBeEmitFileListProgress(fileList);
-			if(file.baseName != null && file.baseName.CompareTo("") != 0)
+			if(file.baseName != null && file.baseName.CompareTo(String.Empty) != 0)
 			{
 				fileList.Add(file);
 				sendFileEntry(file, f, baseFlags );
@@ -361,12 +367,12 @@ namespace NetSync
 			}
 		}
 
-		public FileStruct makeFile(string fileName, ArrayList fileList, int excludeLevel)
+        public FileStruct makeFile(string fileName, List<FileStruct> fileList, int excludeLevel)
 		{
-			if(fileName == null || fileName.CompareTo("") == 0) return null;
+			if(fileName == null || fileName.CompareTo(String.Empty) == 0) return null;
 			string thisName = Util.cleanFileName(fileName,false);
 			if(options.sanitizePath)
-				thisName = Util.sanitizePath(thisName, "", 0);
+				thisName = Util.sanitizePath(thisName, String.Empty, 0);
 			FileStruct fs = new FileStruct();
 			// TODO: path length
 			if(FileSystem.Directory.Exists(thisName))
@@ -426,7 +432,7 @@ namespace NetSync
 		{			
 			if(cInfo == null)
 			{
-				lastName = "";
+				lastName = String.Empty;
 				return null;
 			}
 			IOStream f = cInfo.IoStream;
@@ -451,14 +457,14 @@ namespace NetSync
 			
 			thisName = Util.cleanFileName(thisName, false);
 			if(options.sanitizePath)
-				thisName = Util.sanitizePath(thisName, "", 0);
+				thisName = Util.sanitizePath(thisName, String.Empty, 0);
 
-			string baseName = "";
-			string dirName = "";			
+			string baseName = String.Empty;
+			string dirName = String.Empty;			
 			if (thisName.LastIndexOf("/") != -1) 
 			{
 				baseName = Path.GetFileName(thisName);				
-				dirName = FileSystem.Directory.GetDirectoryName(thisName).Replace(@"\","/").Replace(":","");
+				dirName = FileSystem.Directory.GetDirectoryName(thisName).Replace(@"\","/").Replace(":",String.Empty);
 			} 
 			else 
 			{
@@ -510,10 +516,10 @@ namespace NetSync
 			if(file == null)
 			{
 				f.writeByte(0);
-				lastName = "";
+				lastName = String.Empty;
 				return;
 			}
-			string fileName = file.FNameTo().Replace(":","");
+			string fileName = file.FNameTo().Replace(":",String.Empty);
 			for (l1 = 0;
 				lastName.Length >l1 && (fileName[l1] == lastName[l1]) && (l1 < 255);
 				l1++) {}
@@ -589,7 +595,7 @@ namespace NetSync
 			lastName = fileName;
 		}
 
-		public void sendDirectory(IOStream f, ArrayList fileList, string dir)
+        public void sendDirectory(IOStream f, List<FileStruct> fileList, string dir)
 		{
 			FileSystem.DirectoryInfo di = new FileSystem.DirectoryInfo(dir);
 			if(di.Exists)
@@ -615,7 +621,7 @@ namespace NetSync
 			}
 		}
 
-		public void cleanFileList(ArrayList fileList, bool stripRoot, bool noDups)
+        public void cleanFileList(List<FileStruct> fileList, bool stripRoot, bool noDups)
 		{			
 			if(fileList == null || fileList.Count == 0)
 				return;
@@ -629,10 +635,10 @@ namespace NetSync
 			{
 				for(int i = 0; i <fileList.Count; i++)
 				{
-					if(((FileStruct)fileList[i]).dirName != null && ((FileStruct)fileList[i]).dirName[0] == '/')
-						((FileStruct)fileList[i]).dirName = ((FileStruct)fileList[i]).dirName.Substring(1);
-					if(((FileStruct)fileList[i]).dirName != null && ((FileStruct)fileList[i]).dirName.CompareTo("") == 0)
-						((FileStruct)fileList[i]).dirName = null;
+					if((fileList[i]).dirName != null && (fileList[i]).dirName[0] == '/')
+						(fileList[i]).dirName = (fileList[i]).dirName.Substring(1);
+					if((fileList[i]).dirName != null && (fileList[i]).dirName.CompareTo(String.Empty) == 0)
+						(fileList[i]).dirName = null;
 				}
 
 			}
@@ -648,33 +654,33 @@ namespace NetSync
 		{
 			Log.Write(kind + " ...");
 			if (options.verbose > 1 || options.doProgress)
-				Log.WriteLine("");
+				Log.WriteLine(String.Empty);
 		}
 
-		private void finishFileListProgress(ArrayList fileList)
+        private void finishFileListProgress(List<FileStruct> fileList)
 		{
 			if (options.doProgress) 
 				Log.WriteLine(fileList.Count.ToString() + " file"+ (fileList.Count == 1 ? " " : "s ") + "to consider"); 
 			else
 				Log.WriteLine("Done.");
-		} 
+		}
 
-		private void mayBeEmitFileListProgress(ArrayList fileList)
+        private void mayBeEmitFileListProgress(List<FileStruct> fileList)
 		{
 			if(options.doProgress && showFileListP() && (fileList.Count % 100) == 0)
 				EmitFileListProgress(fileList);
 		}
 
-		private void EmitFileListProgress(ArrayList fileList)
+        private void EmitFileListProgress(List<FileStruct> fileList)
 		{
 			Log.WriteLine(" " + fileList.Count + " files...");
 		}
 
 		private void listFileEntry(FileStruct fileEntry)
 		{
-			if(fileEntry.baseName == null || fileEntry.baseName.CompareTo("") == 0)
+			if(fileEntry.baseName == null || fileEntry.baseName.CompareTo(String.Empty) == 0)
 				return;			
-			string perms = "";			
+			string perms = String.Empty;			
 			Log.WriteLine(perms + " " + fileEntry.length + " " + fileEntry.modTime.ToString() + " " + fileEntry.FNameTo());
 		}
 
@@ -689,7 +695,7 @@ namespace NetSync
 
 			if (excludeLevel == Options.NO_EXCLUDES)
 				return false;
-			if (fileName.CompareTo("") != 0) 
+			if (fileName.CompareTo(String.Empty) != 0) 
 			{
 				/* never exclude '.', even if somebody does --exclude '*' */
 				if (fileName[0] == '.' && fileName.Length == 1)

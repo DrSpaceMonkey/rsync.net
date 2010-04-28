@@ -20,6 +20,7 @@ using System.IO;
 using System.Collections;
 using System.Text;
 using NetSync;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -30,13 +31,18 @@ namespace NetSync
 		public int i;
 	} 
 
-	public class TargetComparer : IComparer  
+	public class TargetComparer : IComparer<Target>, IComparer  
 	{
 		int IComparer.Compare( Object x, Object y )  
 		{
 			return Match.CompareTargets((Target)x,(Target)y);
 		}
-	}
+
+        public int Compare(Target x, Target y)
+        {
+            return Match.CompareTargets(x, y);
+        }
+    }
 
 	public class Match
 	{
@@ -53,7 +59,7 @@ namespace NetSync
 		private int totalTagHits;
 		private int totalMatches;
 		private int lastMatch;
-		private ArrayList targets = new ArrayList();
+        private List<Target> targets = new List<Target>();
 		private int[] tagTable = new int[TABLESIZE];
 
 		private Options options;		
@@ -85,8 +91,8 @@ namespace NetSync
 
 			for (int i = 0; i < s.count; i++) 
 			{
-				((Target)targets[i]).i = i;
-				((Target)targets[i]).t = GetTag(s.sums[i].sum1);
+				targets[i].i = i;
+				targets[i].t = GetTag(s.sums[i].sum1);
 			}
 
 			targets.Sort(0, s.count, new TargetComparer());

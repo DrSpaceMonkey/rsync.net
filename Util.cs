@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
 namespace NetSync
 {
 	public class Util
@@ -42,7 +43,7 @@ namespace NetSync
 				currDir = FileSystem.Directory.GetCurrentDirectory();
 			}
 
-			if( dir == null || dir.CompareTo("") == 0)
+			if( dir == null || dir.CompareTo(String.Empty) == 0)
 				return false;
 			//...
 			try
@@ -91,7 +92,7 @@ namespace NetSync
 			if(cleanedName.EndsWith("\\"))
 				cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
 			if(collapseDotDot)
-				cleanedName = cleanedName.Substring(0,2) + cleanedName.Substring(2).Replace("..","");
+				cleanedName = cleanedName.Substring(0,2) + cleanedName.Substring(2).Replace("..",String.Empty);
 			return cleanedName;
 		}
 

@@ -215,7 +215,7 @@ namespace NetSync
 		 */
 		public string readFilesFromLine(Stream fd, Options options)
 		{
-			string fileName = "";
+			string fileName = String.Empty;
 			bool readingRemotely = options.remoteFilesFromFile != null;
 			bool nulls = options.eolNulls || readingRemotely;
 			while(true)
@@ -228,13 +228,13 @@ namespace NetSync
 					// ...select
 					if(nulls ? readByte == '\0' : (readByte == '\r' || readByte == '\n'))
 					{
-						if(!readingRemotely && fileName == "")
+						if(!readingRemotely && fileName == String.Empty)
 							continue;
 						break;
 					}
 					fileName += readByte;
 				}
-				if(fileName == "" || !(fileName[0] == '#' || fileName[0] == ';') )
+				if(fileName == String.Empty || !(fileName[0] == '#' || fileName[0] == ';') )
 					break;
 				continue;
 			}

@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -42,9 +43,9 @@ namespace NetSync
 			if (options.protocolVersion >= 27)
 				f.writeInt(sum.s2Length);
 			f.writeInt((int)sum.remainder);
-		} 
+		}
 
-		public void GenerateFiles(IOStream f, ArrayList fileList, string localName)
+        public void GenerateFiles(IOStream f, List<FileStruct> fileList, string localName)
 		{
 			int i;
 			int phase = 0;
@@ -55,7 +56,7 @@ namespace NetSync
 
 			for (i = 0; i < fileList.Count; i++) 
 			{
-				FileStruct file = ((FileStruct)fileList[i]);			 
+				FileStruct file = (fileList[i]);			 
 				if (file.baseName == null)
 					continue;
 				if(Util.S_ISDIR(file.mode))
@@ -83,7 +84,7 @@ namespace NetSync
 			* */
 			for (i = 0; i < fileList.Count; i++) 
 			{
-				FileStruct file = ((FileStruct)fileList[i]);
+				FileStruct file = (fileList[i]);
 				if (file.baseName != null || Util.S_ISDIR(file.mode))
 					continue;
 				ReceiveGenerator(localName != null ? localName : file.FNameTo() ,file, i, null);

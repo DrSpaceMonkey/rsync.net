@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Net;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -37,7 +38,7 @@ namespace NetSync
 					{
 						case "--version":
 							MainClass.PrintRsyncVersion();
-							MainClass.Exit("",null);
+							MainClass.Exit(String.Empty,null);
 							break;
 						case "--suffix":
 							options.backupSuffix  = args[++i];
@@ -105,7 +106,7 @@ namespace NetSync
 						case "--help":
 						case "-h":
 							MainClass.Usage();
-							MainClass.Exit("" ,null);
+							MainClass.Exit(String.Empty ,null);
 							break;
 						case "--backup":
 						case "-b":
@@ -319,7 +320,7 @@ namespace NetSync
 			if(options.amSender && !options.amServer)
 			{
 				MainClass.Usage();
-				MainClass.Exit("", null);
+				MainClass.Exit(String.Empty, null);
 			}
 			if (options.ioTimeout > 0 && options.ioTimeout < options.selectTimeout)
 				options.selectTimeout = options.ioTimeout;
@@ -363,7 +364,7 @@ namespace NetSync
 	{
 		public void Init()
 		{
-			excludeList.Add(new ExcludeStruct("", 0, 0));
+			excludeList.Add(new ExcludeStruct(String.Empty, 0, 0));
 			localExcludeList.Add(new ExcludeStruct("per-dir .cvsignore ", 0, 0));
 			serverExcludeList.Add(new ExcludeStruct("server ", 0, 0));
 		}
@@ -422,9 +423,9 @@ namespace NetSync
 		public const UInt32 XMIT_SAME_DEV = (1<<10);
 		public const UInt32 XMIT_RDEV_MINOR_IS_SMALL = (1<<11) ;
 		//
-		public ArrayList excludeList = new ArrayList();
-		public ArrayList localExcludeList = new ArrayList();
-		public ArrayList serverExcludeList = new ArrayList();
+        public List<ExcludeStruct> excludeList = new List<ExcludeStruct>();
+        public List<ExcludeStruct> localExcludeList = new List<ExcludeStruct>();
+        public List<ExcludeStruct> serverExcludeList = new List<ExcludeStruct>();
 		public string excludePathPrefix = null;
 
 		public DateTime startTime = System.DateTime.Now;
@@ -512,7 +513,7 @@ namespace NetSync
 		public Stream sockFIn = null;
 		public Stream sockFOut = null;
 		public int remoteProtocol = 0;
-		public string dir = "";
+		public string dir = String.Empty;
 		public FileStream logFile = null;		
 		public int ModuleId = -1;		
 		public string remoteAddr = null;		

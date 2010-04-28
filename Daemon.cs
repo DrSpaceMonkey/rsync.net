@@ -20,6 +20,7 @@ using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -36,9 +37,9 @@ namespace NetSync
 		private Socket Client;
 		private Thread ClientThread;
 		private ClientInfo ClientInfo;
-		private ArrayList ClientSockets;
+		private List<TCPSocketListener> ClientSockets;
 
-		public TCPSocketListener(Socket client, ref ArrayList clientSockets)
+        public TCPSocketListener(Socket client, ref List<TCPSocketListener> clientSockets)
 		{
 			Client = client;
 			ClientSockets = clientSockets;
@@ -75,7 +76,7 @@ namespace NetSync
 	public class Daemon
 	{
 		private static TcpListener Server = null;
-		private static ArrayList ClientSockets = null;
+        private static List<TCPSocketListener> ClientSockets = null;
 		private static bool StopServer = true;
 		public static Options ServerOptions = null;
 
@@ -107,7 +108,7 @@ namespace NetSync
 			}
 			Log.WriteLine("WinRSyncd starting, listening on port " + port);
 			StopServer = false;
-			ClientSockets = new ArrayList();
+            ClientSockets = new List<TCPSocketListener>();
 			while(!StopServer)
 			{
 				try
@@ -169,11 +170,11 @@ namespace NetSync
 
 			if (line[0] == '#') 
 			{
-				stream.IOPrintf("@ERROR: Unknown command '" + line.Replace("\n","") + "'\n");
+				stream.IOPrintf("@ERROR: Unknown command '" + line.Replace("\n",String.Empty) + "'\n");
 				return -1;
 			}
 
-			int i = config.GetNumberModule(line.Replace("\n",""));
+			int i = config.GetNumberModule(line.Replace("\n",String.Empty));
 			if(i < 0)
 			{
 				stream.IOPrintf("@ERROR: Unknown module " + line);
@@ -229,7 +230,7 @@ namespace NetSync
 			}
 
 			FileList fList = new FileList(options);
-			ArrayList fileList = fList.sendFileList(cInfo, args);
+            List<FileStruct> fileList = fList.sendFileList(cInfo, args);
 			if(options.verbose > 3)
 				Log.WriteLine("file list sent");
 			if (fileList.Count == 0) 
@@ -271,11 +272,11 @@ namespace NetSync
 			}
 
 			FileList fList = new FileList(cInfo.Options);
-			ArrayList fileList = fList.receiveFileList(cInfo);				
+            List<FileStruct> fileList = fList.receiveFileList(cInfo);				
 			DoReceive(cInfo, fileList,null); 
 		}
 
-		public static int DoReceive(ClientInfo cInfo, ArrayList fileList ,string localName)
+        public static int DoReceive(ClientInfo cInfo, List<FileStruct> fileList, string localName)
 		{					
 			IOStream f = cInfo.IoStream;
 			Options options = cInfo.Options;

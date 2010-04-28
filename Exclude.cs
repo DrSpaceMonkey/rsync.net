@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.IO;
 using NetSync;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -48,12 +49,12 @@ namespace NetSync
 		}
 
 		public static void AddCvsExcludes() {}
-		public void AddExcludeFile(ref ArrayList exclList, string fileName, int xFlags)
+        public void AddExcludeFile(ref List<ExcludeStruct> exclList, string fileName, int xFlags)
 		{
 			bool wordSplit = (xFlags & Options.XFLG_WORD_SPLIT) != 0;
 			TextReader f;
 			// TODO: path length
-			if(fileName == null || fileName.CompareTo("") == 0 || !FileSystem.File.Exists(fileName))
+			if(fileName == null || fileName.CompareTo(String.Empty) == 0 || !FileSystem.File.Exists(fileName))
 				return;
 			if(fileName.CompareTo("-") == 0)
 				f = System.Console.In;
@@ -75,13 +76,13 @@ namespace NetSync
 				string line = f.ReadLine();
 				if(line == null)
 					break;
-				if(line.CompareTo("") != 0 && (wordSplit || (line[0] != ';' && line[0] != '#')))
+				if(line.CompareTo(String.Empty) != 0 && (wordSplit || (line[0] != ';' && line[0] != '#')))
 					AddExclude(ref exclList, line, xFlags);
 			}
 			f.Close();
 
 		}
-		public void AddExclude(ref ArrayList exclList, string pattern, int xFlags)
+        public void AddExclude(ref List<ExcludeStruct> exclList, string pattern, int xFlags)
 		{
 			UInt32 mFlags;
 			if (pattern == null)
@@ -109,7 +110,7 @@ namespace NetSync
 			}
 		}
 
-		public void MakeExlude(ref ArrayList exclList, string pat, UInt32 mFlags)
+		public void MakeExlude(ref List<ExcludeStruct> exclList, string pat, UInt32 mFlags)
 		{
 			int exLen = 0;
 			int patLen = pat.Length;
@@ -120,7 +121,7 @@ namespace NetSync
 				exLen = options.excludePathPrefix.Length;
 			else
 				exLen = 0;
-			ret.pattern = "";
+			ret.pattern = String.Empty;
 			if(exLen != 0)
 				ret.pattern += options.excludePathPrefix;
 			ret.pattern += pat.Replace('\\','/');
@@ -155,7 +156,7 @@ namespace NetSync
 			len = 0;
 			string s = p;
 			mFlags = 0;
-			if(p.CompareTo("") == 0) return "";
+			if(p.CompareTo(String.Empty) == 0) return String.Empty;
 
 			if((xFlags & Options.XFLG_WORD_SPLIT) != 0)
 			{
@@ -189,7 +190,7 @@ namespace NetSync
 		* Return -1 if file "name" is defined to be excluded by the specified
 		* exclude list, 1 if it is included, and 0 if it was not matched.
 		*/
-		public int CheckExclude(ArrayList listp, string name, int nameIsDir)
+        public int CheckExclude(List<ExcludeStruct> listp, string name, int nameIsDir)
 		{			
 			foreach (ExcludeStruct ex in listp) 
 			{
@@ -207,9 +208,9 @@ namespace NetSync
 			int match_start = 0;
 			string pattern = ex.pattern;
 
-			if (name.CompareTo("") == 0)
+			if (name.CompareTo(String.Empty) == 0)
 				return false;
-			if (pattern.CompareTo("") == 0)
+			if (pattern.CompareTo(String.Empty) == 0)
 				return false;
 
 			if (0 != (ex.matchFlags & Options.MATCHFLG_DIRECTORY) && nameIsDir == 0)
@@ -286,7 +287,7 @@ namespace NetSync
 				Log.Write(options.WhoAmI() + " "+ ((ent.matchFlags & Options.MATCHFLG_INCLUDE) != 0 ? "in" : "ex") +
 					"cluding " + (nameIsDir != 0 ? "directory" : "file") + " " +
 					name + " because of " + ent.pattern + " pattern " +
-					((ent.matchFlags & Options.MATCHFLG_DIRECTORY) != 0 ? "/" : "") + "\n");
+					((ent.matchFlags & Options.MATCHFLG_DIRECTORY) != 0 ? "/" : String.Empty) + "\n");
 			}
 		}
 
@@ -329,7 +330,7 @@ namespace NetSync
 
 		public void ReceiveExcludeList(IOStream f)		
 		{			
-			string line = "";
+			string line = String.Empty;
 			int l;
 			while ((l = f.readInt()) != 0) 
 			{

@@ -20,6 +20,7 @@ using System.Collections;
 using System.IO;
 using Win32;
 using HANDLE = System.IntPtr;
+using System.Collections.Generic;
 
 namespace NetSync.FileSystem
 {
@@ -48,8 +49,8 @@ namespace NetSync.FileSystem
 		public DirectoryInfo[] GetDirectories() 
 		{
 			bool finished = false;
-			ArrayList diList = new ArrayList();
-			string searchPath="";
+            List<DirectoryInfo> diList = new List<DirectoryInfo>();
+			string searchPath=String.Empty;
 			if(path.LastIndexOf("\\")==path.Length-1)
 				searchPath=path+"*";
 			else searchPath=path+@"\*";
@@ -84,8 +85,8 @@ namespace NetSync.FileSystem
 		public FileInfo[] GetFiles() 
 		{
 			bool finished = false;
-			string searchPath="";
-			ArrayList fiList = new ArrayList();
+			string searchPath=String.Empty;
+            List<FileInfo> fiList = new List<FileInfo>();
 			WIN32_FIND_DATA fileData = new WIN32_FIND_DATA();
 			if(path.LastIndexOf("\\")==path.Length-1)
 				searchPath=path+"*";
@@ -121,7 +122,7 @@ namespace NetSync.FileSystem
 //		private string CreatePath(string fName)
 //		{
 //			if (path.)
-//			return "";
+//			return String.Empty;
 //		}
 	}
 }

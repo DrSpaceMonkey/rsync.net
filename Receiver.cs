@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.IO;
 using NetSync;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -35,12 +36,12 @@ namespace NetSync
 		
 		private string LocalizePath(ClientInfo cInfo, string path)
 		{
-			string normalized = cInfo.Options.dir.Replace('\\', '/').Replace(":", "").ToLower();
-			string ret="";
+			string normalized = cInfo.Options.dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
+			string ret=String.Empty;
 			if (path.ToLower().IndexOf(normalized)!=-1)
 				ret = path.Substring(path.ToLower().IndexOf(normalized) + normalized.Length).Replace('/', Path.DirectorySeparatorChar);
 
-			if (ret == "")
+			if (ret == String.Empty)
 				return path.TrimEnd('\\');
 			if (ret[0] == Path.DirectorySeparatorChar)
 				ret = ret.Substring(1);
@@ -48,14 +49,14 @@ namespace NetSync
 			return ret;
 		}
 
-		public int ReceiveFiles(ClientInfo cInfo, ArrayList fileList, string localName)
+        public int ReceiveFiles(ClientInfo cInfo, List<FileStruct> fileList, string localName)
 		{
 			FStat st = new FStat();
 			FileStruct file;
 			IOStream f = cInfo.IoStream;
 			
 			string fileName;
-			string fNameCmp = "", fNameTmp = "";		
+			string fNameCmp = String.Empty, fNameTmp = String.Empty;		
 			bool saveMakeBackups = options.makeBackups;
 			int i, phase = 0;
 			bool recv_ok;
@@ -83,22 +84,22 @@ namespace NetSync
 					MainClass.Exit("Invalid file index " + i +" in receiveFiles (count=" + fileList.Count +")", cInfo);
 				}
 
-				file = ((FileStruct)fileList[i]);
+				file = (fileList[i]);
 
 				Options.stats.currentFileIndex = i;
 				Options.stats.numTransferredFiles++;
 				Options.stats.totalTransferredSize += file.length;			
 
-				if (localName != null && localName.CompareTo("") != 0)
+				if (localName != null && localName.CompareTo(String.Empty) != 0)
 					fileName = localName;
 				else
 				{
-					fileName = Path.Combine(options.dir,LocalizePath(cInfo, file.FNameTo().Replace(":","")).Replace("\\", "/"));
-					//fileName = Path.Combine(options.dir, file.FNameTo().Replace(":","")).Replace("\\", "/");
+					fileName = Path.Combine(options.dir,LocalizePath(cInfo, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/"));
+					//fileName = Path.Combine(options.dir, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/");
 					// TODO: path length
-					FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,LocalizePath(cInfo, file.dirName.Replace(":",""))).Replace("\\", "/"));
+					FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,LocalizePath(cInfo, file.dirName.Replace(":",String.Empty))).Replace("\\", "/"));
 					Log.WriteLine(Path.Combine(options.dir, file.dirName));
-					//FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":","")).Replace("\\", "/"));
+					//FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":",String.Empty)).Replace("\\", "/"));
 				}
 
 				if (options.dryRun) {
@@ -110,7 +111,7 @@ namespace NetSync
 				if (options.verbose > 2)
 					Log.WriteLine("receiveFiles(" + fileName + ")");
 
-				if (options.partialDir != null && options.partialDir.CompareTo("") != 0) {			
+				if (options.partialDir != null && options.partialDir.CompareTo(String.Empty) != 0) {			
 				} else
 					fNameCmp = fileName;
 				
@@ -316,29 +317,29 @@ namespace NetSync
 			return Path.GetTempFileName();	
 		}
 
-		public void DeleteFiles(ArrayList fileList)
+        public void DeleteFiles(List<FileStruct> fileList)
 		{
 			string[] argv = new string[1];
-			ArrayList localFileList = null;
+            List<FileStruct> localFileList = null;
 			if(options.cvsExclude)
 				Exclude.AddCvsExcludes();
 			for(int j=0; j<fileList.Count; j++)
 			{
-				if((((FileStruct)fileList[j]).mode & Options.FLAG_TOP_DIR) == 0  || !Util.S_ISDIR(((FileStruct)fileList[j]).mode))
+				if(((fileList[j]).mode & Options.FLAG_TOP_DIR) == 0  || !Util.S_ISDIR((fileList[j]).mode))
 					continue;
-				argv[0] = options.dir +((FileStruct)fileList[j]).FNameTo();	
+				argv[0] = options.dir +(fileList[j]).FNameTo();	
 				FileList fList = new FileList(options);
 				if((localFileList = fList.sendFileList(null, argv)) == null)
 				   continue;
 				for (int i = localFileList.Count-1; i >= 0; i--) 
 				{					
-					if(((FileStruct)localFileList[i]).baseName == null)
+					if((localFileList[i]).baseName == null)
 						continue;
-					((FileStruct)localFileList[i]).dirName = ((FileStruct)localFileList[i]).dirName.Substring(options.dir.Length);
-					if (FileList.fileListFind(fileList,((FileStruct)localFileList[i])) < 0) 
+					(localFileList[i]).dirName = (localFileList[i]).dirName.Substring(options.dir.Length);
+					if (FileList.fileListFind(fileList,(localFileList[i])) < 0) 
 					{
-						((FileStruct)localFileList[i]).dirName = options.dir + ((FileStruct)localFileList[i]).dirName;
-						deleteOne(((FileStruct)localFileList[i]).FNameTo(),Util.S_ISDIR(((FileStruct)localFileList[i]).mode));
+						(localFileList[i]).dirName = options.dir + (localFileList[i]).dirName;
+						deleteOne((localFileList[i]).FNameTo(),Util.S_ISDIR((localFileList[i]).mode));
 					}
 				}
 			}

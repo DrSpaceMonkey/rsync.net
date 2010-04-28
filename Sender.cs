@@ -21,6 +21,7 @@ using System.IO;
 using System.Collections;
 using System.Windows.Forms;
 using NetSync;
+using System.Collections.Generic;
 
 namespace NetSync
 {
@@ -35,13 +36,13 @@ namespace NetSync
 			checkSum = new CheckSum(options);
 		}
 
-		public void SendFiles(ArrayList fileList, ClientInfo cInfo)
+		public void SendFiles(List<FileStruct> fileList, ClientInfo cInfo)
 		{
 			ShowMessage("Processing...");
 			try 
 			{
 				IOStream f = cInfo.IoStream;
-				string fileName = "", fileName2 = "";
+				string fileName = String.Empty, fileName2 = String.Empty;
 				SumStruct s = null;
 				int phase = 0;
 				bool saveMakeBackups = options.makeBackups;			
@@ -51,7 +52,7 @@ namespace NetSync
 					Log.WriteLine("SendFiles starting");			
 				while (true)
 				{
-					fileName = "";				
+					fileName = String.Empty;				
 					int i = f.readInt();
 					if (i == -1) 
 					{
@@ -73,13 +74,13 @@ namespace NetSync
 						MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")",cInfo);
 					}
 
-					FileStruct file = (FileStruct)fileList[i];
+					FileStruct file = fileList[i];
 
 					Options.stats.currentFileIndex = i;
 					Options.stats.numTransferredFiles++;
 					Options.stats.totalTransferredSize += file.length;
 
-					if (file.baseDir != null && file.baseDir.CompareTo("") != 0) 
+					if (file.baseDir != null && file.baseDir.CompareTo(String.Empty) != 0) 
 					{
 						fileName = file.baseDir;
 						if(!fileName.EndsWith("/"))

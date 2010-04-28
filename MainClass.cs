@@ -47,7 +47,7 @@ namespace NetSync
 			if(args.Length  == 0)
 			{
 				Usage();				
-				MainClass.Exit("", null);
+				MainClass.Exit(String.Empty, null);
 			}
 			int argsNotUsed = CommandLineParser.ParseArguments(args, opt);
 			if (argsNotUsed == -1)
@@ -119,7 +119,7 @@ namespace NetSync
 			Options options = cInfo.Options;
 			if (args[0].StartsWith(Options.URL_PREFIX) && !options.readBatch) //source is remote
 			{
-				string path, user = "";
+				string path, user = String.Empty;
 				string host = args[0].Substring(Options.URL_PREFIX.Length,args[0].Length - Options.URL_PREFIX.Length);
 				if(host.LastIndexOf('@') != -1)
 				{				
@@ -137,7 +137,7 @@ namespace NetSync
 					
 				} 
 				else
-					path ="";
+					path =String.Empty;
 				if(host[0] == '[' && host.IndexOf(']') != -1)
 				{
 					host = host.Remove(host.IndexOf(']'),1);
@@ -156,7 +156,7 @@ namespace NetSync
 			if(!options.readBatch)
 			{
 				int p = Util.FindColon(args[0]);
-				string user = "";
+				string user = String.Empty;
 				options.amSender = true;
 				if (args[args.Length - 1].StartsWith(Options.URL_PREFIX) && !options.readBatch)
 				{
@@ -178,7 +178,7 @@ namespace NetSync
 				
 					} 
 					else
-						path ="";
+						path =String.Empty;
 					if(host[0] == '[' && host.IndexOf(']') != -1)
 					{
 						host = host.Remove(host.IndexOf(']'),1);
@@ -210,7 +210,7 @@ namespace NetSync
 		public static int StartSocketClient(string host, string path, string user, string[] args, ClientInfo cInfo)
 		{
 			Options options = cInfo.Options;
-			if(path.CompareTo("") != 0 && path[0] == '/')
+			if(path.CompareTo(String.Empty) != 0 && path[0] == '/')
 			{
 				Log.WriteLine("ERROR: The remote path must start with a module name not a /");
 				return -1;
@@ -268,13 +268,13 @@ namespace NetSync
 					break;				
 				if (line.Length > 18 && line.Substring(0, 18).CompareTo("@RSYNCD: AUTHREQD ") == 0) 
 				{
-					string pass = "";
+					string pass = String.Empty;
 					if(user.IndexOf(':') != -1)
 					{
 						pass = user.Substring(user.IndexOf(':')+1);
 						user = user.Substring(0, user.IndexOf(':'));				
 					}
-					f.IOPrintf(user + " " + Authentication.auth_client(user, pass, line.Substring(18).Replace("\n",""), options) + "\n");
+					f.IOPrintf(user + " " + Authentication.auth_client(user, pass, line.Substring(18).Replace("\n",String.Empty), options) + "\n");
 					continue;
 				}
 				
@@ -283,7 +283,7 @@ namespace NetSync
 				
 				if(line.StartsWith("@ERROR: "))
 				{										
-					MainClass.Exit("Server: " + line.Replace("\n",""), null);
+					MainClass.Exit("Server: " + line.Replace("\n",String.Empty), null);
 				}
 			}
 

@@ -21,6 +21,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections.Generic;
 
 namespace NetSync
 {	
@@ -28,7 +29,7 @@ namespace NetSync
 	{
 		private string confFile;
 
-		public ArrayList Modules = null;
+		public List<Module> Modules = null;
 		public string logFile;
 		public string port;
 		public string address;
@@ -43,7 +44,7 @@ namespace NetSync
 			lock(this)
 			{
 				for(int i=0; i < Modules.Count; i++)
-					if(((Module)Modules[i]).Name == nameModule)
+					if(Modules[i].Name == nameModule)
 						return i;
 			}
 			return -1;
@@ -106,7 +107,7 @@ namespace NetSync
 			{
 				TextReader cf;
 				// TODO: path length
-				if(confFile == null || confFile.CompareTo("") == 0 || !FileSystem.File.Exists(confFile))
+				if(confFile == null || confFile.CompareTo(String.Empty) == 0 || !FileSystem.File.Exists(confFile))
 				{
 					MainClass.Exit("Can't find .conf file: " + confFile, null);
 					return false;			
@@ -124,7 +125,7 @@ namespace NetSync
 				Module mod = null;
 			
 				if(Modules == null)
-					Modules = new ArrayList();
+                    Modules = new List<Module>();
 				lock(cf)
 				{
 					while(true)
@@ -133,7 +134,7 @@ namespace NetSync
 						if(line == null)
 							break;
 						line = line.Trim();
-						if(line.CompareTo("") != 0 && line[0] != ';' && line[0] != '#')
+						if(line.CompareTo(String.Empty) != 0 && line[0] != ';' && line[0] != '#')
 						{
 							if(line[0] == '[' && line[line.Length - 1] == ']')
 							{
@@ -232,14 +233,14 @@ namespace NetSync
 	public class Module
 	{
 		public string Name;
-		public string Path = "";
-		public string Comment = "";	
+		public string Path = String.Empty;
+		public string Comment = String.Empty;	
 		public bool ReadOnly = true;
 		public bool WriteOnly = false;
-		public string HostsAllow = "";
-		public string HostsDeny = "";
-		public string AuthUsers = "";
-		public string SecretsFile = "";		
+		public string HostsAllow = String.Empty;
+		public string HostsDeny = String.Empty;
+		public string AuthUsers = String.Empty;
+		public string SecretsFile = String.Empty;		
 		
 		public Module(string name)
 		{

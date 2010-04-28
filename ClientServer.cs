@@ -34,11 +34,11 @@ namespace NetSync
 			Options options = cInfo.Options;
 			string[] args = new string[Options.MAX_ARGS];
 			int argc = 0, maxargs = Options.MAX_ARGS;				  			
-			string line = "";
+			string line = String.Empty;
 			
 			if(path[0] == '/')
 				path = path.Remove(0,1);
-			path = path.Replace("\n","");		
+			path = path.Replace("\n",String.Empty);		
 
 			Access ac = new Access();
 			if (!ac.AllowAccess(options.remoteAddr, options.remoteHost, Daemon.config.GetHostsAllow(moduleNumber), Daemon.config.GetHostsDeny(moduleNumber))) 
@@ -76,7 +76,7 @@ namespace NetSync
 			{
 				line = f.ReadLine();
 				line = line.Substring(0,line.Length-1);
-				if (line.CompareTo("") == 0)
+				if (line.CompareTo(String.Empty) == 0)
 					break;
 				if (argc == maxargs) 
 				{

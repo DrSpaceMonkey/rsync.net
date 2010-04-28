@@ -34,9 +34,9 @@ namespace NetSync
 
 		public bool AllowAccess(string addr, string host, string allowList, string denyList)
 		{
-			if(allowList == null || allowList.CompareTo("") == 0)
+			if(allowList == null || allowList.CompareTo(String.Empty) == 0)
 				allowList = null;
-			if(denyList == null || denyList.CompareTo("") == 0)
+			if(denyList == null || denyList.CompareTo(String.Empty) == 0)
 				denyList = null;
 			/* if theres no deny list and no allow list then allow access */
 			if (denyList == null && allowList == null)
@@ -73,7 +73,7 @@ namespace NetSync
 			
 			for (int i = 0; i < list2.Length; i++)
 			{
-				if(list2[i].CompareTo("") == 0)
+				if(list2[i].CompareTo(String.Empty) == 0)
 					continue;
 				if (MatchHostname(host, list2[i]) || MatchAddress(addr, list2[i])) 
 				{
@@ -94,12 +94,12 @@ namespace NetSync
 		{
 			
 			IPAddress ipaddr = null, iptok = null;
-			string p = "";
+			string p = String.Empty;
 			int len = 0, addrlen = 0;
 			byte[] mask = new byte[16];
 			Int64 bits = 0;
 						
-			if (addr == null || addr.CompareTo("") == 0) return false;			
+			if (addr == null || addr.CompareTo(String.Empty) == 0) return false;			
 			int pos = tok.IndexOf('/');
 			if (pos > 0) 
 			{

@@ -24,7 +24,7 @@ namespace NetSync
 {
 	class Authentication
 	{
-		public static string password_file = "";
+		public static string password_file = String.Empty;
 
 		public static string base64_encode(string message)
 		{
@@ -36,7 +36,7 @@ namespace NetSync
 
 		public static string gen_challenge(string addr, Options opt)
 		{			
-			string challenge = "";
+			string challenge = String.Empty;
 			byte[] input = new byte[32];			
 			DateTime tv = DateTime.Now;			
 			
@@ -68,13 +68,13 @@ namespace NetSync
 
 		public static string auth_client( string user, string pass, string challenge, Options options)
 		{			
-			if(String.Compare(user, "") == 0)
+			if(String.Compare(user, String.Empty) == 0)
 				user = "nobody";
-			if(pass == null || String.Compare(pass, "") == 0)
+			if(pass == null || String.Compare(pass, String.Empty) == 0)
 				pass = getpassf(password_file);
-			if(String.Compare(pass, "") == 0)
+			if(String.Compare(pass, String.Empty) == 0)
 				pass = System.Environment.GetEnvironmentVariable("RSYNC_PASSWORD");			
-			if(pass == null || String.Compare(pass, "") == 0)
+			if(pass == null || String.Compare(pass, String.Empty) == 0)
 				pass = getpass();
 			string pass2 = generate_hash(pass, challenge, options);
 			Log.WriteLine(user + " " + pass2);
@@ -90,7 +90,7 @@ namespace NetSync
 
 		public static string getpassf(string filename)
 		{
-			return "";
+			return String.Empty;
 		}
 
 		public static bool AuthServer(ClientInfo cInfo, int moduleNumber, string addr, string leader)
@@ -101,16 +101,16 @@ namespace NetSync
 			IOStream f = cInfo.IoStream;
 			string line;
 
-			string user = "";
-			string secret = "";
-			string pass = "";
-			string pass2 = "";
+			string user = String.Empty;
+			string secret = String.Empty;
+			string pass = String.Empty;
+			string pass2 = String.Empty;
 			string[] listUsers;
-			string tok = "";
+			string tok = String.Empty;
 			
 
 			/* if no auth list then allow anyone in! */
-			if (users == null || users.CompareTo("") == 0)
+			if (users == null || users.CompareTo(String.Empty) == 0)
 			return true;
 
 			challenge = gen_challenge(addr, cInfo.Options);
@@ -137,7 +137,7 @@ namespace NetSync
 				tok = null;
 			}			
 
-			if (tok == null || tok.CompareTo("") == 0)
+			if (tok == null || tok.CompareTo(String.Empty) == 0)
 				return false;
 			
 			if ((secret = GetSecret(moduleNumber, user)) == null) 
@@ -158,7 +158,7 @@ namespace NetSync
 			string secret = null;
 			TextReader fd;			
 
-			if (fname == null || fname.CompareTo("") == 0)
+			if (fname == null || fname.CompareTo(String.Empty) == 0)
 				return null;
 			try{
 				fd = new System.IO.StreamReader(fname);
@@ -172,7 +172,7 @@ namespace NetSync
 				if(line == null)
 					break;
 				line.Trim();
-				if(line.CompareTo("") != 0 && (line[0] != ';' && line[0] != '#'))
+				if(line.CompareTo(String.Empty) != 0 && (line[0] != ';' && line[0] != '#'))
 				{
 					string[] userp = line.Split(':');
 					if(userp[0].Trim().CompareTo(user) == 0)

@@ -16,6 +16,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 using System.Collections;
+using System.Collections.Generic;
+using System;
 namespace NetSync
 {
 	public class Client
@@ -25,7 +27,7 @@ namespace NetSync
 			Options options = cInfo.Options;
 			IOStream f = cInfo.IoStream;
 			FileList fList;
-			ArrayList fileList;			
+			List<FileStruct> fileList;			
 
 			MainClass.SetupProtocol(cInfo);
 			if(options.protocolVersion >= 23 && !options.readBatch)
@@ -55,7 +57,7 @@ namespace NetSync
 				return -1;
 			}						
 			options.dir = args[0];
-			if(options.dir.CompareTo("") != 0 && options.dir.IndexOf(':') == -1)
+			if(options.dir.CompareTo(String.Empty) != 0 && options.dir.IndexOf(':') == -1)
 			{
 				if(options.dir[0] == '/')
 					options.dir = "c:" + options.dir;

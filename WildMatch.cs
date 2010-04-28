@@ -193,7 +193,7 @@ namespace NetSync
 				}				
 			}
 			text = text.Substring(1);
-			return text.CompareTo("") != 0 ? 0 : 1;
+			return text.CompareTo(String.Empty) != 0 ? 0 : 1;
 		}
 	}
 }
