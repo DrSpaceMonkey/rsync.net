@@ -24,229 +24,231 @@ using System.Text;
 using System.Collections.Generic;
 
 namespace NetSync
-{	
-	public class Configuration
-	{
-		private string confFile;
+{
+    public class Configuration
+    {
+        private string confFile;
 
-		public List<Module> Modules = null;
-		public string logFile;
-		public string port;
-		public string address;
+        public List<Module> Modules = null;
+        public string logFile;
+        public string port;
+        public string address;
 
-		public Configuration(string cFile)
-		{			
-			confFile = Path.Combine(Environment.SystemDirectory,Path.GetFileName(cFile));			
-		}
+        public Configuration(string cFile)
+        {
+            confFile = Path.Combine(Environment.SystemDirectory, Path.GetFileName(cFile));
+        }
 
-		public int GetNumberModule(string nameModule)
-		{
-			lock(this)
-			{
-				for(int i=0; i < Modules.Count; i++)
-					if(Modules[i].Name == nameModule)
-						return i;
-			}
-			return -1;
-		}
+        public int GetNumberModule(string nameModule)
+        {
+            lock (this)
+            {
+                for (int i = 0; i < Modules.Count; i++)
+                    if (Modules[i].Name == nameModule)
+                        return i;
+            }
+            return -1;
+        }
 
-		public Module GetModule(int numberModule)
-		{
-			lock(this)
-			{
-				if(numberModule < 0 || numberModule > Modules.Count)
-					return null;
-				return (Module)Modules[numberModule];
-			}
-		}
-		
-		public string GetModuleName(int numberModule){
-			lock(this)
-				return GetModule(numberModule).Name;
-		}
+        public Module GetModule(int numberModule)
+        {
+            lock (this)
+            {
+                if (numberModule < 0 || numberModule > Modules.Count)
+                    return null;
+                return (Module)Modules[numberModule];
+            }
+        }
 
-		public bool ModuleIsReadOnly(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).ReadOnly;
-		}
+        public string GetModuleName(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).Name;
+        }
 
-		public bool ModuleIsWriteOnly(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).WriteOnly;
-		}
+        public bool ModuleIsReadOnly(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).ReadOnly;
+        }
 
-		public string GetHostsAllow(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).HostsAllow;
-		}
+        public bool ModuleIsWriteOnly(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).WriteOnly;
+        }
 
-		public string GetHostsDeny(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).HostsDeny;
-		}
+        public string GetHostsAllow(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).HostsAllow;
+        }
 
-		public string GetAuthUsers(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).AuthUsers;
-		}
+        public string GetHostsDeny(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).HostsDeny;
+        }
 
-		public string GetSecretsFile(int numberModule)
-		{
-			lock(this)
-				return GetModule(numberModule).SecretsFile;
-		}
+        public string GetAuthUsers(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).AuthUsers;
+        }
 
-		public bool LoadParm(Options options)
-		{
-			lock(this)
-			{
-				TextReader cf;
-				// TODO: path length
-				if(confFile == null || confFile.CompareTo(String.Empty) == 0 || !File.Exists(confFile))
-				{
-					MainClass.Exit("Can't find .conf file: " + confFile, null);
-					return false;			
-				}
-				try
-				{
-					cf = new System.IO.StreamReader(confFile);
-				}
-				catch
-				{				
-					MainClass.Exit("failed to open: " + confFile, null);
-					return false;
-				}
+        public string GetSecretsFile(int numberModule)
+        {
+            lock (this)
+                return GetModule(numberModule).SecretsFile;
+        }
 
-				Module mod = null;
-			
-				if(Modules == null)
-                    Modules = new List<Module>();
-				lock(cf)
-				{
-					while(true)
-					{
-						string line = cf.ReadLine();
-						if(line == null)
-							break;
-						line = line.Trim();
-						if(line.CompareTo(String.Empty) != 0 && line[0] != ';' && line[0] != '#')
-						{
-							if(line[0] == '[' && line[line.Length - 1] == ']')
-							{
-								line = line.TrimStart('[').TrimEnd(']');
-								int numberModule = -1;
-								if((numberModule = GetNumberModule(line)) >= 0)
-								{ 
-									mod = GetModule(numberModule);
-								}
-								else 
-								{
-									mod = new Module(line);
-									Modules.Add(mod);
-								}
-							} 
-							else 
-							{
-								if(mod != null)
-								{
-									string[] parm = line.Split('=');
-									if(parm.Length > 2)
-										continue;
-									parm[0] = parm[0].Trim().ToLower();
-									parm[1] = parm[1].Trim();
-									switch(parm[0])
-									{
-										case "path":
-											mod.Path = parm[1].Replace(@"\","/");
-											break;
-										case "comment":
-											mod.Comment = parm[1];
-											break;
-										case "read only":
-											mod.ReadOnly = (parm[1].CompareTo("false") == 0) ? false : true;
-											break;
-										case "write only":
-											mod.WriteOnly = (parm[1].CompareTo("true") == 0) ? true : false;
-											break;
-										case "hosts allow":
-											mod.HostsAllow = parm[1];
-											break;
-										case "hosts deny":
-											mod.HostsDeny = parm[1];
-											break;
-										case "auth users":
-											mod.AuthUsers = parm[1];
-											break;
-										case "secrets file":
-											mod.SecretsFile = Path.GetFileName(parm[1]);
-											break;
-										default:
-											continue;
-									}
-								} 
-								else
-								{
-									string[] parm = line.Split('=');
-									if(parm.Length > 2)
-										continue;
-									parm[0] = parm[0].Trim();
-									parm[1] = parm[1].Trim();
-									switch(parm[0])
-									{
-										case "log file":
-											string logFile = parm[1];
-											try
-											{
-												options.logFile = new FileStream(logFile, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);
-											}										
-											catch(Exception e)
-											{
-												Log.Write(e.Message);
-											}																				
-											break;
-										case "port":
-											port = parm[1];									
-											options.rsyncPort = Convert.ToInt32(port);
-											break;
-										case "address":
-											options.bindAddress = address = parm[1];
-											break;
-										default:
-											continue;
-									}
-								}
-							}
-						}
-					}
-					cf.Close();
-				}
-			}
-			return true;	
-		}
-	}
+        public bool LoadParm(Options options)
+        {
+            lock (this)
+            {
+                // TODO: path length
+                if (confFile == null || confFile.CompareTo(String.Empty) == 0 || !File.Exists(confFile))
+                {
+                    MainClass.Exit("Can't find .conf file: " + confFile, null);
+                    return false;
+                }
+                try
+                {
+                    using (var cf = new System.IO.StreamReader(confFile))
+                    {
+                        Module mod = null;
 
-	public class Module
-	{
-		public string Name;
-		public string Path = String.Empty;
-		public string Comment = String.Empty;	
-		public bool ReadOnly = true;
-		public bool WriteOnly = false;
-		public string HostsAllow = String.Empty;
-		public string HostsDeny = String.Empty;
-		public string AuthUsers = String.Empty;
-		public string SecretsFile = String.Empty;		
-		
-		public Module(string name)
-		{
-			Name = name;
-		}
-	}
+                        if (Modules == null)
+                            Modules = new List<Module>();
+
+                        lock (cf)
+                        {
+                            while (true)
+                            {
+                                string line = cf.ReadLine();
+                                if (line == null)
+                                    break;
+                                line = line.Trim();
+                                if (line.CompareTo(String.Empty) != 0 && line[0] != ';' && line[0] != '#')
+                                {
+                                    if (line[0] == '[' && line[line.Length - 1] == ']')
+                                    {
+                                        line = line.TrimStart('[').TrimEnd(']');
+                                        int numberModule = -1;
+                                        if ((numberModule = GetNumberModule(line)) >= 0)
+                                        {
+                                            mod = GetModule(numberModule);
+                                        }
+                                        else
+                                        {
+                                            mod = new Module(line);
+                                            Modules.Add(mod);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (mod != null)
+                                        {
+                                            string[] parm = line.Split('=');
+                                            if (parm.Length > 2)
+                                                continue;
+                                            parm[0] = parm[0].Trim().ToLower();
+                                            parm[1] = parm[1].Trim();
+                                            switch (parm[0])
+                                            {
+                                                case "path":
+                                                    mod.Path = parm[1].Replace(@"\", "/");
+                                                    break;
+                                                case "comment":
+                                                    mod.Comment = parm[1];
+                                                    break;
+                                                case "read only":
+                                                    mod.ReadOnly = (parm[1].CompareTo("false") == 0) ? false : true;
+                                                    break;
+                                                case "write only":
+                                                    mod.WriteOnly = (parm[1].CompareTo("true") == 0) ? true : false;
+                                                    break;
+                                                case "hosts allow":
+                                                    mod.HostsAllow = parm[1];
+                                                    break;
+                                                case "hosts deny":
+                                                    mod.HostsDeny = parm[1];
+                                                    break;
+                                                case "auth users":
+                                                    mod.AuthUsers = parm[1];
+                                                    break;
+                                                case "secrets file":
+                                                    mod.SecretsFile = Path.GetFileName(parm[1]);
+                                                    break;
+                                                default:
+                                                    continue;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            string[] parm = line.Split('=');
+                                            if (parm.Length > 2)
+                                                continue;
+                                            parm[0] = parm[0].Trim();
+                                            parm[1] = parm[1].Trim();
+                                            switch (parm[0])
+                                            {
+                                                case "log file":
+                                                    string logFile = parm[1];
+                                                    try
+                                                    {
+                                                        options.logFile = new FileStream(logFile, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        Log.Write(e.Message);
+                                                    }
+                                                    break;
+                                                case "port":
+                                                    port = parm[1];
+                                                    options.rsyncPort = Convert.ToInt32(port);
+                                                    break;
+                                                case "address":
+                                                    options.bindAddress = address = parm[1];
+                                                    break;
+                                                default:
+                                                    continue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            cf.Close();
+                        }
+                    }
+                }
+                catch
+                {
+                    MainClass.Exit("failed to open: " + confFile, null);
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    public class Module
+    {
+        public string Name;
+        public string Path = String.Empty;
+        public string Comment = String.Empty;
+        public bool ReadOnly = true;
+        public bool WriteOnly = false;
+        public string HostsAllow = String.Empty;
+        public string HostsDeny = String.Empty;
+        public string AuthUsers = String.Empty;
+        public string SecretsFile = String.Empty;
+
+        public Module(string name)
+        {
+            Name = name;
+        }
+    }
 
 
 }

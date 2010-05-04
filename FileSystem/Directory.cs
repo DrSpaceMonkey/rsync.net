@@ -27,60 +27,6 @@ namespace NetSync.FileSystem
 	/// </summary>
 	public class Directory
 	{
-//
-//		public static void CreateDirectory(string path)
-//		{
-//			Win32.SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES();
-//			Win32.Kernel.CreateDirectory(setUnicodePath(path), ref sa);
-//			int error = Win32.Kernel.GetLastError();
-//			// Win32API: CreateDirectory
-//		}
 
-		public static bool CreateDirectory(string path)
-		{
-			if (path != null)
-			{
-				string[] args = path.Split(':');
-
-				string[] dirs = args[1].Replace(":", String.Empty).Split('/');
-				string newpath = args[0]+":";
-				for(int i=1; i<dirs.Length; i++)
-				{
-					newpath = newpath +"/" + dirs[i];
-					SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES();
-					Kernel.CreateDirectory(setUnicodePath(newpath), ref sa);
-					Console.WriteLine(Kernel.GetLastError());
-				}
-
-				return true;
-			}
-			return false;
-		}
-
-		public static string GetDirectoryName(string path)
-		{
-			if (path != null)
-			{
-				string[] dirs = path.Split('/');
-				string dirName=String.Empty;
-				if (dirs.Length>2)
-				{
-					dirName = path.Substring(0, path.Length-dirs[dirs.Length-1].Length-1);
-				}
-				return dirName;
-			}
-			return String.Empty;
-		}
-
-		public static string setUnicodePath(string path)
-		{
-			if (path != null)
-			{
-				path="\\\\?\\"+path.Replace("/","\\");
-				if (path.LastIndexOf("\\")==path.Length-1)
-					path = path.Substring(0, path.Length-1);
-			}
-			return path;
-		}
 	}
 }

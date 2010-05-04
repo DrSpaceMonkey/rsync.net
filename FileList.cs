@@ -399,7 +399,7 @@ namespace NetSync
 				if (excludeLevel != Options.NO_EXCLUDES && checkExcludeFile(thisName, 0, excludeLevel))
 					return null;				
 				fs.baseName = Path.GetFileName(thisName);
-				fs.dirName = FileSystem.Directory.GetDirectoryName(thisName).Replace(@"\","/").TrimEnd('/');				
+				fs.dirName = Path.GetDirectoryName(thisName).Replace(@"\","/").TrimEnd('/');				
 				FileInfo fi = new FileInfo(thisName);
 				
 				// TODO: path length
@@ -463,8 +463,8 @@ namespace NetSync
 			string dirName = String.Empty;			
 			if (thisName.LastIndexOf("/") != -1) 
 			{
-				baseName = Path.GetFileName(thisName);				
-				dirName = FileSystem.Directory.GetDirectoryName(thisName).Replace(@"\","/").Replace(":",String.Empty);
+				baseName = Path.GetFileName(thisName);
+                dirName = Path.GetDirectoryName(thisName);
 			} 
 			else 
 			{

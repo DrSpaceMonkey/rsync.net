@@ -97,7 +97,7 @@ namespace NetSync
 					fileName = Path.Combine(options.dir,LocalizePath(cInfo, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/"));
 					//fileName = Path.Combine(options.dir, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/");
 					// TODO: path length
-					FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,LocalizePath(cInfo, file.dirName.Replace(":",String.Empty))).Replace("\\", "/"));
+					Directory.CreateDirectory(Path.Combine(options.dir,LocalizePath(cInfo, file.dirName.Replace(":",String.Empty))).Replace("\\", "/"));
 					Log.WriteLine(Path.Combine(options.dir, file.dirName));
 					//FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":",String.Empty)).Replace("\\", "/"));
 				}

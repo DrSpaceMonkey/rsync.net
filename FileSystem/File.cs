@@ -23,16 +23,4 @@ using HANDLE = System.IntPtr;
 namespace NetSync.FileSystem
 {
 
-	/// <summary>
-	/// Summary description for File.
-	/// </summary>
-	public class File
-	{
-		public static string setUnicodePath(string path)
-		{
-			if (!path.StartsWith(@"\\?\"))
-				path="\\\\?\\"+path.Replace("/","\\");
-			return path;
-		}
-	}
 }

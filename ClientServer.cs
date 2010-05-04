@@ -61,7 +61,7 @@ namespace NetSync
 				try 
 				{
 					// TODO: path length
-					FileSystem.Directory.CreateDirectory(path);
+					Directory.CreateDirectory(path);
 					f.IOPrintf("@RSYNCD: OK\n");
 				} 
 				catch(Exception){
