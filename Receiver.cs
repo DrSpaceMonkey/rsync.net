@@ -136,7 +136,7 @@ namespace NetSync
 				}			
 				try
 				{
-					FileSystem.FileInfo fi = new FileSystem.FileInfo(fNameCmp);
+					FileInfo fi = new FileInfo(fNameCmp);
 					// TODO: path length
 					st.size = fi.Length;
 				} 
@@ -158,9 +158,9 @@ namespace NetSync
 				if(fd2 != null)
 					fd2.Close();
 				// TODO: path length
-				FileSystem.File.Copy(tempFileName, fileName, true);
+				File.Copy(tempFileName, fileName, true);
 				// TODO: path length
-				FileSystem.File.Delete(tempFileName);
+				File.Delete(tempFileName);
 				if (recv_ok  || options.inplace)
 					FinishTransfer(fileName, fNameTmp, file, recv_ok);
 			}
@@ -367,7 +367,7 @@ namespace NetSync
 			try
 			{
 				// TODO: path length
-				FileSystem.Directory.Delete(pathName);
+				Directory.Delete(pathName);
 				return true;
 			}
 			catch
@@ -390,7 +390,7 @@ namespace NetSync
 			try
 			{
 				// TODO: path length
-				FileSystem.File.Delete(fileName);
+				File.Delete(fileName);
 				return true;
 			}
 			catch

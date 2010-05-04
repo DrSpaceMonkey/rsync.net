@@ -54,7 +54,7 @@ namespace NetSync
 				return -1;
 			}
 // TODO: path length
-			if(FileSystem.Directory.Exists(path))
+			if(Directory.Exists(path))
 				f.IOPrintf("@RSYNCD: OK\n");
 			else 
 			{

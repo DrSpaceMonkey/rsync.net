@@ -28,31 +28,6 @@ namespace NetSync.FileSystem
 	/// </summary>
 	public class File
 	{
-		public static bool Exists(string path)
-		{
-			WIN32_FIND_DATA p = new WIN32_FIND_DATA();
-			int c = Win32.Kernel.FindFirstFile(setUnicodePath(path), ref p);
-			if (c == Win32.Kernel.INVALID_HANDLE_VALUE  || p.dwFileAttributes == Kernel.FILE_ATTRIBUTE_DIRECTORY) return false;
-			return true;
-		}
-
-		public static FileAttributes GetAttributes(string path)
-		{
-			int att = Win32.Kernel.GetFileAttributes(path);
-			return (FileAttributes)att;
-
-		}
-
-		public static void Copy(string sourceFileName, string destFileName, bool overwrite)
-		{
-			Win32.Kernel.CopyFile(File.setUnicodePath(sourceFileName), Directory.setUnicodePath(destFileName), Convert.ToInt32(!overwrite));
-		}
-
-		public static void Delete(string fileName)
-		{
-			Win32.Kernel.DeleteFile(File.setUnicodePath(fileName));
-		}
-
 		public static string setUnicodePath(string path)
 		{
 			if (!path.StartsWith(@"\\?\"))
@@ -60,5 +35,4 @@ namespace NetSync.FileSystem
 			return path;
 		}
 	}
-
 }

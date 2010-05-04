@@ -115,7 +115,7 @@ namespace NetSync
 				statRet = 0;
 				try
 				{
-					FileSystem.FileInfo fi = new FileSystem.FileInfo(fileName);
+					FileInfo fi = new FileInfo(fileName);
 					// TODO: path length
 					st.size = fi.Length;
 					// TODO: path length
@@ -283,10 +283,10 @@ namespace NetSync
 		public bool UnchangedFile(string fileName, FileStruct file)
 		{			
 			// TODO: path length
-			if(!FileSystem.File.Exists(fileName))
+			if(!File.Exists(fileName))
 				return false;
 			
-			FileSystem.FileInfo fi = new FileSystem.FileInfo(fileName);
+			FileInfo fi = new FileInfo(fileName);
 			// TODO: path length
 			if (fi.Length != file.length)
 				return false;

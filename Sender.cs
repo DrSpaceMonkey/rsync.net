@@ -123,7 +123,7 @@ namespace NetSync
 					}
 
 					FStat st = new FStat();
-					FileSystem.FileInfo fi = new FileSystem.FileInfo(fileName);
+					FileInfo fi = new FileInfo(fileName);
 					// TODO: path length
 					st.mTime = fi.LastWriteTime;
 					// TODO: path length
@@ -245,7 +245,7 @@ namespace NetSync
 		public void ShowMessage(string msg)
 		{
 			// TODO: path length
-			if (!FileSystem.File.Exists("logo.ico"))
+			if (!File.Exists("logo.ico"))
 				return;
 
 			if (msg.Length > 64)

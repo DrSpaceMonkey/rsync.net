@@ -18,32 +18,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-using HANDLE = System.IntPtr;
-
 namespace NetSync.FileSystem
 {
-	/// <summary>
-	/// Summary description for FileInfo.
-	/// </summary>
-	public class FileInfo : FileSystemInfo
-	{
-		public FileInfo(string fileName)
-			: base(fileName)
-		{
-			//
-			// TODO: Add constructor logic here
-			//
-		}
 
-		public long Length 
-		{
-			get
-			{
-				Win32.WIN32_FIND_DATA o = new Win32.WIN32_FIND_DATA();
-				// Win32API: GetFileSize; GetFileSizeEx
-				int c = Win32.Kernel.FindFirstFile(path, ref o);
-				return o.nFileSizeLow;
-			}
-		}
-	}
 }

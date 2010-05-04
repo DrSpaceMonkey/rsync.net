@@ -131,7 +131,7 @@ namespace NetSync
 						fileName = fileName.Replace(@"\","/");
 				}
 				// TODO: path length
-				if(FileSystem.Directory.Exists(fileName) && !options.recurse && options.filesFrom == null)
+				if(Directory.Exists(fileName) && !options.recurse && options.filesFrom == null)
 				{
 					Log.WriteLine("skipping directory " + fileName);
 					continue;
@@ -375,7 +375,7 @@ namespace NetSync
 				thisName = Util.sanitizePath(thisName, String.Empty, 0);
 			FileStruct fs = new FileStruct();
 			// TODO: path length
-			if(FileSystem.Directory.Exists(thisName))
+			if(Directory.Exists(thisName))
 			{									
 				if(thisName.LastIndexOf('/') != -1)
 				{
@@ -386,21 +386,21 @@ namespace NetSync
 					fs.uid = 0;
 					fs.mode = 0x4000 | 0x16B ;
 					// TODO: path length
-					FileSystem.DirectoryInfo di = new FileSystem.DirectoryInfo(thisName);
+					DirectoryInfo di = new DirectoryInfo(thisName);
 					if((di.Attributes & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
 						fs.mode |= 0x92;
 				}
 
 			}
 			// TODO: path length
-			if(FileSystem.File.Exists(thisName))
+			if(File.Exists(thisName))
 			{
 				
 				if (excludeLevel != Options.NO_EXCLUDES && checkExcludeFile(thisName, 0, excludeLevel))
 					return null;				
 				fs.baseName = Path.GetFileName(thisName);
 				fs.dirName = FileSystem.Directory.GetDirectoryName(thisName).Replace(@"\","/").TrimEnd('/');				
-				FileSystem.FileInfo fi = new FileSystem.FileInfo(thisName);
+				FileInfo fi = new FileInfo(thisName);
 				
 				// TODO: path length
 				fs.length = (int)fi.Length;
@@ -408,7 +408,7 @@ namespace NetSync
 				fs.modTime = fi.LastWriteTime;	
 				fs.mode = 0x8000 | 0x1A4 ; 
 				// TODO: path length
-				if((FileSystem.File.GetAttributes(thisName) & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
+				if((File.GetAttributes(thisName) & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
 				   fs.mode |= 0x92;
 				fs.gid = 0;
 				fs.uid = 0;
@@ -597,7 +597,7 @@ namespace NetSync
 
         public void sendDirectory(IOStream f, List<FileStruct> fileList, string dir)
 		{
-			FileSystem.DirectoryInfo di = new FileSystem.DirectoryInfo(dir);
+			DirectoryInfo di = new DirectoryInfo(dir);
 			if(di.Exists)
 			{
 				if(options.cvsExclude)
@@ -605,11 +605,11 @@ namespace NetSync
 					Exclude excl = new Exclude(options);
 					excl.AddExcludeFile(ref options.localExcludeList, dir, (int)(Options.XFLG_WORD_SPLIT & Options.XFLG_WORDS_ONLY));
 				}
-				FileSystem.FileInfo[] files = di.GetFiles();
+				FileInfo[] files = di.GetFiles();
 				for(int i=0; i< files.Length; i++)
 					// TODO: path length
 					sendFileName(f, fileList,files[i].FullName.Replace("\\", "/"), options.recurse,0);
-				FileSystem.DirectoryInfo[] dirs = di.GetDirectories();
+				DirectoryInfo[] dirs = di.GetDirectories();
 				for(int i=0; i< dirs.Length; i++)
 					// TODO: path length
 					sendFileName(f, fileList,dirs[i].FullName.Replace("\\", "/"), options.recurse,0);

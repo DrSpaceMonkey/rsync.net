@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.IO;
 namespace NetSync
 {
 	public class Util
@@ -40,7 +41,7 @@ namespace NetSync
 			{
 				pushDirInitialized = true;
 				// TODO: path length
-				currDir = FileSystem.Directory.GetCurrentDirectory();
+				currDir = Directory.GetCurrentDirectory();
 			}
 
 			if( dir == null || dir.CompareTo(String.Empty) == 0)
@@ -49,7 +50,7 @@ namespace NetSync
 			try
 			{
 				// TODO: path length
-				FileSystem.Directory.SetCurrentDirectory(dir);
+				Directory.SetCurrentDirectory(dir);
 			}
 			catch
 			{
@@ -57,7 +58,7 @@ namespace NetSync
 			}
 
 			// TODO: path length
-			currDir = FileSystem.Directory.GetCurrentDirectory();
+			currDir = Directory.GetCurrentDirectory();
 			return true;
 		}
 
@@ -66,7 +67,7 @@ namespace NetSync
 			try
 			{
 				// TODO: path length
-				FileSystem.Directory.SetCurrentDirectory(dir);
+				Directory.SetCurrentDirectory(dir);
 			} 
 			catch
 			{

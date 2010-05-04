@@ -107,7 +107,7 @@ namespace NetSync
 			{
 				TextReader cf;
 				// TODO: path length
-				if(confFile == null || confFile.CompareTo(String.Empty) == 0 || !FileSystem.File.Exists(confFile))
+				if(confFile == null || confFile.CompareTo(String.Empty) == 0 || !File.Exists(confFile))
 				{
 					MainClass.Exit("Can't find .conf file: " + confFile, null);
 					return false;			

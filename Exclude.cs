@@ -54,7 +54,7 @@ namespace NetSync
 			bool wordSplit = (xFlags & Options.XFLG_WORD_SPLIT) != 0;
 			TextReader f;
 			// TODO: path length
-			if(fileName == null || fileName.CompareTo(String.Empty) == 0 || !FileSystem.File.Exists(fileName))
+			if(fileName == null || fileName.CompareTo(String.Empty) == 0 || !File.Exists(fileName))
 				return;
 			if(fileName.CompareTo("-") == 0)
 				f = System.Console.In;

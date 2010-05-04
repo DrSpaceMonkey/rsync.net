@@ -27,18 +27,6 @@ namespace NetSync.FileSystem
 	/// </summary>
 	public class Directory
 	{
-		public static bool Exists(string path)
-		{
-			// Win32API: FindFirstFile
-			if (path != null)
-			{
-				WIN32_FIND_DATA p = new WIN32_FIND_DATA();
-				int c = Win32.Kernel.FindFirstFile(setUnicodePath(path), ref p);
-				if (c == Win32.Kernel.INVALID_HANDLE_VALUE || p.dwFileAttributes != Kernel.FILE_ATTRIBUTE_DIRECTORY) return false;
-				return true;
-			}
-			return false;
-		}
 //
 //		public static void CreateDirectory(string path)
 //		{
@@ -82,26 +70,6 @@ namespace NetSync.FileSystem
 				return dirName;
 			}
 			return String.Empty;
-		}
-		public static void Delete(string path)
-		{
-			if (path!=null) Win32.Kernel.RemoveDirectory(setUnicodePath(path));
-			// Win32API: RemoveDirectory
-		}
-
-		public static void SetCurrentDirectory(string path)
-		{
-			if (path!=null) Win32.Kernel.SetCurrentDirectory(setUnicodePath(path));
-			// Win32API: SetCurrentDirectory
-		}
-
-		public static string GetCurrentDirectory()
-		{
-			int bufferLength = 32767;
-			StringBuilder lpBuffer= new StringBuilder(bufferLength);
-			Win32.Kernel.GetCurrentDirectory(bufferLength, lpBuffer);
-			// Win32API: GetCurrentDirectory
-			return lpBuffer.ToString();
 		}
 
 		public static string setUnicodePath(string path)
