@@ -284,7 +284,7 @@ namespace NetSync
 				{
 					ret = ReadfdUnbuffered(data, total, len-total);
 					total += ret;
-				} catch (Exception e)
+				} catch (Exception)
 				{
 					MainClass.Exit("Unable to read data from the transport connection", null);
 					if(ClientThread != null)
@@ -358,7 +358,6 @@ namespace NetSync
 					break;
 				default:
 					throw new Exception("Read unknown message from stream");					
-					break;
 				}
 			}
 

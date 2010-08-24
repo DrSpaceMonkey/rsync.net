@@ -374,7 +374,7 @@ namespace NetSync
 			PrintRsyncVersion();
 
             Log.WriteLine(string.Empty);
-			Log.WriteLine("rsync is a file transfer program capable of efficient remote updatevia a fast differencing algorithm.");
+			Log.WriteLine("rsync is a file transfer program capable of efficient remote update via a fast differencing algorithm.");
 
 			Log.WriteLine("Usage: rsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST");
 			Log.WriteLine("  or   rsync [OPTION]... [USER@]HOST:SRC DEST");
@@ -483,7 +483,7 @@ namespace NetSync
 	{
 		public static void WriteLine(string str)
 		{			
-			LogWrite(str);			
+			LogWrite(str + Environment.NewLine);			
 		}
 		
 		public static void Write(string str)
@@ -506,19 +506,19 @@ namespace NetSync
 					{
 						Daemon.ServerOptions.logFile = new FileStream(Path.Combine(Environment.SystemDirectory,"rsyncd.log"), FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);						
 					}										
-					catch(Exception e)
+					catch(Exception)
 					{
 						return;
 					}
 				}
-				str = "[ " + DateTime.Now + " ] " + str + "\r\n";				
+				str = "[ " + DateTime.Now + " ] " + str;				
 				Daemon.ServerOptions.logFile.Write(Encoding.ASCII.GetBytes(str),0,str.Length);
 				Daemon.ServerOptions.logFile.Flush();				
 			} 
 			else 
 			{
 				if(!MainClass.opt.amDaemon )			
-					Console.WriteLine(str);			
+					Console.Write(str);			
 			}
 
 		}

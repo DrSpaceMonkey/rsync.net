@@ -16,12 +16,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Collections.Generic;
+using System.IO;
 
 namespace NetSync
 {

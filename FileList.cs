@@ -17,9 +17,8 @@
  */
 using System;
 using System.Collections;
-using System.IO;
-using Win32;
 using System.Collections.Generic;
+using System.IO;
 
 namespace NetSync
 {
