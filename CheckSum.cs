@@ -79,7 +79,9 @@ namespace NetSync
         {
             byte[] buf1 = new byte[len + 4];
             for (int j = 0; j < len; j++)
+            {
                 buf1[j] = buf[off + j];
+            }
             MDFour m = new MDFour(options);
             m.Begin();
             if (options.checksumSeed != 0)
@@ -89,9 +91,13 @@ namespace NetSync
             }
             int i;
             for (i = 0; i + CSUM_CHUNK <= len; i += CSUM_CHUNK)
+            {
                 m.Update(buf1, i, CSUM_CHUNK);
+            }
             if (len - i > 0 || options.protocolVersion >= 27)
+            {
                 m.Update(buf1, i, (UInt32)(len - i));
+            }
             return m.Result();
         }
 
@@ -280,7 +286,9 @@ namespace NetSync
         private void copy64(ref UInt32[] M, int ind, byte[] inData, int ind2)
         {
             for (int i = 0; i < 16; i++)
+            {
                 M[i + ind] = (UInt32)((inData[i * 4 + 3 + ind2] << 24) | (inData[i * 4 + 2 + ind2] << 16) | (inData[i * 4 + 1 + ind2] << 8) | (inData[i * 4 + 0 + ind2] << 0));
+            }
         }
 
         public void Tail(byte[] inData, int ind, UInt32 n)
@@ -288,17 +296,23 @@ namespace NetSync
             UInt32[] M = new UInt32[16];
             this.totalN += n << 3;
             if (this.totalN < (n << 3))
+            {
                 this.totalN2++;
+            }
             this.totalN2 += n >> 29;
             byte[] buf = new byte[128];
             for (int i = 0; i < n; i++)
+            {
                 buf[i] = inData[ind + i];
+            }
             buf[n] = 0x80;
             if (n <= 55)
             {
                 copy4(ref buf, 56, this.totalN);
                 if (options.protocolVersion >= 27)
+                {
                     copy4(ref buf, 60, this.totalN2);
+                }
                 copy64(ref M, 0, buf, 0);
                 MDFour64(M);
             }
@@ -306,7 +320,9 @@ namespace NetSync
             {
                 copy4(ref buf, 120, this.totalN);
                 if (options.protocolVersion >= 27)
+                {
                     copy4(ref buf, 124, this.totalN2);
+                }
                 copy64(ref M, 0, buf, 0);
                 MDFour64(M);
                 copy64(ref M, 0, buf, 64);
@@ -319,7 +335,9 @@ namespace NetSync
             UInt32[] M = new UInt32[16];
 
             if (n == 0)
+            {
                 Tail(inData, ind, 0);
+            }
 
             int i = 0;
             while (n >= 64)
@@ -330,11 +348,15 @@ namespace NetSync
                 n -= 64;
                 totalN += 64 << 3;
                 if (totalN < 64 << 3)
+                {
                     totalN2++;
+                }
             }
 
             if (n != 0)
+            {
                 Tail(inData, ind + i, n);
+            }
         }
     }
 
@@ -366,7 +388,9 @@ namespace NetSync
             if (len + sumResidue < CheckSum.CSUM_CHUNK)
             {
                 for (int j = 0; j < len; j++)
+                {
                     sumrbuf[sumResidue + j] = p[j + ind];
+                }
                 sumResidue += len;
                 return;
             }
@@ -375,7 +399,9 @@ namespace NetSync
             {
                 int min = Math.Min(CheckSum.CSUM_CHUNK - sumResidue, len);
                 for (int j = 0; j < min; j++)
+                {
                     sumrbuf[sumResidue + j] = p[j + ind];
+                }
                 md.Update(sumrbuf, 0, (UInt32)(min + sumResidue));
                 len -= min;
                 pPos += min;
@@ -385,7 +411,9 @@ namespace NetSync
             for (i = 0; i + CheckSum.CSUM_CHUNK <= len; i += CheckSum.CSUM_CHUNK)
             {
                 for (int j = 0; j < CheckSum.CSUM_CHUNK; j++)
+                {
                     sumrbuf[j] = p[pPos + i + j + ind];
+                }
                 md.Update(sumrbuf, 0, CheckSum.CSUM_CHUNK);
             }
 
@@ -393,16 +421,22 @@ namespace NetSync
             {
                 sumResidue = len - i;
                 for (int j = 0; j < sumResidue; j++)
+                {
                     sumrbuf[j] = p[pPos + i + j + ind];
+                }
             }
             else
+            {
                 sumResidue = 0;
+            }
         }
 
         public byte[] End()
         {
             if (sumResidue != 0 || options.protocolVersion >= 27)
+            {
                 md.Update(sumrbuf, 0, (UInt32)sumResidue);
+            }
             return md.Result();
         }
 

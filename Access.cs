@@ -35,32 +35,45 @@ namespace NetSync
         public bool AllowAccess(string addr, string host, string allowList, string denyList)
         {
             if (allowList == null || allowList.CompareTo(String.Empty) == 0)
+            {
                 allowList = null;
+            }
             if (denyList == null || denyList.CompareTo(String.Empty) == 0)
+            {
                 denyList = null;
+            }
             /* if theres no deny list and no allow list then allow access */
             if (denyList == null && allowList == null)
+            {
                 return true;
-
+            }
             /* if there is an allow list but no deny list then allow only hosts
                on the allow list */
             if (denyList == null)
+            {
                 return (AccessMatch(allowList, addr, host));
+            }
 
             /* if theres a deny list but no allow list then allow
                all hosts not on the deny list */
             if (allowList == null)
+            {
                 return (!AccessMatch(denyList, addr, host));
+            }
 
             /* if there are both type of list then allow all hosts on the
                    allow list */
             if (AccessMatch(allowList, addr, host))
+            {
                 return true;
+            }
 
             /* if there are both type of list and it's not on the allow then
                allow it if its not on the deny */
             if (AccessMatch(denyList, addr, host))
+            {
                 return false;
+            }
 
             return true;
         }
@@ -69,12 +82,17 @@ namespace NetSync
         {
             char[] separators = { ' ', ',', '\t' };
             string[] list2 = list.ToLower().Split(separators);
-            if (host != null) host = host.ToLower();
+            if (host != null)
+            {
+                host = host.ToLower();
+            }
 
             for (int i = 0; i < list2.Length; i++)
             {
                 if (list2[i].CompareTo(String.Empty) == 0)
+                {
                     continue;
+                }
                 if (MatchHostname(host, list2[i]) || MatchAddress(addr, list2[i]))
                 {
                     return true;
@@ -85,7 +103,10 @@ namespace NetSync
 
         protected bool MatchHostname(string host, string tok)
         {
-            if (host == null) return false;
+            if (host == null)
+            {
+                return false;
+            }
             return WildMatch.CheckWildMatch(tok, host);
         }
 
@@ -99,7 +120,10 @@ namespace NetSync
             byte[] mask = new byte[16];
             Int64 bits = 0;
 
-            if (addr == null || addr.CompareTo(String.Empty) == 0) return false;
+            if (addr == null || addr.CompareTo(String.Empty) == 0)
+            {
+                return false;
+            }
             int pos = tok.IndexOf('/');
             if (pos > 0)
             {
@@ -125,9 +149,13 @@ namespace NetSync
                 return false;
             }
             if (iptok.AddressFamily == AddressFamily.InterNetwork)
+            {
                 addrlen = 4;
+            }
             else
+            {
                 addrlen = 16;
+            }
 
             bits = -1;
             if (pos > 0)
@@ -137,7 +165,9 @@ namespace NetSync
                     mask = new byte[16];
                     bits = Convert.ToInt64(tok.Substring(pos + 1));
                     if (bits == 0)
+                    {
                         return true;
+                    }
                     if (bits < 0 || bits > (addrlen << 3))
                     {
                         Log.Write("malformed mask in " + tok);
@@ -151,7 +181,9 @@ namespace NetSync
             }
 
             if (bits >= 0)
+            {
                 MakeMask(mask, (int)bits, addrlen);
+            }
 
             return MatchBinary(ipaddr.ToString(), iptok.ToString(), mask, addrlen);
         }
@@ -164,15 +196,25 @@ namespace NetSync
             b = plen & 0x7;
 
             if (w > 0)
+            {
                 for (i = 0; i < w; i++)
+                {
                     mask[i] = 0xff;
+                }
+            }
 
             if (w < addrlen)
+            {
                 mask[w] = (byte)(0xff & (0xff << (8 - b)));
+            }
 
             if (w + 1 < addrlen)
+            {
                 for (i = 0; i < addrlen - w - 1; i++)
+                {
                     mask[w + 1 + i] = 0;
+                }
+            }
 
             return;
         }
@@ -195,9 +237,13 @@ namespace NetSync
         protected byte[] InetPton(AddressFamily af, string src)
         {
             if (af == AddressFamily.InterNetwork)
+            {
                 return InetPton4(src);
+            }
             else
+            {
                 return InetPton6(src);
+            }
         }
 
         protected byte[] InetPton4(string src)
@@ -220,27 +266,37 @@ namespace NetSync
                 {
                     byte dig = (byte)(res[pos] * 10 + pch);
                     if (dig > 255)
+                    {
                         return null;
+                    }
                     res[pos] = dig;
                     if (!saw_digit)
                     {
                         if (++octets > 4)
+                        {
                             return null;
+                        }
                         saw_digit = true;
                     }
                 }
                 else if (ch == '.' && saw_digit)
                 {
                     if (octets == 4)
+                    {
                         return null;
+                    }
                     pos++;
                     saw_digit = false;
                 }
                 else
+                {
                     return null;
+                }
             }
             if (octets < 4)
+            {
                 return null;
+            }
             return res;
         }
 
@@ -257,8 +313,12 @@ namespace NetSync
 
             /* Leading :: requires some special handling. */
             if (src[pos] == ':')
+            {
                 if (src[++pos] != ':')
+                {
                     return null;
+                }
+            }
             curtok = src;
             saw_xdigit = false;
             val = 0;
@@ -272,7 +332,9 @@ namespace NetSync
                     val <<= 4;
                     val |= pch;
                     if (val > 0xffff)
+                    {
                         return null;
+                    }
                     saw_xdigit = true;
                     continue;
                 }
@@ -282,12 +344,16 @@ namespace NetSync
                     if (!saw_xdigit)
                     {
                         if (colonp > 0)
+                        {
                             return null;
+                        }
                         colonp = respos;
                         continue;
                     }
                     if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                    {
                         return null;
+                    }
                     res[respos++] = (byte)((val >> 8) & 0xff);
                     res[respos++] = (byte)(val & 0xff);
                     saw_xdigit = false;
@@ -309,7 +375,9 @@ namespace NetSync
             if (saw_xdigit)
             {
                 if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                {
                     return null;
+                }
                 res[respos++] = (byte)((val >> 8) & 0xff);
                 res[respos++] = (byte)(val & 0xff);
             }

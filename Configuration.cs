@@ -40,8 +40,12 @@ namespace NetSync
             lock (this)
             {
                 for (int i = 0; i < Modules.Count; i++)
+                {
                     if (Modules[i].Name == nameModule)
+                    {
                         return i;
+                    }
+                }
             }
             return -1;
         }
@@ -51,7 +55,9 @@ namespace NetSync
             lock (this)
             {
                 if (numberModule < 0 || numberModule > Modules.Count)
+                {
                     return null;
+                }
                 return (Module)Modules[numberModule];
             }
         }
@@ -59,43 +65,57 @@ namespace NetSync
         public string GetModuleName(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).Name;
+            }
         }
 
         public bool ModuleIsReadOnly(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).ReadOnly;
+            }
         }
 
         public bool ModuleIsWriteOnly(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).WriteOnly;
+            }
         }
 
         public string GetHostsAllow(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).HostsAllow;
+            }
         }
 
         public string GetHostsDeny(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).HostsDeny;
+            }
         }
 
         public string GetAuthUsers(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).AuthUsers;
+            }
         }
 
         public string GetSecretsFile(int numberModule)
         {
             lock (this)
+            {
                 return GetModule(numberModule).SecretsFile;
+            }
         }
 
         public bool LoadParm(Options options)
@@ -115,7 +135,9 @@ namespace NetSync
                         Module mod = null;
 
                         if (Modules == null)
+                        {
                             Modules = new List<Module>();
+                        }
 
                         lock (cf)
                         {
@@ -123,7 +145,9 @@ namespace NetSync
                             {
                                 string line = cf.ReadLine();
                                 if (line == null)
+                                {
                                     break;
+                                }
                                 line = line.Trim();
                                 if (line.CompareTo(String.Empty) != 0 && line[0] != ';' && line[0] != '#')
                                 {
@@ -147,7 +171,9 @@ namespace NetSync
                                         {
                                             string[] parm = line.Split('=');
                                             if (parm.Length > 2)
+                                            {
                                                 continue;
+                                            }
                                             parm[0] = parm[0].Trim().ToLower();
                                             parm[1] = parm[1].Trim();
                                             switch (parm[0])
@@ -184,7 +210,9 @@ namespace NetSync
                                         {
                                             string[] parm = line.Split('=');
                                             if (parm.Length > 2)
+                                            {
                                                 continue;
+                                            }
                                             parm[0] = parm[0].Trim();
                                             parm[1] = parm[1].Trim();
                                             switch (parm[0])

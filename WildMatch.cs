@@ -44,10 +44,16 @@ namespace NetSync
             {
                 ch = p[k];
                 if (k > 0)
+                {
                     if (text.Length > 1)
+                    {
                         text = text.Substring(1);
+                    }
                     else
+                    {
                         return 0;
+                    }
+                }
                 switch (ch)
                 {
                     case '\\':
@@ -58,19 +64,25 @@ namespace NetSync
                         goto default;
                     default:
                         if (text[0] != ch)
+                        {
                             return 0;
+                        }
                         continue;
                     case '?':
                         /* Match anything but '/'. */
                         if (text[0] == '/')
+                        {
                             return 0;
+                        }
                         continue;
                     case '*':
                         if (k + 1 < p.Length)
                         {
                             if (p[++k] == '*')
                             {
-                                while (p[++k] == '*') { }
+                                while (p[++k] == '*')
+                                {
+                                }
                                 special = 1;
                             }
                             else
@@ -79,22 +91,31 @@ namespace NetSync
                             }
                         }
                         else
+                        {
                             special = 0;
+                        }
                         if (p[k] == '\0')
                         {
                             return (special == 1) ? 1 : (text.IndexOf('/') == -1 ? 0 : 1);
                         }
-                        if (p.CompareTo("*") == 0) text = text.Substring(1);
+                        if (p.CompareTo("*") == 0)
+                        {
+                            text = text.Substring(1);
+                        }
                         string r = p.Substring(k);
                         for (int t = 0; t < text.Length; )
                         {
                             if ((matched = DoMatch(r, text)) != 0)
                             {
                                 if (special == 0 || matched != ABORT_TO_STARSTAR)
+                                {
                                     return 1;
+                                }
                             }
                             else if (special == 0 && text[0] == '/')
+                            {
                                 return ABORT_TO_STARSTAR;
+                            }
                             text = text.Substring(1);
                         }
                         return ABORT_ALL;
@@ -112,14 +133,20 @@ namespace NetSync
                         do
                         {
                             if (k >= p.Length)
+                            {
                                 return ABORT_ALL;
+                            }
                             if (ch == '\\')
                             {
                                 ch = p[++k];
                                 if (k > p.Length)
+                                {
                                     return ABORT_ALL;
+                                }
                                 if (text[0] == ch)
+                                {
                                     matched = 1;
+                                }
                             }
                             else if (ch == '-' && prev != Char.MinValue && p.Length - k > 1 && p[1] != ']')
                             {
@@ -128,10 +155,14 @@ namespace NetSync
                                 {
                                     ch = p[++k];
                                     if (k >= p.Length)
+                                    {
                                         return ABORT_ALL;
+                                    }
                                 }
                                 if (text[0].CompareTo(ch) <= 0 && text[0].CompareTo(prev) >= 0)
+                                {
                                     matched = 1;
+                                }
                                 ch = Char.MinValue; /* This makes "prev" get set to 0. */
                             }
                             else if (ch == '[' && p[k] == ':')
@@ -144,13 +175,17 @@ namespace NetSync
                                     ch = p[k + 1 + j];
                                 }
                                 if (k + 1 >= p.Length)
+                                {
                                     return ABORT_ALL;
+                                }
                                 if (j == 0 || p[k + j] != ':')
                                 {
                                     /* Didn't find ":]", so treat like a normal set. */
                                     ch = '[';
                                     if (text[0] == ch)
+                                    {
                                         matched = 1;
+                                    }
                                     continue;
                                 }
                                 else
@@ -161,58 +196,82 @@ namespace NetSync
                                 if (CC_EQ(s, "alnum"))
                                 {
                                     if (Char.IsLetterOrDigit(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "alpha"))
                                 {
                                     if (Char.IsLetter(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "blank"))
                                 {
                                     if (Char.IsWhiteSpace(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "digit"))
                                 {
                                     if (Char.IsDigit(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "lower"))
                                 {
                                     if (Char.IsLower(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "punct"))
                                 {
                                     if (Char.IsPunctuation(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "space"))
                                 {
                                     if (Char.IsWhiteSpace(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "upper"))
                                 {
                                     if (Char.IsUpper(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else if (CC_EQ(s, "xdigit"))
                                 {
                                     if (Char.IsSurrogate(text[0]))
+                                    {
                                         matched = 1;
+                                    }
                                 }
                                 else
+                                {
                                     return ABORT_ALL;
+                                }
                                 ch = Char.MinValue;
                             }
                             else if (text[0] == ch)
+                            {
                                 matched = 1;
+                            }
                             prev = ch;
                         } while ((ch = p[++k]) != ']');
                         if (matched == special || text[0] == '/')
+                        {
                             return 0;
+                        }
                         continue;
                 }
             }

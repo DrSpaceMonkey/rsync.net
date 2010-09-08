@@ -64,7 +64,6 @@ namespace NetSync
             ClientInfo.Options.remoteAddr = remoteAddr;
             ClientInfo.Options.remoteHost = remoteHost;
 
-
             Daemon.StartDaemon(ClientInfo);
             Client.Close();
             ClientSockets.Remove(this);
@@ -115,7 +114,9 @@ namespace NetSync
                 {
                     Socket soc = Server.AcceptSocket();
                     if (!config.LoadParm(ServerOptions))
+                    {
                         continue;
+                    }
                     TCPSocketListener socketListener = new TCPSocketListener(soc, ref ClientSockets);
                     lock (ClientSockets)
                     {
@@ -125,7 +126,9 @@ namespace NetSync
                     for (int i = 0; i < ClientSockets.Count; i++)
                     {
                         if (ClientSockets[i] == null)
+                        {
                             ClientSockets.RemoveAt(i);
+                        }
                     }
                 }
                 catch (SocketException)
@@ -134,7 +137,9 @@ namespace NetSync
                 }
             }
             if (ServerOptions.logFile != null)
+            {
                 ServerOptions.logFile.Close();
+            }
         }
 
         public static int StartDaemon(ClientInfo cInfo)
@@ -160,7 +165,9 @@ namespace NetSync
                 return -1;
             }
             if (options.protocolVersion > options.remoteProtocol)
+            {
                 options.protocolVersion = options.remoteProtocol;
+            }
             line = stream.ReadLine();
             if (line.CompareTo("#list\n") == 0)
             {
@@ -193,7 +200,9 @@ namespace NetSync
             Options options = cInfo.Options;
 
             if (options.protocolVersion >= 23)
+            {
                 f.IOStartMultiplexOut();
+            }
             if (options.amSender)
             {
                 options.keepDirLinks = false; /* Must be disabled on the sender. */
@@ -232,7 +241,9 @@ namespace NetSync
             FileList fList = new FileList(options);
             List<FileStruct> fileList = fList.sendFileList(cInfo, args);
             if (options.verbose > 3)
+            {
                 Log.WriteLine("file list sent");
+            }
             if (fileList.Count == 0)
             {
                 MainClass.Exit("File list is empty", cInfo);
@@ -246,7 +257,9 @@ namespace NetSync
             f.Flush();
             MainClass.Report(cInfo);
             if (options.protocolVersion >= 24)
+            {
                 f.readInt();
+            }
             f.Flush();
         }
 
@@ -287,14 +300,18 @@ namespace NetSync
             if (!options.deleteAfter)
             {
                 if (options.recurse && options.deleteMode && localName == null && fileList.Count > 0)
+                {
                     receiver.DeleteFiles(fileList);
+                }
             }
             f.IOStartBufferingOut();
             Generator gen = new Generator(options);
             gen.GenerateFiles(f, fileList, localName);
             f.Flush();
             if (fileList != null && fileList.Count != 0)
+            {
                 receiver.ReceiveFiles(cInfo, fileList, localName);
+            }
             MainClass.Report(cInfo);
             if (options.protocolVersion >= 24)
             {

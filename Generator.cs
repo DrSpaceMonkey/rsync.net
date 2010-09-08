@@ -36,11 +36,15 @@ namespace NetSync
         public void WriteSumHead(IOStream f, SumStruct sum)
         {
             if (sum == null)
+            {
                 sum = new SumStruct();
+            }
             f.writeInt(sum.count);
             f.writeInt((int)sum.bLength);
             if (options.protocolVersion >= 27)
+            {
                 f.writeInt(sum.s2Length);
+            }
             f.writeInt((int)sum.remainder);
         }
 
@@ -51,32 +55,44 @@ namespace NetSync
 
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("generator starting count=" + fileList.Count);
+            }
 
             for (i = 0; i < fileList.Count; i++)
             {
                 FileStruct file = (fileList[i]);
                 if (file.baseName == null)
+                {
                     continue;
+                }
                 if (Util.S_ISDIR(file.mode))
+                {
                     continue;
+                }
                 ReceiveGenerator(localName != null ? localName : file.FNameTo(), file, i, f);
             }
 
             phase++;
             checkSum.cSumLength = CheckSum.SUM_LENGTH;
             if (options.verbose > 2)
+            {
                 Log.WriteLine("GenerateFiles phase=" + phase);
+            }
             f.writeInt(-1);
 
             phase++;
             if (options.verbose > 2)
+            {
                 Log.WriteLine("GenerateFiles phase=" + phase);
+            }
 
             f.writeInt(-1);
 
             if (options.protocolVersion >= 29 && !options.delayUpdates)
+            {
                 f.writeInt(-1);
+            }
 
             /* now we need to fix any directory permissions that were
             * modified during the transfer 
@@ -85,12 +101,16 @@ namespace NetSync
             {
                 FileStruct file = (fileList[i]);
                 if (file.baseName != null || Util.S_ISDIR(file.mode))
+                {
                     continue;
+                }
                 ReceiveGenerator(localName != null ? localName : file.FNameTo(), file, i, null);
             }
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("GenerateFiles finished");
+            }
         }
 
         public void ReceiveGenerator(string fileName, FileStruct file, int i, IOStream f)
@@ -102,7 +122,9 @@ namespace NetSync
                 return;
             }
             if (options.verbose > 2)
+            {
                 Log.WriteLine("Receive Generator(" + fileName + "," + i + ")\n");
+            }
             int statRet;
             FStat st = new FStat();
             if (options.dryRun)
@@ -130,7 +152,9 @@ namespace NetSync
             {
                 /* we only want to update existing files */
                 if (options.verbose > 1)
+                {
                     Log.WriteLine("not creating new file \"" + fileName + "\"");
+                }
                 return;
             }
             string fNameCmp = fileName;
@@ -148,17 +172,23 @@ namespace NetSync
             catch
             {
                 if (options.verbose > 3)
+                {
                     Log.WriteLine("failed to open " + Util.fullFileName(fNameCmp) + ", continuing");
+                }
                 f.writeInt(i);
                 WriteSumHead(f, null);
                 return;
             }
 
             if (options.verbose > 3)
+            {
                 Log.WriteLine("gen mapped " + fNameCmp + " of size " + st.size);
+            }
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("generating and sending sums for " + i);
+            }
 
             f.writeInt(i);
             Stream fCopy = null;
@@ -181,9 +211,13 @@ namespace NetSync
             SumSizesSqroot(sum, (UInt64)len);
 
             if (len > 0)
+            {
                 mapBuf = new MapFile(fd, (int)len, Options.MAX_MAP_SIZE, (int)sum.bLength);
+            }
             else
+            {
                 mapBuf = null;
+            }
 
             WriteSumHead(f, sum);
 
@@ -197,14 +231,18 @@ namespace NetSync
 
                 sum2 = checkSum.GetChecksum2(map, off, (int)n1);
                 if (options.verbose > 3)
+                {
                     Log.WriteLine("chunk[" + i + "] offset=" + offset + " len=" + n1 + " sum1=" + sum1);
+                }
                 f.writeInt((int)sum1);
                 f.Write(sum2, 0, sum.s2Length);
                 len -= n1;
                 offset += n1;
             }
             if (mapBuf != null)
+            {
                 mapBuf = null;
+            }
         }
 
         public void SumSizesSqroot(SumStruct sum, UInt64 len)
@@ -236,15 +274,20 @@ namespace NetSync
                     {
                         bLength |= c;
                         if (len < bLength * bLength)
+                        {
                             bLength &= ~c;
+                        }
                         c >>= 1;
                     } while (c >= 8);	/* round to multiple of 8 */
                     bLength = Math.Max(bLength, Options.BLOCK_SIZE);
                 }
 
             if (options.protocolVersion < 27)
+            {
                 s2Length = checkSum.cSumLength;
+            }
             else
+            {
                 if (checkSum.cSumLength == CheckSum.SUM_LENGTH)
                 {
                     s2Length = CheckSum.SUM_LENGTH;
@@ -266,6 +309,7 @@ namespace NetSync
                     s2Length = Math.Max(s2Length, checkSum.cSumLength);
                     s2Length = Math.Min(s2Length, CheckSum.SUM_LENGTH);
                 }
+            }
 
             sum.fLength = (int)len;
             sum.bLength = bLength;
@@ -274,8 +318,10 @@ namespace NetSync
             sum.remainder = (UInt32)(len % bLength);
 
             if (sum.count != 0 && options.verbose > 2)
+            {
                 Log.WriteLine("count=" + sum.count + " rem=" + sum.remainder + " blength=" + sum.bLength +
                     " s2length=" + sum.s2Length + " flength=" + sum.fLength);
+            }
         }
 
         /* Perform our quick-check heuristic for determining if a file is unchanged. */
@@ -283,12 +329,16 @@ namespace NetSync
         {
             // TODO: path length
             if (!File.Exists(fileName))
+            {
                 return false;
+            }
 
             FileInfo fi = new FileInfo(fileName);
             // TODO: path length
             if (fi.Length != file.length)
+            {
                 return false;
+            }
 
             /* if always checksum is set then we use the checksum instead
             of the file time to determine whether to sync */
@@ -301,10 +351,14 @@ namespace NetSync
             }
 
             if (options.sizeOnly)
+            {
                 return true;
+            }
 
             if (options.ignoreTimes)
+            {
                 return false;
+            }
 
             // TODO: path length
             return Util.CompareModTime(fi.LastWriteTime.Second, file.modTime.Second, options) == 0;

@@ -56,7 +56,9 @@ namespace NetSync
             }
             string[] args2 = new string[argsNotUsed];
             for (int i = 0; i < argsNotUsed; i++)
+            {
                 args2[i] = args[args.Length - argsNotUsed + i];
+            }
 
             if (opt.amDaemon && !opt.amSender)
             {
@@ -137,7 +139,9 @@ namespace NetSync
 
                 }
                 else
+                {
                     path = String.Empty;
+                }
                 if (host[0] == '[' && host.IndexOf(']') != -1)
                 {
                     host = host.Remove(host.IndexOf(']'), 1);
@@ -178,7 +182,9 @@ namespace NetSync
 
                     }
                     else
+                    {
                         path = String.Empty;
+                    }
                     if (host[0] == '[' && host.IndexOf(']') != -1)
                     {
                         host = host.Remove(host.IndexOf(']'), 1);
@@ -201,7 +207,9 @@ namespace NetSync
                     if (args[args.Length - 1][p + 1] == ':')
                     {
                         if (options.shellCmd == null)
+                        {
                             return StartSocketClient(args[args.Length - 1].Substring(0, p), args[args.Length - 1].Substring(p + 2), user, args, cInfo);
+                        }
                     }
             }
             return 0;
@@ -218,7 +226,9 @@ namespace NetSync
             cInfo.IoStream = OpenSocketOutWrapped(host, options.rsyncPort, options.bindAddress);
 
             if (cInfo.IoStream != null)
+            {
                 StartInbandExchange(user, path, cInfo, args.Length);
+            }
 
             Client client = new Client();
             return client.ClientRun(cInfo, -1, args);
@@ -236,7 +246,9 @@ namespace NetSync
             //sargs[sargc++] = path;
 
             if (argc == 0 && !options.amSender)
+            {
                 options.listOnly = true;
+            }
             if (path[0] == '/')
             {
                 Log.WriteLine("ERROR: The remote path must start with a module name");
@@ -259,13 +271,17 @@ namespace NetSync
                 return -1;
             }
             if (options.protocolVersion > options.remoteProtocol)
+            {
                 options.protocolVersion = options.remoteProtocol;
+            }
             f.IOPrintf(path + "\n");
             while (true)
             {
                 line = f.ReadLine();
                 if (line.CompareTo("@RSYNCD: OK\n") == 0)
+                {
                     break;
+                }
                 if (line.Length > 18 && line.Substring(0, 18).CompareTo("@RSYNCD: AUTHREQD ") == 0)
                 {
                     string pass = String.Empty;
@@ -279,7 +295,9 @@ namespace NetSync
                 }
 
                 if (line.CompareTo("@RSYNCD: EXIT\n") == 0)
+                {
                     MainClass.Exit("@RSYNCD: EXIT", null);
+                }
 
                 if (line.StartsWith("@ERROR: "))
                 {
@@ -288,7 +306,9 @@ namespace NetSync
             }
 
             for (int i = 0; i < sargc; i++)
+            {
                 f.IOPrintf(sargs[i] + "\n");
+            }
             f.IOPrintf("\n");
             return 0;
         }
@@ -321,10 +341,14 @@ namespace NetSync
             if (options.remoteProtocol == 0)
             {
                 if (!options.readBatch)
+                {
                     f.writeInt(options.protocolVersion);
+                }
                 options.remoteProtocol = f.readInt();
                 if (options.protocolVersion > options.remoteProtocol)
+                {
                     options.protocolVersion = options.remoteProtocol;
+                }
             }
             if (options.readBatch && options.remoteProtocol > options.protocolVersion)
             {
@@ -341,11 +365,15 @@ namespace NetSync
             if (options.amServer)
             {
                 if (options.checksumSeed == 0)
+                {
                     options.checksumSeed = (int)System.DateTime.Now.Ticks;
+                }
                 f.writeInt(options.checksumSeed);
             }
             else
+            {
                 options.checksumSeed = f.readInt();
+            }
         }
 
         public static void PrintRsyncVersion()
@@ -519,7 +547,9 @@ namespace NetSync
             else
             {
                 if (!MainClass.opt.amDaemon)
+                {
                     Console.Write(str);
+                }
             }
 
         }

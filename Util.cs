@@ -27,7 +27,9 @@ namespace NetSync
         public static bool S_ISDIR(uint mode)
         {
             if ((mode & 0x8000) == 0)
+            {
                 return true;
+            }
             return false;
         }
 
@@ -45,7 +47,9 @@ namespace NetSync
             }
 
             if (dir == null || dir.CompareTo(String.Empty) == 0)
+            {
                 return false;
+            }
             //...
             try
             {
@@ -81,9 +85,13 @@ namespace NetSync
         {
             //...Safe FileName
             if (fileName.IndexOf(':') != -1 || fileName.StartsWith("\\\\"))
+            {
                 return fileName;	//absolute
+            }
             else
+            {
                 return currDir + '\\' + fileName;	//relative
+            }
             //...modules
         }
 
@@ -91,9 +99,13 @@ namespace NetSync
         {
             string cleanedName = fileName.Replace("\\\\", "\\");
             if (cleanedName.EndsWith("\\"))
+            {
                 cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
+            }
             if (collapseDotDot)
+            {
                 cleanedName = cleanedName.Substring(0, 2) + cleanedName.Substring(2).Replace("..", String.Empty);
+            }
             return cleanedName;
         }
 
@@ -106,10 +118,14 @@ namespace NetSync
         {
             int index = s.IndexOf(":");
             if (index == -1)
+            {
                 return -1;
+            }
             int slashIndex = s.IndexOf("/");
             if (slashIndex != -1 && slashIndex < index)
+            {
                 return -1;
+            }
             return index;
         }
 
@@ -117,7 +133,9 @@ namespace NetSync
         {
             object[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
+            {
                 y[i] = x[i];
+            }
             return y;
         }
 
@@ -125,22 +143,30 @@ namespace NetSync
         {
             object[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
+            {
                 y[i] = x[i + 1];
+            }
             return y;
         }
 
         public static int MemCmp(byte[] arr1, int off1, byte[] arr2, int off2, int length)
         {
             for (int i = 0; i < length; i++)
+            {
                 if (arr1[off1 + i] != arr2[off2 + i])
+                {
                     return arr1[off1 + i] - arr2[off2 + i];
+                }
+            }
             return 0;
         }
 
         public static void MemCpy(byte[] arr1, int off1, byte[] arr2, int off2, int length)
         {
             for (int i = 0; i < length; i++)
+            {
                 arr1[off1 + i] = arr2[off2 + i];
+            }
         }
 
         public static int CompareModTime(long file1, long file2, Options options)
@@ -148,11 +174,15 @@ namespace NetSync
             if (file2 > file1)
             {
                 if (file2 - file1 <= options.modifyWindow)
+                {
                     return 0;
+                }
                 return -1;
             }
             if (file1 - file2 <= options.modifyWindow)
+            {
                 return 0;
+            }
             return 1;
         }
     }

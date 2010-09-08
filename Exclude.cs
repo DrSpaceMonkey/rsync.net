@@ -53,10 +53,15 @@ namespace NetSync
             TextReader f;
             // TODO: path length
             if (fileName == null || fileName.CompareTo(String.Empty) == 0 || !File.Exists(fileName))
+            {
                 return;
+            }
             if (fileName.CompareTo("-") == 0)
+            {
                 f = System.Console.In;
+            }
             else
+            {
                 try
                 {
                     f = new System.IO.StreamReader(fileName);
@@ -69,13 +74,18 @@ namespace NetSync
                     }
                     return;
                 }
+            }
             while (true)
             {
                 string line = f.ReadLine();
                 if (line == null)
+                {
                     break;
+                }
                 if (line.CompareTo(String.Empty) != 0 && (wordSplit || (line[0] != ';' && line[0] != '#')))
+                {
                     AddExclude(ref exclList, line, xFlags);
+                }
             }
             f.Close();
 
@@ -84,27 +94,37 @@ namespace NetSync
         {
             UInt32 mFlags;
             if (pattern == null)
+            {
                 return;
+            }
             string cp = pattern;
             int len = 0;
             while (true)
             {
                 if (len >= cp.Length)
+                {
                     break;
+                }
                 cp = GetExcludeToken(cp.Substring(len), out len, out mFlags, xFlags);
                 if (len == 0)
+                {
                     break;
+                }
                 if ((mFlags & Options.MATCHFLG_CLEAR_LIST) != 0)
                 {
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("[" + options.WhoAmI() + "] clearing exclude list");
+                    }
                     exclList.Clear();
                     continue;
                 }
 
                 MakeExlude(ref exclList, cp, mFlags);
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("[" + options.WhoAmI() + "] AddExclude(" + cp + ")");
+                }
             }
         }
 
@@ -114,14 +134,22 @@ namespace NetSync
             int patLen = pat.Length;
             ExcludeStruct ret = new ExcludeStruct();
             if (options.excludePathPrefix != null)
+            {
                 mFlags |= Options.MATCHFLG_ABS_PATH;
+            }
             if (options.excludePathPrefix != null && pat[0] == '/')
+            {
                 exLen = options.excludePathPrefix.Length;
+            }
             else
+            {
                 exLen = 0;
+            }
             ret.pattern = String.Empty;
             if (exLen != 0)
+            {
                 ret.pattern += options.excludePathPrefix;
+            }
             ret.pattern += pat.Replace('\\', '/');
             patLen += exLen;
 
@@ -132,7 +160,9 @@ namespace NetSync
                 {
                     mFlags |= Options.MATCHFLG_WILD2;
                     if (ret.pattern.IndexOf("**") == 0)
+                    {
                         mFlags |= Options.MATCHFLG_WILD2_PREFIX;
+                    }
                 }
             }
 
@@ -143,8 +173,12 @@ namespace NetSync
             }
 
             for (int i = 0; i < ret.pattern.Length; i++)
+            {
                 if (ret.pattern[i] == '/')
+                {
                     ret.slashCnt++;
+                }
+            }
             ret.matchFlags = mFlags;
             exclList.Add(ret);
         }
@@ -154,7 +188,10 @@ namespace NetSync
             len = 0;
             string s = p;
             mFlags = 0;
-            if (p.CompareTo(String.Empty) == 0) return String.Empty;
+            if (p.CompareTo(String.Empty) == 0)
+            {
+                return String.Empty;
+            }
 
             if ((xFlags & Options.XFLG_WORD_SPLIT) != 0)
             {
@@ -163,24 +200,36 @@ namespace NetSync
             if ((xFlags & Options.XFLG_WORDS_ONLY) == 0 && (s[0] == '-' || s[0] == '+') && s[1] == ' ')
             {
                 if (s[0] == '+')
+                {
                     mFlags |= Options.MATCHFLG_INCLUDE;
+                }
                 s = s.Substring(2);
             }
             else if ((xFlags & Options.XFLG_DEF_INCLUDE) != 0)
+            {
                 mFlags |= Options.MATCHFLG_INCLUDE;
+            }
             if ((xFlags & Options.XFLG_DIRECTORY) != 0)
+            {
                 mFlags |= Options.MATCHFLG_DIRECTORY;
+            }
             if ((xFlags & Options.XFLG_WORD_SPLIT) != 0)
             {
                 int i = 0;
                 while (i < s.Length && s[i] == ' ')
+                {
                     i++;
+                }
                 len = s.Length - i;
             }
             else
+            {
                 len = s.Length;
+            }
             if (p[0] == '!' && len == 1)
+            {
                 mFlags |= Options.MATCHFLG_CLEAR_LIST;
+            }
             return s;
         }
 
@@ -207,19 +256,27 @@ namespace NetSync
             string pattern = ex.pattern;
 
             if (name.CompareTo(String.Empty) == 0)
+            {
                 return false;
+            }
             if (pattern.CompareTo(String.Empty) == 0)
+            {
                 return false;
+            }
 
             if (0 != (ex.matchFlags & Options.MATCHFLG_DIRECTORY) && nameIsDir == 0)
+            {
                 return false;
+            }
 
             if (pattern[0] == '/')
             {
                 match_start = 1;
                 pattern = pattern.TrimStart('/');
                 if (name[0] == '/')
+                {
                     name = name.TrimStart('/');
+                }
             }
 
             if ((ex.matchFlags & Options.MATCHFLG_WILD) != 0)
@@ -231,14 +288,18 @@ namespace NetSync
                     name = name.Substring(name.IndexOf('/') + 1);
                 }
                 if (WildMatch.CheckWildMatch(pattern, name))
+                {
                     return true;
+                }
                 if ((ex.matchFlags & Options.MATCHFLG_WILD2_PREFIX) != 0)
                 {
                     /* If the **-prefixed pattern has a '/' as the next
                     * character, then try to match the rest of the
                     * pattern at the root. */
                     if (pattern[2] == '/' && WildMatch.CheckWildMatch(pattern.Substring(3), name))
+                    {
                         return true;
+                    }
                 }
                 else if (0 == match_start && (ex.matchFlags & Options.MATCHFLG_WILD2) != 0)
                 {
@@ -250,14 +311,18 @@ namespace NetSync
                     {
                         name = name.Substring(posSlash + 1);
                         if (WildMatch.CheckWildMatch(pattern, name))
+                        {
                             return true;
+                        }
                     }
                 }
             }
             else if (match_start != 0)
             {
                 if (name.CompareTo(pattern) == 0)
+                {
                     return true;
+                }
             }
             else
             {
@@ -292,7 +357,9 @@ namespace NetSync
         public void SendExcludeList(IOStream f)
         {
             if (options.listOnly && !options.recurse)
+            {
                 AddExclude(ref options.excludeList, "/*/*", 0);
+            }
 
             foreach (ExcludeStruct ent in options.excludeList)
             {
@@ -300,7 +367,9 @@ namespace NetSync
                 string p;
 
                 if (ent.pattern.Length == 0 || ent.pattern.Length > Options.MAXPATHLEN)
+                {
                     continue;
+                }
                 l = ent.pattern.Length;
                 p = ent.pattern;
                 if ((ent.matchFlags & Options.MATCHFLG_DIRECTORY) != 0)
@@ -319,7 +388,9 @@ namespace NetSync
                     f.IOPrintf("- ");
                 }
                 else
+                {
                     f.writeInt(l);
+                }
                 f.IOPrintf(p);
 
             }

@@ -82,7 +82,6 @@ namespace NetSync
             catch (Exception e)
             {
                 Log.Write(e.Message);
-
             }
             CalculationTotalWritten(len);
         }
@@ -110,7 +109,9 @@ namespace NetSync
                 }
 
                 if (iobuf_out_cnt == IO_BUFFER_SIZE)
+                {
                     Flush();
+                }
             }
         }
 
@@ -123,25 +124,35 @@ namespace NetSync
             CheckSum.SIVAL(ref buffer, 0, (UInt32)(((MPLEX_BASE + (int)code) << 24) + len));
 
             if (n > buffer.Length - 4)
+            {
                 n = buffer.Length - 4;
+            }
 
             Util.MemCpy(buffer, 4, buf, 0, n);
             sockOut.Write(buffer, 0, n + 4);
 
             len -= n;
             if (len > 0)
+            {
                 sockOut.Write(buf, n, len);
+            }
         }
 
         public void Flush()
         {
             if (iobuf_out_cnt == 0 || no_flush != 0)
+            {
                 return;
+            }
 
             if (IOMultiplexingOut)
+            {
                 MplexWrite(MsgCode.MSG_DATA, iobuf_out, iobuf_out_cnt);
+            }
             else
+            {
                 sockOut.Write(iobuf_out, 0, iobuf_out_cnt);
+            }
             iobuf_out_cnt = 0;
         }
 
@@ -226,18 +237,24 @@ namespace NetSync
                 {
                     int readByte = fd.ReadByte();
                     if (readByte == -1)
+                    {
                         break;
+                    }
                     // ...select
                     if (nulls ? readByte == '\0' : (readByte == '\r' || readByte == '\n'))
                     {
                         if (!readingRemotely && fileName == String.Empty)
+                        {
                             continue;
+                        }
                         break;
                     }
                     fileName += readByte;
                 }
                 if (fileName == String.Empty || !(fileName[0] == '#' || fileName[0] == ';'))
+                {
                     break;
+                }
                 continue;
             }
             return fileName;
@@ -256,12 +273,18 @@ namespace NetSync
             {
                 int readInt = readByte();
                 if (readInt == -1)
+                {
                     return data.ToString();
+                }
                 char read = Convert.ToChar(readInt);
                 if (read != '\r')
+                {
                     data.Append(read);
+                }
                 if (read == '\n')
+                {
                     break;
+                }
             }
 
             return data.ToString();
@@ -291,7 +314,9 @@ namespace NetSync
                 {
                     MainClass.Exit("Unable to read data from the transport connection", null);
                     if (ClientThread != null)
+                    {
                         ClientThread.Abort();
+                    }
                     return null;
                 }
             }
@@ -318,7 +343,9 @@ namespace NetSync
             byte[] line = new byte[1024];
 
             if (iobuf_in == null)
+            {
                 return sockIn.Read(data, off, len);
+            }
 
             if (!IOMultiplexingIn && remaining == 0)
             {
@@ -359,7 +386,9 @@ namespace NetSync
                     case MsgCode.MSG_INFO:
                     case MsgCode.MSG_ERROR:
                         if (remaining >= line.Length)
+                        {
                             throw new Exception("multiplexing overflow " + tag + ":" + remaining);
+                        }
                         ReadLoop(line, remaining);
                         remaining = 0;
                         break;
@@ -369,7 +398,9 @@ namespace NetSync
             }
 
             if (remaining == 0)
+            {
                 Flush();
+            }
 
             return ret;
         }
@@ -389,9 +420,13 @@ namespace NetSync
             byte[] tmp = ReadBuf(1);
             data = tmp[0];
             if (data == -1)
+            {
                 throw new Exception("Can't read from Stream");
+            }
             else
+            {
                 return Convert.ToByte(data);
+            }
         }
 
         public Int64 ReadLongInt()
@@ -401,7 +436,9 @@ namespace NetSync
             ret = readInt();
 
             if ((UInt32)ret != 0xffffffff)
+            {
                 return ret;
+            }
 
             b = ReadBuf(8);
             ret = IVAL(b, 0) | (((Int64)IVAL(b, 4)) << 32);
@@ -437,7 +474,9 @@ namespace NetSync
         public void IOStartBufferingIn()
         {
             if (iobuf_in != null)
+            {
                 return;
+            }
             iobuf_in_siz = 2 * IO_BUFFER_SIZE;
             iobuf_in = new byte[iobuf_in_siz];
         }
@@ -457,7 +496,9 @@ namespace NetSync
         public void IOStartBufferingOut()
         {
             if (iobuf_out != null)
+            {
                 return;
+            }
             iobuf_out = new byte[IO_BUFFER_SIZE];
             iobuf_out_cnt = 0;
         }

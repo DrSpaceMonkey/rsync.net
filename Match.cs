@@ -85,7 +85,9 @@ namespace NetSync
         public void BuildHashTable(SumStruct s)
         {
             for (int i = 0; i < s.count; i++)
+            {
                 targets.Add(new Target());
+            }
 
             for (int i = 0; i < s.count; i++)
             {
@@ -96,7 +98,9 @@ namespace NetSync
             targets.Sort(0, s.count, new TargetComparer());
 
             for (int i = 0; i < TABLESIZE; i++)
+            {
                 tagTable[i] = NULL_TAG;
+            }
 
 
             for (int i = s.count; i-- > 0; )
@@ -123,12 +127,16 @@ namespace NetSync
                 BuildHashTable(s);
 
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("built hash table");
+                }
 
                 HashSearch(f, s, buf, len, sum);
 
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("done hash search");
+                }
             }
             else
             {
@@ -142,16 +150,22 @@ namespace NetSync
 
             fileSum = sum.End();
             if (buf != null && buf.status)
+            {
                 fileSum[0]++;
+            }
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("sending fileSum");
+            }
             f.Write(fileSum, 0, CheckSum.MD4_SUM_LENGTH);
 
             targets.Clear();
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("falseAlarms=" + falseAlarms + " tagHits=" + tagHits + " matches=" + matches);
+            }
 
             totalTagHits += tagHits;
             totalFalseAlarms += falseAlarms;
@@ -165,7 +179,9 @@ namespace NetSync
             int j;
 
             if (options.verbose > 2 && i >= 0)
+            {
                 Log.WriteLine("match at " + offset + " last_match=" + lastMatch + " j=" + i + " len=" + s.sums[i].len + " n=" + n);
+            }
 
             Token token = new Token(options);
             token.SendToken(f, i, buf, lastMatch, n, (int)(i < 0 ? 0 : s.sums[i].len));
@@ -185,15 +201,21 @@ namespace NetSync
             }
 
             if (i >= 0)
+            {
                 lastMatch = (int)(offset + s.sums[i].len);
+            }
             else
+            {
                 lastMatch = offset;
+            }
 
             if (buf != null && options.doProgress)
             {
                 Progress.ShowProgress(lastMatch, buf.fileSize);
                 if (i == -1)
+                {
                     Progress.EndProgress(buf.fileSize);
+                }
             }
         }
 
@@ -209,7 +231,9 @@ namespace NetSync
 
             wantI = 0;
             if (options.verbose > 2)
+            {
                 Log.WriteLine("hash search ob=" + s.bLength + " len=" + len);
+            }
 
             k = (UInt32)Math.Min(len, s.bLength);
             int off = buf.MapPtr(0, (int)k);
@@ -220,12 +244,16 @@ namespace NetSync
             s1 = sum & 0xFFFF;
             s2 = sum >> 16;
             if (options.verbose > 3)
+            {
                 Log.WriteLine("sum=" + sum + " k=" + k);
+            }
 
             offset = 0;
             end = (int)(len + 1 - s.sums[s.count - 1].len);
             if (options.verbose > 3)
+            {
                 Log.WriteLine("hash search s.bLength=" + s.bLength + " len=" + len + " count=" + s.count);
+            }
 
             do
             {
@@ -234,10 +262,14 @@ namespace NetSync
                 int j = tagTable[t];
 
                 if (options.verbose > 4)
+                {
                     Log.WriteLine("offset=" + offset + " sum=" + sum);
+                }
 
                 if (j == NULL_TAG)
+                {
                     goto null_tag;
+                }
 
                 sum = (s1 & 0xffff) | (s2 << 16);
                 tagHits++;
@@ -247,14 +279,20 @@ namespace NetSync
                     int i = ((Target)targets[j]).i;
 
                     if (sum != s.sums[i].sum1)
+                    {
                         continue;
+                    }
 
                     l = (UInt32)Math.Min(s.bLength, len - offset);
                     if (l != s.sums[i].len)
+                    {
                         continue;
+                    }
 
                     if (options.verbose > 3)
+                    {
                         Log.WriteLine("potential match at " + offset + " target=" + j + " " + i + " sum=" + sum);
+                    }
 
                     if (!doneCsum2)
                     {
@@ -295,7 +333,9 @@ namespace NetSync
             null_tag:
                 backup = offset - lastMatch;
                 if (backup < 0)
+                {
                     backup = 0;
+                }
 
                 more = (offset + k) < len ? 1 : 0;
                 off = buf.MapPtr(offset - backup, (int)(k + more + backup)) + backup;
@@ -308,10 +348,14 @@ namespace NetSync
                     s2 += s1;
                 }
                 else
+                {
                     --k;
+                }
 
                 if (backup >= CHUNK_SIZE + s.bLength && end - offset > CHUNK_SIZE)
+                {
                     Matched(f, s, buf, (int)(offset - s.bLength), -2, _sum);
+                }
             } while (++offset < end);
 
             Matched(f, s, buf, len, -1, _sum);
@@ -321,7 +365,9 @@ namespace NetSync
         public void MatchReport(IOStream f)
         {
             if (options.verbose <= 1)
+            {
                 return;
+            }
 
             string report = "total: matches=" + totalMatches + "  tagHits=" + totalTagHits + "  falseAlarms=" +
                 totalFalseAlarms + " data=" + Options.stats.literalData;

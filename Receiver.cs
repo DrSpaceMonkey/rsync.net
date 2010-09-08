@@ -37,12 +37,18 @@ namespace NetSync
             string normalized = cInfo.Options.dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
             string ret = String.Empty;
             if (path.ToLower().IndexOf(normalized) != -1)
+            {
                 ret = path.Substring(path.ToLower().IndexOf(normalized) + normalized.Length).Replace('/', Path.DirectorySeparatorChar);
+            }
 
             if (ret == String.Empty)
+            {
                 return path.TrimEnd('\\');
+            }
             if (ret[0] == Path.DirectorySeparatorChar)
+            {
                 ret = ret.Substring(1);
+            }
 
             return ret;
         }
@@ -60,22 +66,30 @@ namespace NetSync
             bool recv_ok;
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("ReceiveFiles(" + fileList.Count + ") starting");
+            }
             while (true)
             {
                 i = f.readInt();
                 if (i == -1)
                 {
                     if (phase != 0)
+                    {
                         break;
+                    }
 
                     phase = 1;
                     checkSum.cSumLength = CheckSum.SUM_LENGTH;
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("ReceiveFiles phase=" + phase);
+                    }
                     f.writeInt(0); //send_msg DONE
                     if (options.keepPartial)
+                    {
                         options.makeBackups = false;
+                    }
                     continue;
                 }
 
@@ -91,7 +105,9 @@ namespace NetSync
                 Options.stats.totalTransferredSize += file.length;
 
                 if (localName != null && localName.CompareTo(String.Empty) != 0)
+                {
                     fileName = localName;
+                }
                 else
                 {
                     fileName = Path.Combine(options.dir, LocalizePath(cInfo, file.FNameTo().Replace(":", String.Empty)).Replace("\\", "/"));
@@ -105,18 +121,24 @@ namespace NetSync
                 if (options.dryRun)
                 {
                     if (!options.amServer && options.verbose > 0)
+                    {
                         Log.WriteLine(fileName);
+                    }
                     continue;
                 }
 
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("receiveFiles(" + fileName + ")");
+                }
 
                 if (options.partialDir != null && options.partialDir.CompareTo(String.Empty) != 0)
                 {
                 }
                 else
+                {
                     fNameCmp = fileName;
+                }
 
                 FileStream fd1 = null;
                 try
@@ -151,30 +173,42 @@ namespace NetSync
                 fd2 = new FileStream(tempFileName, FileMode.OpenOrCreate, FileAccess.Write);
 
                 if (!options.amServer && options.verbose > 0)
+                {
                     Log.WriteLine(fileName);
+                }
 
                 /* recv file data */
                 recv_ok = ReceiveData(cInfo, fNameCmp, fd1, st.size,
                             fileName, fd2, file.length);
 
                 if (fd1 != null)
+                {
                     fd1.Close();
+                }
                 if (fd2 != null)
+                {
                     fd2.Close();
+                }
                 // TODO: path length
                 File.Copy(tempFileName, fileName, true);
                 // TODO: path length
                 File.Delete(tempFileName);
                 if (recv_ok || options.inplace)
+                {
                     FinishTransfer(fileName, fNameTmp, file, recv_ok);
+                }
             }
             options.makeBackups = saveMakeBackups;
 
             if (options.deleteAfter && options.recurse && localName == null && fileList.Count > 0)
+            {
                 DeleteFiles(fileList);
+            }
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("ReceiveFiles finished");
+            }
 
             return 0;
         }
@@ -197,7 +231,9 @@ namespace NetSync
                 int mapSize = (int)Math.Max(sum.bLength * 2, 16 * 1024);
                 mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sum.bLength);
                 if (options.verbose > 2)
-                    Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR); ;
+                {
+                    Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR);
+                }
             }
             Sum s = new Sum(options);
             s.Init(options.checksumSeed);
@@ -207,16 +243,22 @@ namespace NetSync
             while ((i = token.ReceiveToken(f, ref data, 0)) != 0)
             {
                 if (options.doProgress)
+                {
                     Progress.ShowProgress(offset, totalSize);
+                }
 
                 if (i > 0)
                 {
                     if (options.verbose > 3)
+                    {
                         Log.WriteLine("data recv " + i + " at " + offset);
+                    }
                     Options.stats.literalData += i;
                     s.Update(data, 0, i);
                     if (fd != null && FileIO.WriteFile(fd, data, 0, i) != i)
+                    {
                         goto report_write_error;
+                    }
                     offset += i;
                     continue;
                 }
@@ -225,12 +267,16 @@ namespace NetSync
                 int offset2 = (int)(i * sum.bLength);
                 len = sum.bLength;
                 if (i == sum.count - 1 && sum.remainder != 0)
+                {
                     len = sum.remainder;
+                }
 
                 Options.stats.matchedData += len;
 
                 if (options.verbose > 3)
+                {
                     Log.WriteLine("chunk[" + i + "] of size " + len + " at " + offset2 + " offset=" + offset);
+                }
 
                 byte[] map = null;
                 int off = 0;
@@ -256,12 +302,16 @@ namespace NetSync
                     }
                 }
                 if (fd != null && FileIO.WriteFile(fd, map, off, (int)len) != (int)len)
+                {
                     goto report_write_error;
+                }
                 offset += (int)len;
             }
 
             if (options.doProgress)
+            {
                 Progress.EndProgress(totalSize);
+            }
             if (fd != null && offset > 0 && FileIO.SparseEnd(fd) != 0)
             {
                 MainClass.Exit("write failed on " + Util.fullFileName(fileName), cInfo);
@@ -270,13 +320,19 @@ namespace NetSync
             file_sum1 = s.End();
 
             if (mapBuf != null)
+            {
                 mapBuf = null;
+            }
 
             file_sum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
             if (options.verbose > 2)
+            {
                 Log.WriteLine("got fileSum");
+            }
             if (fd != null && Util.MemCmp(file_sum1, 0, file_sum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
+            {
                 return false;
+            }
             return true;
         report_write_error:
             {
@@ -296,18 +352,30 @@ namespace NetSync
             {
 
                 if (!sc.robustUnlink(fileName))
+                {
                     Log.WriteLine("Can't delete '" + fileName + "' file");
+                }
                 else
+                {
                     if (options.verbose > 0)
+                    {
                         Log.WriteLine("deleting file " + fileName);
+                    }
+                }
             }
             else
             {
                 if (!sc.doRmDir(fileName))
+                {
                     Log.WriteLine("Can't delete '" + fileName + "' dir");
+                }
                 else
+                {
                     if (options.verbose > 0)
+                    {
                         Log.WriteLine("deleting directory " + fileName);
+                    }
+                }
             }
         }
 
@@ -326,19 +394,27 @@ namespace NetSync
             string[] argv = new string[1];
             List<FileStruct> localFileList = null;
             if (options.cvsExclude)
+            {
                 Exclude.AddCvsExcludes();
+            }
             for (int j = 0; j < fileList.Count; j++)
             {
                 if (((fileList[j]).mode & Options.FLAG_TOP_DIR) == 0 || !Util.S_ISDIR((fileList[j]).mode))
+                {
                     continue;
+                }
                 argv[0] = options.dir + (fileList[j]).FNameTo();
                 FileList fList = new FileList(options);
                 if ((localFileList = fList.sendFileList(null, argv)) == null)
+                {
                     continue;
+                }
                 for (int i = localFileList.Count - 1; i >= 0; i--)
                 {
                     if ((localFileList[i]).baseName == null)
+                    {
                         continue;
+                    }
                     (localFileList[i]).dirName = (localFileList[i]).dirName.Substring(options.dir.Length);
                     if (FileList.fileListFind(fileList, (localFileList[i])) < 0)
                     {
@@ -365,9 +441,13 @@ namespace NetSync
         public bool doRmDir(string pathName)
         {
             if (options.dryRun)
+            {
                 return true;
+            }
             if (options.readOnly || options.listOnly)
+            {
                 return false;
+            }
             try
             {
                 // TODO: path length
@@ -388,9 +468,13 @@ namespace NetSync
         public bool doUnlink(string fileName)
         {
             if (options.dryRun)
+            {
                 return true;
+            }
             if (options.readOnly || options.listOnly)
+            {
                 return false;
+            }
             try
             {
                 // TODO: path length

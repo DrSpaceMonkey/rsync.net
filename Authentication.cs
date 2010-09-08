@@ -40,7 +40,9 @@ namespace NetSync
             DateTime tv = DateTime.Now;
 
             for (int i = 0; i < addr.Length; i++)
+            {
                 input[i] = Convert.ToByte(addr[i]);
+            }
 
             CheckSum.SIVAL(ref input, 16, (UInt32)tv.Second);
             CheckSum.SIVAL(ref input, 20, (UInt32)tv.Hour);
@@ -68,13 +70,21 @@ namespace NetSync
         public static string auth_client(string user, string pass, string challenge, Options options)
         {
             if (String.Compare(user, String.Empty) == 0)
+            {
                 user = "nobody";
+            }
             if (pass == null || String.Compare(pass, String.Empty) == 0)
+            {
                 pass = getpassf(password_file);
+            }
             if (String.Compare(pass, String.Empty) == 0)
+            {
                 pass = System.Environment.GetEnvironmentVariable("RSYNC_PASSWORD");
+            }
             if (pass == null || String.Compare(pass, String.Empty) == 0)
+            {
                 pass = getpass();
+            }
             string pass2 = generate_hash(pass, challenge, options);
             Log.WriteLine(user + " " + pass2);
 
@@ -110,7 +120,9 @@ namespace NetSync
 
             /* if no auth list then allow anyone in! */
             if (users == null || users.CompareTo(String.Empty) == 0)
+            {
                 return true;
+            }
 
             challenge = gen_challenge(addr, cInfo.Options);
 
@@ -126,19 +138,25 @@ namespace NetSync
                 pass = line.Substring(line.IndexOf(' ')).Trim('\n').Trim();
             }
             else
+            {
                 return false;
+            }
             listUsers = users.Split(',');
 
             for (int i = 0; i < listUsers.Length; i++)
             {
                 tok = listUsers[i];
                 if (user.CompareTo(tok) == 0)
+                {
                     break;
+                }
                 tok = null;
             }
 
             if (tok == null || tok.CompareTo(String.Empty) == 0)
+            {
                 return false;
+            }
 
             if ((secret = GetSecret(moduleNumber, user)) == null)
             {
@@ -148,7 +166,9 @@ namespace NetSync
             pass2 = generate_hash(secret, b64_challenge, cInfo.Options);
 
             if (pass.CompareTo(pass2) == 0)
+            {
                 return true;
+            }
             return false;
         }
 
@@ -158,7 +178,9 @@ namespace NetSync
             string secret = null;
 
             if (fname == null || fname.CompareTo(String.Empty) == 0)
+            {
                 return null;
+            }
             try
             {
                 using (var fd = new System.IO.StreamReader(fname))
@@ -167,7 +189,9 @@ namespace NetSync
                     {
                         string line = fd.ReadLine();
                         if (line == null)
+                        {
                             break;
+                        }
                         line.Trim();
                         if (line.CompareTo(String.Empty) != 0 && (line[0] != ';' && line[0] != '#'))
                         {

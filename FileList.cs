@@ -41,16 +41,26 @@ namespace NetSync
             string fullName = String.Empty;
 
             if (baseName == null || baseName.CompareTo(String.Empty) == 0)
+            {
                 baseName = null;
+            }
             if (dirName == null || dirName.CompareTo(String.Empty) == 0)
+            {
                 dirName = null;
+            }
 
             if (dirName != null && baseName != null)
+            {
                 fullName = dirName + "/" + baseName;
+            }
             else if (baseName != null)
+            {
                 fullName = baseName;
+            }
             else if (dirName != null)
+            {
                 fullName = dirName;
+            }
             return fullName;
 
         }
@@ -89,14 +99,18 @@ namespace NetSync
         {
             IOStream f = null;
             if (cInfo != null)
+            {
                 f = cInfo.IoStream;
+            }
 
             string dir = String.Empty, olddir = String.Empty;
             string lastPath = String.Empty;
             string fileName = String.Empty;
             bool useFFFD = false;
             if (showFileListP() && f != null)
+            {
                 startFileListProgress("building file list");
+            }
             Int64 startWrite = Options.stats.totalWritten;
             List<FileStruct> fileList = new List<FileStruct>();
             if (f != null)
@@ -116,18 +130,26 @@ namespace NetSync
                 if (useFFFD)
                 {
                     if ((fileName = f.readFilesFromLine(Options.filesFromFD, options)).Length == 0)
+                    {
                         break;
+                    }
                 }
                 else
                 {
                     if (argv.Length == 0)
+                    {
                         break;
+                    }
                     fileName = argv[0];
                     argv = (string[])Util.ArrayDeleteFirstElement(argv);
                     if (fileName != null && fileName.CompareTo(".") == 0)
+                    {
                         continue;
+                    }
                     if (fileName != null)
+                    {
                         fileName = fileName.Replace(@"\", "/");
+                    }
                 }
                 // TODO: path length
                 if (Directory.Exists(fileName) && !options.recurse && options.filesFrom == null)
@@ -145,9 +167,13 @@ namespace NetSync
                     if (index != -1)
                     {
                         if (index == 0)
+                        {
                             dir = "/";
+                        }
                         else
+                        {
                             dir = fileName.Substring(0, index);
+                        }
                         fileName = fileName.Substring(index + 1);
                     }
                 }
@@ -161,7 +187,9 @@ namespace NetSync
                         while (i < fn.Length && i < lastPath.Length && fn[i] == lastPath[i])
                         {
                             if (fn[i] == '/')
+                            {
                                 slash = fileName.Substring(i);
+                            }
                             i++;
                         }
                         if (i != fileName.LastIndexOf('/') || (i < lastPath.Length && lastPath[i] != '/'))
@@ -192,9 +220,13 @@ namespace NetSync
                         continue;
                     }
                     if (lastDir != null && lastDir.CompareTo(dir) == 0)
+                    {
                         fileListDir = lastDir;
+                    }
                     else
+                    {
                         fileListDir = lastDir = dir;
+                    }
                 }
                 sendFileName(f, fileList, fileName, options.recurse, Options.XMIT_TOP_DIR);
                 if (olddir != null && olddir != String.Empty)
@@ -210,7 +242,9 @@ namespace NetSync
             {
                 sendFileEntry(null, f, 0);
                 if (showFileListP())
+                {
                     finishFileListProgress(fileList);
+                }
             }
             cleanFileList(fileList, false, false);
             if (f != null)
@@ -221,9 +255,13 @@ namespace NetSync
             }
 
             if (options.verbose > 3)
+            {
                 outputFileList(fileList);
+            }
             if (options.verbose > 2)
+            {
                 Log.WriteLine("sendFileList done");
+            }
             return fileList;
         }
 
@@ -233,7 +271,9 @@ namespace NetSync
             List<FileStruct> fileList = new List<FileStruct>();
 
             if (showFileListP())
+            {
                 startFileListProgress("receiving file list");
+            }
 
             Int64 startRead = Options.stats.totalRead;
 
@@ -241,23 +281,33 @@ namespace NetSync
             while ((flags = f.readByte()) != 0)
             {
                 if (options.protocolVersion >= 28 && (flags & Options.XMIT_EXTENDED_FLAGS) != 0)
+                {
                     flags |= (UInt32)(f.readByte() << 8);
+                }
                 FileStruct file = receiveFileEntry(flags, cInfo);
                 if (file == null)
+                {
                     continue;
+                }
                 fileList.Add(file);
                 Options.stats.totalSize += (fileList[fileList.Count - 1]).length;
                 mayBeEmitFileListProgress(fileList);
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("receiveFileName(" + (fileList[fileList.Count - 1]).FNameTo() + ")");
+                }
             }
             receiveFileEntry(0, null);
 
             if (options.verbose > 2)
+            {
                 Log.WriteLine("received " + fileList.Count + " names");
+            }
 
             if (showFileListP())
+            {
                 finishFileListProgress(fileList);
+            }
 
             cleanFileList(fileList, (options.relativePaths == 0) ? false : true, true);
 
@@ -267,12 +317,20 @@ namespace NetSync
             }
 
             if (options.verbose > 3)
+            {
                 outputFileList(fileList);
+            }
             if (options.listOnly)
+            {
                 for (int i = 0; i < fileList.Count; i++)
+                {
                     listFileEntry(fileList[i]);
+                }
+            }
             if (options.verbose > 2)
+            {
                 Log.WriteLine("receiveFileList done");
+            }
 
             Options.stats.flistSize = (int)(Options.stats.totalRead - startRead);
             Options.stats.numFiles = fileList.Count;
@@ -293,41 +351,63 @@ namespace NetSync
             }
 
             if ((s2.Length == s1.Length) && (s1.Length == i) && (s2.Length == i))
+            {
                 return 0;
+            }
 
             if (s1.Length == i)
+            {
                 return -(int)s2[i];
+            }
             if (s2.Length == i)
+            {
                 return (int)s1[i];
+            }
             return (int)s1[i] - (int)s2[i];
         }
 
         public static int fileListFind(List<FileStruct> fileList, FileStruct file)
         {
             int low = 0, high = fileList.Count - 1;
-            while (high >= 0 && (fileList[high]).baseName == null) high--;
+            while (high >= 0 && (fileList[high]).baseName == null)
+            {
+                high--;
+            }
             if (high < 0)
+            {
                 return -1;
+            }
             while (low != high)
             {
                 int mid = (low + high) / 2;
                 int ret = fileCompare(fileList[fileListUp(fileList, mid)], file);
                 if (ret == 0)
+                {
                     return fileListUp(fileList, mid);
+                }
                 if (ret > 0)
+                {
                     high = mid;
+                }
                 else
+                {
                     low = mid + 1;
+                }
             }
 
             if (fileCompare(fileList[fileListUp(fileList, low)], file) == 0)
+            {
                 return fileListUp(fileList, low);
+            }
             return -1;
         }
 
         static int fileListUp(List<FileStruct> fileList, int i)
         {
-            while ((fileList[i]).baseName == null) i++;
+            while ((fileList[i]).baseName == null)
+            {
+                i++;
+            }
             return i;
         }
 
@@ -338,9 +418,13 @@ namespace NetSync
             {
                 FileStruct file = fileList[i];
                 if ((options.amRoot || options.amSender) && options.preserveUID)
+                {
                     uid = " uid=" + file.uid;
+                }
                 if (options.preserveGID && file.gid != Options.GID_NONE)
+                {
                     gid = " gid=" + file.gid;
+                }
                 Log.WriteLine("[" + options.WhoAmI() + "] i=" + i + " " + Util.NS(file.baseDir) + " " +
                     Util.NS(file.dirName) + " " + Util.NS(file.baseName) + " mode=0" + Convert.ToString(file.mode, 8) +
                     " len=" + file.length + uid + gid);
@@ -351,7 +435,9 @@ namespace NetSync
         {
             FileStruct file = makeFile(fileName, fileList, f == null && options.deleteExcluded ? Options.SERVER_EXCLUDES : Options.ALL_EXCLUDES);
             if (file == null)
+            {
                 return;
+            }
             mayBeEmitFileListProgress(fileList);
             if (file.baseName != null && file.baseName.CompareTo(String.Empty) != 0)
             {
@@ -368,10 +454,15 @@ namespace NetSync
 
         public FileStruct makeFile(string fileName, List<FileStruct> fileList, int excludeLevel)
         {
-            if (fileName == null || fileName.CompareTo(String.Empty) == 0) return null;
+            if (fileName == null || fileName.CompareTo(String.Empty) == 0)
+            {
+                return null;
+            }
             string thisName = Util.cleanFileName(fileName, false);
             if (options.sanitizePath)
+            {
                 thisName = Util.sanitizePath(thisName, String.Empty, 0);
+            }
             FileStruct fs = new FileStruct();
             // TODO: path length
             if (Directory.Exists(thisName))
@@ -387,7 +478,9 @@ namespace NetSync
                     // TODO: path length
                     DirectoryInfo di = new DirectoryInfo(thisName);
                     if ((di.Attributes & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
+                    {
                         fs.mode |= 0x92;
+                    }
                 }
 
             }
@@ -396,7 +489,9 @@ namespace NetSync
             {
 
                 if (excludeLevel != Options.NO_EXCLUDES && checkExcludeFile(thisName, 0, excludeLevel))
+                {
                     return null;
+                }
                 fs.baseName = Path.GetFileName(thisName);
                 fs.dirName = Path.GetDirectoryName(thisName).Replace(@"\", "/").TrimEnd('/');
                 FileInfo fi = new FileInfo(thisName);
@@ -408,7 +503,9 @@ namespace NetSync
                 fs.mode = 0x8000 | 0x1A4;
                 // TODO: path length
                 if ((File.GetAttributes(thisName) & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
+                {
                     fs.mode |= 0x92;
+                }
                 fs.gid = 0;
                 fs.uid = 0;
 
@@ -439,12 +536,18 @@ namespace NetSync
             int l1 = 0, l2 = 0;
 
             if ((flags & Options.XMIT_SAME_NAME) != 0)
+            {
                 l1 = f.readByte();
+            }
 
             if ((flags & Options.XMIT_LONG_NAME) != 0)
+            {
                 l2 = f.readInt();
+            }
             else
+            {
                 l2 = f.readByte();
+            }
             if (l2 >= Options.MAXPATHLEN - l1)
             {
                 MainClass.Exit("overflow: lastname=" + lastName, cInfo);
@@ -456,7 +559,9 @@ namespace NetSync
 
             thisName = Util.cleanFileName(thisName, false);
             if (options.sanitizePath)
+            {
                 thisName = Util.sanitizePath(thisName, String.Empty, 0);
+            }
 
             string baseName = String.Empty;
             string dirName = String.Empty;
@@ -474,9 +579,13 @@ namespace NetSync
             Int64 fileLength = f.ReadLongInt();
 
             if ((flags & Options.XMIT_SAME_TIME) == 0)
+            {
                 modTime = DateTime.FromFileTime(f.readInt());
+            }
             if ((flags & Options.XMIT_SAME_MODE) == 0)
+            {
                 mode = (UInt32)f.readInt();
+            }
 
             if (options.preserveUID && (flags & Options.XMIT_SAME_UID) == 0)
             {
@@ -511,7 +620,9 @@ namespace NetSync
             int l1 = 0, l2 = 0;
 
             if (f == null)
+            {
                 return;
+            }
             if (file == null)
             {
                 f.writeByte(0);
@@ -521,17 +632,24 @@ namespace NetSync
             string fileName = file.FNameTo().Replace(":", String.Empty);
             for (l1 = 0;
                 lastName.Length > l1 && (fileName[l1] == lastName[l1]) && (l1 < 255);
-                l1++) { }
+                l1++)
+            {
+
+            }
             l2 = fileName.Substring(l1).Length;
 
             flags |= Options.XMIT_SAME_NAME;
 
             if (l2 > 255)
+            {
                 flags |= Options.XMIT_LONG_NAME;
+            }
             if (options.protocolVersion >= 28)
             {
                 if (flags == 0 && !Util.S_ISDIR(file.mode))
+                {
                     flags |= Options.XMIT_TOP_DIR;
+                }
                 /*if ((flags & 0xFF00) > 0 || flags == 0) 
                 {
                     flags |= Options.XMIT_EXTENDED_FLAGS;
@@ -544,17 +662,27 @@ namespace NetSync
             else
             {
                 if ((flags & 0xFF) == 0 && !Util.S_ISDIR(file.mode))
+                {
                     flags |= Options.XMIT_TOP_DIR;
+                }
                 if ((flags & 0xFF) == 0)
+                {
                     flags |= Options.XMIT_LONG_NAME;
+                }
                 f.writeByte((byte)flags);
             }
             if ((flags & Options.XMIT_SAME_NAME) != 0)
+            {
                 f.writeByte((byte)l1);
+            }
             if ((flags & Options.XMIT_LONG_NAME) != 0)
+            {
                 f.writeInt(l2);
+            }
             else
+            {
                 f.writeByte((byte)l2);
+            }
 
 
             byte[] b = System.Text.ASCIIEncoding.ASCII.GetBytes(fileName);
@@ -564,9 +692,13 @@ namespace NetSync
 
 
             if ((flags & Options.XMIT_SAME_TIME) == 0)
+            {
                 f.writeInt(file.modTime.Second);
+            }
             if ((flags & Options.XMIT_SAME_MODE) == 0)
+            {
                 f.writeInt((int)file.mode);
+            }
             if (options.preserveUID && (flags & Options.XMIT_SAME_UID) == 0)
             {
                 f.writeInt(file.uid);
@@ -579,11 +711,17 @@ namespace NetSync
             {
                 byte[] sum;
                 if (!Util.S_ISDIR(file.mode))
+                {
                     sum = file.sum;
+                }
                 else if (options.protocolVersion < 28)
+                {
                     sum = new byte[16];
+                }
                 else
+                {
                     sum = null;
+                }
 
                 if (sum != null)
                 {
@@ -607,12 +745,16 @@ namespace NetSync
                 }
                 FileInfo[] files = di.GetFiles();
                 for (int i = 0; i < files.Length; i++)
+                {
                     // TODO: path length
                     sendFileName(f, fileList, files[i].FullName.Replace("\\", "/"), options.recurse, 0);
+                }
                 DirectoryInfo[] dirs = di.GetDirectories();
                 for (int i = 0; i < dirs.Length; i++)
+                {
                     // TODO: path length
                     sendFileName(f, fileList, dirs[i].FullName.Replace("\\", "/"), options.recurse, 0);
+                }
             }
             else
             {
@@ -624,21 +766,29 @@ namespace NetSync
         public void cleanFileList(List<FileStruct> fileList, bool stripRoot, bool noDups)
         {
             if (fileList == null || fileList.Count == 0)
+            {
                 return;
+            }
             fileList.Sort(new FileStructComparer());
             for (int i = 0; i < fileList.Count; i++)
             {
                 if (fileList[i] == null)
+                {
                     fileList.RemoveAt(i);
+                }
             }
             if (stripRoot)
             {
                 for (int i = 0; i < fileList.Count; i++)
                 {
                     if ((fileList[i]).dirName != null && (fileList[i]).dirName[0] == '/')
+                    {
                         (fileList[i]).dirName = (fileList[i]).dirName.Substring(1);
+                    }
                     if ((fileList[i]).dirName != null && (fileList[i]).dirName.CompareTo(String.Empty) == 0)
+                    {
                         (fileList[i]).dirName = null;
+                    }
                 }
 
             }
@@ -654,21 +804,29 @@ namespace NetSync
         {
             Log.Write(kind + " ...");
             if (options.verbose > 1 || options.doProgress)
+            {
                 Log.WriteLine(String.Empty);
+            }
         }
 
         private void finishFileListProgress(List<FileStruct> fileList)
         {
             if (options.doProgress)
+            {
                 Log.WriteLine(fileList.Count.ToString() + " file" + (fileList.Count == 1 ? " " : "s ") + "to consider");
+            }
             else
+            {
                 Log.WriteLine("Done.");
+            }
         }
 
         private void mayBeEmitFileListProgress(List<FileStruct> fileList)
         {
             if (options.doProgress && showFileListP() && (fileList.Count % 100) == 0)
+            {
                 EmitFileListProgress(fileList);
+            }
         }
 
         private void EmitFileListProgress(List<FileStruct> fileList)
@@ -679,7 +837,9 @@ namespace NetSync
         private void listFileEntry(FileStruct fileEntry)
         {
             if (fileEntry.baseName == null || fileEntry.baseName.CompareTo(String.Empty) == 0)
+            {
                 return;
+            }
             string perms = String.Empty;
             Log.WriteLine(perms + " " + fileEntry.length + " " + fileEntry.modTime.ToString() + " " + fileEntry.FNameTo());
         }
@@ -694,26 +854,36 @@ namespace NetSync
             int rc;
 
             if (excludeLevel == Options.NO_EXCLUDES)
+            {
                 return false;
+            }
             if (fileName.CompareTo(String.Empty) != 0)
             {
                 /* never exclude '.', even if somebody does --exclude '*' */
                 if (fileName[0] == '.' && fileName.Length == 1)
+                {
                     return false;
+                }
                 /* Handle the -R version of the '.' dir. */
                 if (fileName[0] == '/')
                 {
                     int len = fileName.Length;
                     if (fileName[len - 1] == '.' && fileName[len - 2] == '/')
+                    {
                         return true;
+                    }
                 }
             }
             if (excludeLevel != Options.ALL_EXCLUDES)
+            {
                 return false;
+            }
             Exclude excl = new Exclude(options);
             if (options.excludeList.Count > 0
                 && (rc = excl.CheckExclude(options.excludeList, fileName, isDir)) != 0)
+            {
                 return (rc < 0) ? true : false;
+            }
             return false;
         }
     }

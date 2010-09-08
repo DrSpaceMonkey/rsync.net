@@ -321,7 +321,9 @@ namespace NetSync
                 MainClass.Exit(String.Empty, null);
             }
             if (options.ioTimeout > 0 && options.ioTimeout < options.selectTimeout)
+            {
                 options.selectTimeout = options.ioTimeout;
+            }
             return argsNotUsed;
         }
 
@@ -527,31 +529,47 @@ namespace NetSync
             int argc = 0;
             args[argc++] = "--server";
             for (int i = 0; i < verbose; i++)
+            {
                 args[argc++] = "-v";
+            }
 
 
             args[argc++] = "-R";
             if (alwaysChecksum)
+            {
                 args[argc++] = "-c";
+            }
             if (recurse)
+            {
                 args[argc++] = "-r";
+            }
 
             if (amSender)
             {
                 if (deleteExcluded)
+                {
                     args[argc++] = "--delete-excluded";
+                }
                 else if (deleteMode)
+                {
                     args[argc++] = "--delete";
+                }
 
                 if (deleteAfter)
+                {
                     args[argc++] = "--delete-after";
+                }
 
                 if (forceDelete)
+                {
                     args[argc++] = "--force";
+                }
             }
 
             if (!amSender)
+            {
                 args[argc++] = "--sender";
+            }
 
             return argc;
         }

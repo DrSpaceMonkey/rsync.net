@@ -30,7 +30,9 @@ namespace NetSync
 
             MainClass.SetupProtocol(cInfo);
             if (options.protocolVersion >= 23 && !options.readBatch)
+            {
                 f.IOStartMultiplexIn();
+            }
             if (options.amSender)
             {
                 f.IOStartBufferingOut();
@@ -42,12 +44,16 @@ namespace NetSync
                 }
 
                 if (options.verbose > 3)
+                {
                     Log.Write("File list sent\n");
+                }
                 f.Flush();
                 fList = new FileList(options);
                 fileList = fList.sendFileList(cInfo, args);
                 if (options.verbose > 3)
+                {
                     Log.WriteLine("file list sent");
+                }
                 f.Flush();
                 Sender sender = new Sender(options);
                 sender.SendFiles(fileList, cInfo);
@@ -59,7 +65,9 @@ namespace NetSync
             if (options.dir.CompareTo(String.Empty) != 0 && options.dir.IndexOf(':') == -1)
             {
                 if (options.dir[0] == '/')
+                {
                     options.dir = "c:" + options.dir;
+                }
                 else if (options.dir.IndexOf('/') != -1)
                 {
                     options.dir = options.dir.Insert(options.dir.IndexOf('/') - 1, ":");

@@ -37,7 +37,9 @@ namespace NetSync
             string line = String.Empty;
 
             if (path[0] == '/')
+            {
                 path = path.Remove(0, 1);
+            }
             path = path.Replace("\n", String.Empty);
 
             Access ac = new Access();
@@ -56,7 +58,9 @@ namespace NetSync
             }
             // TODO: path length
             if (Directory.Exists(path))
+            {
                 f.IOPrintf("@RSYNCD: OK\n");
+            }
             else
             {
                 try
@@ -79,7 +83,9 @@ namespace NetSync
                 line = f.ReadLine();
                 line = line.Substring(0, line.Length - 1);
                 if (line.CompareTo(String.Empty) == 0)
+                {
                     break;
+                }
                 if (argc == maxargs)
                 {
                     maxargs += Options.MAX_ARGS;
@@ -97,8 +103,9 @@ namespace NetSync
             }
             string[] args2 = new string[argsNotUsed];
             for (int i = 0; i < argsNotUsed; i++)
+            {
                 args2[i] = args[args.Length - argsNotUsed + i];
-
+            }
 
             MainClass.SetupProtocol(cInfo);
             f.IOStartMultiplexOut();

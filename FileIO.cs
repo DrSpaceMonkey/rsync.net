@@ -49,24 +49,36 @@ namespace NetSync
             lastByte = buf[len - 1];
 
             if (l1 == len || l2 > 0)
+            {
                 lastSparse = 1;
+            }
 
             if (l1 > 0)
+            {
                 f.Seek(l1, SeekOrigin.Current);
+            }
 
 
             if (l1 == len)
+            {
                 return len;
+            }
 
             f.Write(buf, l1, len - (l1 + l2));
             ret = len - (l1 + l2);
             if (ret == -1 || ret == 0)
+            {
                 return ret;
+            }
             else if (ret != (len - (l1 + l2)))
+            {
                 return (l1 + ret);
+            }
 
             if (l2 > 0)
+            {
                 f.Seek(l2, SeekOrigin.Current);
+            }
 
             return len;
         }
@@ -93,7 +105,9 @@ namespace NetSync
         public MapFile(Stream fd, int len, int mapSize, int blockSize)
         {
             if (blockSize != 0 && (mapSize % blockSize) != 0)
+            {
                 mapSize += blockSize - (mapSize % blockSize);
+            }
             this.fd = fd;
             this.fileSize = len;
             this.defWindowSize = mapSize;
@@ -107,20 +121,30 @@ namespace NetSync
             int windowSize, readSize, readOffset;
 
             if (len == 0)
+            {
                 return -1;
+            }
 
             if (len > (this.fileSize - offset))
+            {
                 len = this.fileSize - offset;
+            }
 
             if (offset >= this.pOffset && offset + len <= this.pOffset + this.pLen)
+            {
                 return offset - this.pOffset;
+            }
 
             windowStart = offset;
             windowSize = this.defWindowSize;
             if (windowStart + windowSize > this.fileSize)
+            {
                 windowSize = this.fileSize - windowStart;
+            }
             if (offset + len > windowStart + windowSize)
+            {
                 windowSize = (offset + len) - windowStart;
+            }
 
             if (windowSize > this.pSize)
             {
@@ -144,7 +168,9 @@ namespace NetSync
                 readOffset = 0;
             }
             if (readSize <= 0)
+            {
                 Log.WriteLine("Warning: unexpected read size of " + readSize + " in MapPtr");
+            }
             else
             {
                 if (this.pFdOffset != readStart)
@@ -181,20 +207,26 @@ namespace NetSync
         private void FillMem(ref byte[] data, int offset, byte val, int n)
         {
             for (int i = 0; i < n; i++)
+            {
                 data[offset + i] = val;
+            }
         }
 
         private void MemMove(ref byte[] dest, byte[] src, int srcInd, int n)
         {
             byte[] srcCopy = (byte[])src.Clone();
             for (int i = 0; i < n; i++)
+            {
                 dest[i] = srcCopy[srcInd + i];
+            }
         }
 
         public static void ReallocArray(ref byte[] arr, int size)
         {
             if (arr == null)
+            {
                 arr = new byte[size];
+            }
             else
             {
                 byte[] arr2 = new byte[arr.Length];
@@ -207,7 +239,9 @@ namespace NetSync
         public static void ReallocArrayString(ref string[] arr, int size)
         {
             if (arr == null)
+            {
                 arr = new string[size];
+            }
             else
             {
                 string[] arr2 = new string[arr.Length];

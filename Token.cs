@@ -31,24 +31,34 @@ namespace NetSync
         public void SetCompression(string fname)
         {
             if (!options.doCompression)
+            {
                 return;
+            }
         }
 
         public void SendToken(IOStream f, int token, MapFile buf, int offset, int n, int toklen)
         {
             if (!options.doCompression)
+            {
                 SimpleSendToken(f, token, buf, offset, n);
+            }
             else
+            {
                 SendDeflatedToken(f, token, buf, offset, n, toklen);
+            }
         }
 
         public int ReceiveToken(IOStream f, ref byte[] data, int offset)
         {
             int tok;
             if (!options.doCompression)
+            {
                 tok = SimpleReceiveToken(f, ref data, offset);
+            }
             else
+            {
                 tok = ReceiveDeflatedToken(f, data, offset);
+            }
             return tok;
         }
 
@@ -59,7 +69,9 @@ namespace NetSync
             {
                 int i = f.readInt();
                 if (i <= 0)
+                {
                     return i;
+                }
                 residue = i;
             }
 
@@ -81,7 +93,9 @@ namespace NetSync
         public void SeeToken(byte[] data, int offset, int tokLen)
         {
             if (options.doCompression)
+            {
                 SeeDeflateToken(data, offset, tokLen);
+            }
         }
 
         public void SeeDeflateToken(byte[] data, int offset, int tokLen)
@@ -103,7 +117,9 @@ namespace NetSync
                 }
             }
             if (token != -2)
+            {
                 f.writeInt(-(token + 1));
+            }
         }
     }
 }
