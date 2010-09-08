@@ -19,60 +19,60 @@ using System;
 using System.Collections.Generic;
 namespace NetSync
 {
-	public class Client
-	{
-		public int ClientRun(ClientInfo cInfo, int pid, string[] args)
-		{
-			Options options = cInfo.Options;
-			IOStream f = cInfo.IoStream;
-			FileList fList;
-			List<FileStruct> fileList;			
+    public class Client
+    {
+        public int ClientRun(ClientInfo cInfo, int pid, string[] args)
+        {
+            Options options = cInfo.Options;
+            IOStream f = cInfo.IoStream;
+            FileList fList;
+            List<FileStruct> fileList;
 
-			MainClass.SetupProtocol(cInfo);
-			if(options.protocolVersion >= 23 && !options.readBatch)
-				f.IOStartMultiplexIn();
-			if(options.amSender)
-			{				
-				f.IOStartBufferingOut();	
-				
-				if (options.deleteMode && !options.deleteExcluded)
-				{
-					Exclude excl = new Exclude(options);
-					excl.SendExcludeList(f);
-				}
+            MainClass.SetupProtocol(cInfo);
+            if (options.protocolVersion >= 23 && !options.readBatch)
+                f.IOStartMultiplexIn();
+            if (options.amSender)
+            {
+                f.IOStartBufferingOut();
 
-				if (options.verbose > 3)
-					Log.Write("File list sent\n");
-				f.Flush();
-				fList = new FileList(options);
-				fileList = fList.sendFileList(cInfo, args);
-				if(options.verbose > 3)
-					Log.WriteLine("file list sent");
-				f.Flush();
-				Sender sender = new Sender(options);
-				sender.SendFiles(fileList, cInfo);
-				f.Flush();
-				f.writeInt(-1);
-				return -1;
-			}						
-			options.dir = args[0];
-			if(options.dir.CompareTo(String.Empty) != 0 && options.dir.IndexOf(':') == -1)
-			{
-				if(options.dir[0] == '/')
-					options.dir = "c:" + options.dir;
-				else  if(options.dir.IndexOf('/') != -1)
-				{
-					options.dir = options.dir.Insert(options.dir.IndexOf('/') - 1,":");
-				}
-			} 
-			if(!options.readBatch)
-			{
-				Exclude excl = new Exclude(options);
-				excl.SendExcludeList(f);
-			}
-			fList = new FileList(options);
-			fileList = fList.receiveFileList(cInfo);			
-			return Daemon.DoReceive(cInfo,fileList,null);			
-		}
-	}	
+                if (options.deleteMode && !options.deleteExcluded)
+                {
+                    Exclude excl = new Exclude(options);
+                    excl.SendExcludeList(f);
+                }
+
+                if (options.verbose > 3)
+                    Log.Write("File list sent\n");
+                f.Flush();
+                fList = new FileList(options);
+                fileList = fList.sendFileList(cInfo, args);
+                if (options.verbose > 3)
+                    Log.WriteLine("file list sent");
+                f.Flush();
+                Sender sender = new Sender(options);
+                sender.SendFiles(fileList, cInfo);
+                f.Flush();
+                f.writeInt(-1);
+                return -1;
+            }
+            options.dir = args[0];
+            if (options.dir.CompareTo(String.Empty) != 0 && options.dir.IndexOf(':') == -1)
+            {
+                if (options.dir[0] == '/')
+                    options.dir = "c:" + options.dir;
+                else if (options.dir.IndexOf('/') != -1)
+                {
+                    options.dir = options.dir.Insert(options.dir.IndexOf('/') - 1, ":");
+                }
+            }
+            if (!options.readBatch)
+            {
+                Exclude excl = new Exclude(options);
+                excl.SendExcludeList(f);
+            }
+            fList = new FileList(options);
+            fileList = fList.receiveFileList(cInfo);
+            return Daemon.DoReceive(cInfo, fileList, null);
+        }
+    }
 }

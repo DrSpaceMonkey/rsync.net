@@ -245,6 +245,4 @@ namespace NetSync
             Name = name;
         }
     }
-
-
 }

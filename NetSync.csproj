@@ -149,12 +149,6 @@
     <Compile Include="FileList.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FileSystem\Directory.cs" />
-    <Compile Include="FileSystem\DirectoryInfo.cs" />
-    <Compile Include="FileSystem\File.cs" />
-    <Compile Include="FileSystem\FileInfo.cs" />
-    <Compile Include="FileSystem\FileSystemInfo.cs" />
-    <Compile Include="FileSystem\Kernel.cs" />
     <Compile Include="Generator.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -23,241 +23,240 @@ using System.Windows.Forms;
 
 namespace NetSync
 {
-	class Sender
-	{
-		private Options options;
-		private CheckSum checkSum;
+    class Sender
+    {
+        private Options options;
+        private CheckSum checkSum;
 
-		public Sender(Options opt)
-		{
-			options = opt;
-			checkSum = new CheckSum(options);
-		}
+        public Sender(Options opt)
+        {
+            options = opt;
+            checkSum = new CheckSum(options);
+        }
 
-		public void SendFiles(List<FileStruct> fileList, ClientInfo cInfo)
-		{
-			ShowMessage("Processing...");
-			try 
-			{
-				IOStream f = cInfo.IoStream;
-				string fileName = String.Empty, fileName2 = String.Empty;
-				SumStruct s = null;
-				int phase = 0;
-				bool saveMakeBackups = options.makeBackups;			
-				Match match = new Match(options);
+        public void SendFiles(List<FileStruct> fileList, ClientInfo cInfo)
+        {
+            ShowMessage("Processing...");
+            try
+            {
+                IOStream f = cInfo.IoStream;
+                string fileName = String.Empty, fileName2 = String.Empty;
+                SumStruct s = null;
+                int phase = 0;
+                bool saveMakeBackups = options.makeBackups;
+                Match match = new Match(options);
 
-				if( options.verbose > 2)
-					Log.WriteLine("SendFiles starting");			
-				while (true)
-				{
-					fileName = String.Empty;				
-					int i = f.readInt();
-					if (i == -1) 
-					{
-						if (phase == 0) 
-						{
-							phase++;
-							checkSum.cSumLength = CheckSum.SUM_LENGTH;
-							f.writeInt(-1);
-							if (options.verbose > 2)
-								Log.WriteLine("SendFiles phase=" + phase);
-							options.makeBackups = false;																	
-							continue;
-						}
-						break;
-					}
+                if (options.verbose > 2)
+                    Log.WriteLine("SendFiles starting");
+                while (true)
+                {
+                    fileName = String.Empty;
+                    int i = f.readInt();
+                    if (i == -1)
+                    {
+                        if (phase == 0)
+                        {
+                            phase++;
+                            checkSum.cSumLength = CheckSum.SUM_LENGTH;
+                            f.writeInt(-1);
+                            if (options.verbose > 2)
+                                Log.WriteLine("SendFiles phase=" + phase);
+                            options.makeBackups = false;
+                            continue;
+                        }
+                        break;
+                    }
 
-					if (i < 0 || i >= fileList.Count) 
-					{										
-						MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")",cInfo);
-					}
+                    if (i < 0 || i >= fileList.Count)
+                    {
+                        MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", cInfo);
+                    }
 
-					FileStruct file = fileList[i];
+                    FileStruct file = fileList[i];
 
-					Options.stats.currentFileIndex = i;
-					Options.stats.numTransferredFiles++;
-					Options.stats.totalTransferredSize += file.length;
+                    Options.stats.currentFileIndex = i;
+                    Options.stats.numTransferredFiles++;
+                    Options.stats.totalTransferredSize += file.length;
 
-					if (file.baseDir != null && file.baseDir.CompareTo(String.Empty) != 0) 
-					{
-						fileName = file.baseDir;
-						if(!fileName.EndsWith("/"))
-							fileName += "/";
-					} 
-					fileName2 = file.FNameTo();
-					fileName +=  file.FNameTo();
-					ShowMessage("uploading " + fileName);
+                    if (file.baseDir != null && file.baseDir.CompareTo(String.Empty) != 0)
+                    {
+                        fileName = file.baseDir;
+                        if (!fileName.EndsWith("/"))
+                            fileName += "/";
+                    }
+                    fileName2 = file.FNameTo();
+                    fileName += file.FNameTo();
+                    ShowMessage("uploading " + fileName);
 
-					if (options.verbose > 2)
-						Log.WriteLine("sendFiles(" + i + ", " + fileName + ")");
+                    if (options.verbose > 2)
+                        Log.WriteLine("sendFiles(" + i + ", " + fileName + ")");
 
-					if (options.dryRun) 
-					{
-						if (!options.amServer && options.verbose != 0)
-							Log.WriteLine(fileName2);
-						f.writeInt(i);
-						continue;
-					}
+                    if (options.dryRun)
+                    {
+                        if (!options.amServer && options.verbose != 0)
+                            Log.WriteLine(fileName2);
+                        f.writeInt(i);
+                        continue;
+                    }
 
-					Stats initialStats = Options.stats;
-					s = ReceiveSums(cInfo);
+                    Stats initialStats = Options.stats;
+                    s = ReceiveSums(cInfo);
 
-					Stream fd;
-					try
-					{
-						fd = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-					}
-					catch(FileNotFoundException)
-					{				
-						Log.WriteLine("file has vanished: " + Util.fullFileName(fileName));
-						s = null;
-						continue;
-					}
-					catch(Exception)
-					{					
-						Log.WriteLine("SendFiles failed to open " + Util.fullFileName(fileName));
-						s = null;
-						continue;
-					}
+                    Stream fd;
+                    try
+                    {
+                        fd = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        Log.WriteLine("file has vanished: " + Util.fullFileName(fileName));
+                        s = null;
+                        continue;
+                    }
+                    catch (Exception)
+                    {
+                        Log.WriteLine("SendFiles failed to open " + Util.fullFileName(fileName));
+                        s = null;
+                        continue;
+                    }
 
-					FStat st = new FStat();
-					FileInfo fi = new FileInfo(fileName);
-					// TODO: path length
-					st.mTime = fi.LastWriteTime;
-					// TODO: path length
-					st.size = fi.Length;
+                    FStat st = new FStat();
+                    FileInfo fi = new FileInfo(fileName);
+                    // TODO: path length
+                    st.mTime = fi.LastWriteTime;
+                    // TODO: path length
+                    st.size = fi.Length;
 
-					MapFile mbuf = null;
-					if (st.size != 0) 
-					{
-						int mapSize = (int)Math.Max(s.bLength * 3, Options.MAX_MAP_SIZE);
-						mbuf = new MapFile(fd, (int)st.size, mapSize, (int)s.bLength);
-					} 
+                    MapFile mbuf = null;
+                    if (st.size != 0)
+                    {
+                        int mapSize = (int)Math.Max(s.bLength * 3, Options.MAX_MAP_SIZE);
+                        mbuf = new MapFile(fd, (int)st.size, mapSize, (int)s.bLength);
+                    }
 
-					if (options.verbose > 2) 
-						Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.size);
+                    if (options.verbose > 2)
+                        Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.size);
 
-					f.writeInt(i);
-					Generator gen = new Generator(options);
-					gen.WriteSumHead(f, s);
+                    f.writeInt(i);
+                    Generator gen = new Generator(options);
+                    gen.WriteSumHead(f, s);
 
-					if (options.verbose > 2) 
-						Log.WriteLine("calling MatchSums " + fileName);
+                    if (options.verbose > 2)
+                        Log.WriteLine("calling MatchSums " + fileName);
 
-					if (!options.amServer && options.verbose != 0)
-						Log.WriteLine(fileName2);
+                    if (!options.amServer && options.verbose != 0)
+                        Log.WriteLine(fileName2);
 
-					Token token = new Token(options);
-					token.SetCompression(fileName);
+                    Token token = new Token(options);
+                    token.SetCompression(fileName);
 
-					match.MatchSums(f, s, mbuf, (int)st.size);
-					Log.LogSend(file, initialStats);
+                    match.MatchSums(f, s, mbuf, (int)st.size);
+                    Log.LogSend(file, initialStats);
 
-					if (mbuf != null) 
-					{
-						bool j = mbuf.UnMapFile();
-						if (j) 
-						{						
-							Log.WriteLine("read errors mapping " + Util.fullFileName(fileName));
-						}
-					}
-					fd.Close();
+                    if (mbuf != null)
+                    {
+                        bool j = mbuf.UnMapFile();
+                        if (j)
+                        {
+                            Log.WriteLine("read errors mapping " + Util.fullFileName(fileName));
+                        }
+                    }
+                    fd.Close();
 
-					s.sums = null;
+                    s.sums = null;
 
-					if (options.verbose > 2) 
-						Log.WriteLine("sender finished " + fileName);
-				}
-				options.makeBackups = saveMakeBackups;
+                    if (options.verbose > 2)
+                        Log.WriteLine("sender finished " + fileName);
+                }
+                options.makeBackups = saveMakeBackups;
 
-				if (options.verbose > 2)
-					Log.WriteLine("send files finished");
+                if (options.verbose > 2)
+                    Log.WriteLine("send files finished");
 
-				match.MatchReport(f);
-				f.writeInt(-1);			
-			}
-			finally
-			{
-				HideMessage();
-			}
-		}
+                match.MatchReport(f);
+                f.writeInt(-1);
+            }
+            finally
+            {
+                HideMessage();
+            }
+        }
 
-		public SumStruct ReceiveSums(ClientInfo cInfo)
-		{
-			IOStream f = cInfo.IoStream;
-			SumStruct s = new SumStruct();
-			int i;
-			int offset = 0;
-			ReadSumHead(cInfo, ref s);
-			s.sums = null;
+        public SumStruct ReceiveSums(ClientInfo cInfo)
+        {
+            IOStream f = cInfo.IoStream;
+            SumStruct s = new SumStruct();
+            int i;
+            int offset = 0;
+            ReadSumHead(cInfo, ref s);
+            s.sums = null;
 
-			if (options.verbose > 3) 
-				Log.WriteLine("count=" + s.count + " n=" + s.bLength + " rem=" + s.remainder);
+            if (options.verbose > 3)
+                Log.WriteLine("count=" + s.count + " n=" + s.bLength + " rem=" + s.remainder);
 
-			if (s.count == 0)
-				return s;
+            if (s.count == 0)
+                return s;
 
-			s.sums = new SumBuf[s.count];
+            s.sums = new SumBuf[s.count];
 
-			for (i = 0; i < s.count; i++) 
-			{
-				s.sums[i] = new SumBuf();
-				s.sums[i].sum1 = (UInt32)f.readInt();				
-				s.sums[i].sum2 = f.ReadBuf(s.s2Length);
-				s.sums[i].offset = offset;
-				s.sums[i].flags = 0;
+            for (i = 0; i < s.count; i++)
+            {
+                s.sums[i] = new SumBuf();
+                s.sums[i].sum1 = (UInt32)f.readInt();
+                s.sums[i].sum2 = f.ReadBuf(s.s2Length);
+                s.sums[i].offset = offset;
+                s.sums[i].flags = 0;
 
-				if (i == s.count-1 && s.remainder != 0)
-					s.sums[i].len = s.remainder;
-				else
-					s.sums[i].len = s.bLength;
-				offset += (int)s.sums[i].len;
+                if (i == s.count - 1 && s.remainder != 0)
+                    s.sums[i].len = s.remainder;
+                else
+                    s.sums[i].len = s.bLength;
+                offset += (int)s.sums[i].len;
 
-				if (options.verbose > 3) 
-					Log.WriteLine("chunk[" + i + "] len=" + s.sums[i].len);
-			}
+                if (options.verbose > 3)
+                    Log.WriteLine("chunk[" + i + "] len=" + s.sums[i].len);
+            }
 
-			s.fLength = offset;
-			return s;
-		}
+            s.fLength = offset;
+            return s;
+        }
 
-		public void ReadSumHead(ClientInfo cInfo, ref SumStruct sum)
-		{
-			IOStream f = cInfo.IoStream;
-			sum.count = f.readInt();
-			sum.bLength = (UInt32)f.readInt();
-			if (options.protocolVersion < 27) 
-				sum.s2Length = checkSum.cSumLength;
-			else 
-			{
-				sum.s2Length = f.readInt();
-				if (sum.s2Length > CheckSum.MD4_SUM_LENGTH) 
-				{					
-					MainClass.Exit("Invalid checksum length " + sum.s2Length, cInfo);
-				}
-			}
-			sum.remainder = (UInt32)f.readInt();
-		}
+        public void ReadSumHead(ClientInfo cInfo, ref SumStruct sum)
+        {
+            IOStream f = cInfo.IoStream;
+            sum.count = f.readInt();
+            sum.bLength = (UInt32)f.readInt();
+            if (options.protocolVersion < 27)
+                sum.s2Length = checkSum.cSumLength;
+            else
+            {
+                sum.s2Length = f.readInt();
+                if (sum.s2Length > CheckSum.MD4_SUM_LENGTH)
+                {
+                    MainClass.Exit("Invalid checksum length " + sum.s2Length, cInfo);
+                }
+            }
+            sum.remainder = (UInt32)f.readInt();
+        }
 
-		NotifyIcon icon = new NotifyIcon();
-		public void ShowMessage(string msg)
-		{
-			// TODO: path length
-			if (!File.Exists("logo.ico"))
-				return;
+        NotifyIcon icon = new NotifyIcon();
+        public void ShowMessage(string msg)
+        {
+            // TODO: path length
+            if (!File.Exists("logo.ico"))
+                return;
 
-			if (msg.Length > 64)
-				msg = msg.Substring(0, 60) + "...";
+            if (msg.Length > 64)
+                msg = msg.Substring(0, 60) + "...";
 
-			icon.Icon = new Icon("logo.ico");
-			icon.Text = msg;
-			icon.Visible = true;
-		}
+            icon.Icon = new Icon("logo.ico");
+            icon.Text = msg;
+            icon.Visible = true;
+        }
 
-		public void HideMessage()
-		{
-			icon.Visible = false;
-		}
-	}
-
+        public void HideMessage()
+        {
+            icon.Visible = false;
+        }
+    }
 }

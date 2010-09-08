@@ -21,302 +21,317 @@ using System.Net.Sockets;
 
 namespace NetSync
 {
-	public class Access
-	{
-				 
-		static int  NS_INT16SZ	= 2;
-		static int  NS_INADDRSZ	= 4;
-		static int  NS_IN6ADDRSZ = 16;
+    public class Access
+    {
 
-		public Access()
-		{
-		}
+        static int NS_INT16SZ = 2;
+        static int NS_INADDRSZ = 4;
+        static int NS_IN6ADDRSZ = 16;
 
-		public bool AllowAccess(string addr, string host, string allowList, string denyList)
-		{
-			if(allowList == null || allowList.CompareTo(String.Empty) == 0)
-				allowList = null;
-			if(denyList == null || denyList.CompareTo(String.Empty) == 0)
-				denyList = null;
-			/* if theres no deny list and no allow list then allow access */
-			if (denyList == null && allowList == null)
-				return true;
+        public Access()
+        {
+        }
 
-			/* if there is an allow list but no deny list then allow only hosts
-			   on the allow list */
-			if (denyList == null)
-				return(AccessMatch(allowList, addr, host));
+        public bool AllowAccess(string addr, string host, string allowList, string denyList)
+        {
+            if (allowList == null || allowList.CompareTo(String.Empty) == 0)
+                allowList = null;
+            if (denyList == null || denyList.CompareTo(String.Empty) == 0)
+                denyList = null;
+            /* if theres no deny list and no allow list then allow access */
+            if (denyList == null && allowList == null)
+                return true;
 
-			/* if theres a deny list but no allow list then allow
-			   all hosts not on the deny list */
-			if (allowList == null)
-				return(!AccessMatch(denyList, addr, host));
+            /* if there is an allow list but no deny list then allow only hosts
+               on the allow list */
+            if (denyList == null)
+                return (AccessMatch(allowList, addr, host));
 
-			/* if there are both type of list then allow all hosts on the
-				   allow list */
-			if (AccessMatch(allowList,addr,host))
-				return true;
+            /* if theres a deny list but no allow list then allow
+               all hosts not on the deny list */
+            if (allowList == null)
+                return (!AccessMatch(denyList, addr, host));
 
-			/* if there are both type of list and it's not on the allow then
-			   allow it if its not on the deny */
-			if (AccessMatch(denyList,addr,host))
-				return false;
+            /* if there are both type of list then allow all hosts on the
+                   allow list */
+            if (AccessMatch(allowList, addr, host))
+                return true;
 
-			return true;
-		}
+            /* if there are both type of list and it's not on the allow then
+               allow it if its not on the deny */
+            if (AccessMatch(denyList, addr, host))
+                return false;
 
-		protected bool AccessMatch(string list, string addr, string host)
-		{			
-			char[] separators = {' ',',','\t'};
-			string[] list2 = list.ToLower().Split(separators);
-			if (host != null) host = host.ToLower();
-			
-			for (int i = 0; i < list2.Length; i++)
-			{
-				if(list2[i].CompareTo(String.Empty) == 0)
-					continue;
-				if (MatchHostname(host, list2[i]) || MatchAddress(addr, list2[i])) 
-				{
-					return true;
-				}
-			}			
-			return false;
-		}
+            return true;
+        }
 
-		protected bool MatchHostname(string host, string tok)
-		{
-			if (host == null) return false;
-			return WildMatch.CheckWildMatch(tok, host);
-		}
+        protected bool AccessMatch(string list, string addr, string host)
+        {
+            char[] separators = { ' ', ',', '\t' };
+            string[] list2 = list.ToLower().Split(separators);
+            if (host != null) host = host.ToLower();
+
+            for (int i = 0; i < list2.Length; i++)
+            {
+                if (list2[i].CompareTo(String.Empty) == 0)
+                    continue;
+                if (MatchHostname(host, list2[i]) || MatchAddress(addr, list2[i]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected bool MatchHostname(string host, string tok)
+        {
+            if (host == null) return false;
+            return WildMatch.CheckWildMatch(tok, host);
+        }
 
 
-		protected bool MatchAddress(string addr, string tok)
-		{
-			
-			IPAddress ipaddr = null, iptok = null;
-			string p = String.Empty;
-			int len = 0, addrlen = 0;
-			byte[] mask = new byte[16];
-			Int64 bits = 0;
-						
-			if (addr == null || addr.CompareTo(String.Empty) == 0) return false;			
-			int pos = tok.IndexOf('/');
-			if (pos > 0) 
-			{
-				p = tok.Substring(0, pos);
-				len = p.Length;
-			}
-			else
-			{											
-				len = tok.Length;
-			}
+        protected bool MatchAddress(string addr, string tok)
+        {
 
-			try
-			{
-				ipaddr = IPAddress.Parse(addr);
-				iptok = IPAddress.Parse(p);
-			} catch(Exception)
-			{
-				return false;
-			}
-			if (ipaddr.AddressFamily != iptok.AddressFamily) {
-				return false;				
-			}
-			if(iptok.AddressFamily == AddressFamily.InterNetwork)
-				addrlen = 4;
-			else 
-				addrlen = 16;
+            IPAddress ipaddr = null, iptok = null;
+            string p = String.Empty;
+            int len = 0, addrlen = 0;
+            byte[] mask = new byte[16];
+            Int64 bits = 0;
 
-			bits = -1;	
-			if(pos > 0)
-			{
-				if((mask = InetPton(iptok.AddressFamily, tok.Substring(pos + 1, tok.Length - pos - 1))) == null)
-				{					
-					mask = new byte[16];
-					bits = Convert.ToInt64(tok.Substring(pos + 1));
-					if(bits == 0)
-						return true;
-					if (bits < 0 || bits > (addrlen << 3)) 
-					{
-						Log.Write("malformed mask in " + tok);
-						return false;
-					}
-				} 
-			} 
-			else
-			{
-				bits = 128;	
-			}
-			
-			if (bits >= 0)
-				MakeMask(mask, (int)bits, addrlen);
+            if (addr == null || addr.CompareTo(String.Empty) == 0) return false;
+            int pos = tok.IndexOf('/');
+            if (pos > 0)
+            {
+                p = tok.Substring(0, pos);
+                len = p.Length;
+            }
+            else
+            {
+                len = tok.Length;
+            }
 
-			return MatchBinary(ipaddr.ToString(), iptok.ToString(), mask, addrlen);			
-		}
+            try
+            {
+                ipaddr = IPAddress.Parse(addr);
+                iptok = IPAddress.Parse(p);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            if (ipaddr.AddressFamily != iptok.AddressFamily)
+            {
+                return false;
+            }
+            if (iptok.AddressFamily == AddressFamily.InterNetwork)
+                addrlen = 4;
+            else
+                addrlen = 16;
 
-		protected void MakeMask(byte[] mask, int plen, int addrlen) 
-		{
-			int w, b, i;
+            bits = -1;
+            if (pos > 0)
+            {
+                if ((mask = InetPton(iptok.AddressFamily, tok.Substring(pos + 1, tok.Length - pos - 1))) == null)
+                {
+                    mask = new byte[16];
+                    bits = Convert.ToInt64(tok.Substring(pos + 1));
+                    if (bits == 0)
+                        return true;
+                    if (bits < 0 || bits > (addrlen << 3))
+                    {
+                        Log.Write("malformed mask in " + tok);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                bits = 128;
+            }
 
-			w = plen >> 3;
-			b = plen & 0x7;
+            if (bits >= 0)
+                MakeMask(mask, (int)bits, addrlen);
 
-			if (w > 0)				
-				for(i=0; i<w; i++)
-					mask[i] = 0xff;
+            return MatchBinary(ipaddr.ToString(), iptok.ToString(), mask, addrlen);
+        }
 
-			if (w < addrlen)
-				mask[w] = (byte)(0xff & (0xff<<(8-b)));
+        protected void MakeMask(byte[] mask, int plen, int addrlen)
+        {
+            int w, b, i;
 
-			if (w+1 < addrlen)				
-				for(i=0; i < addrlen-w-1; i++)
-					mask[w + 1 + i] = 0;
+            w = plen >> 3;
+            b = plen & 0x7;
 
-			return;
-		}
+            if (w > 0)
+                for (i = 0; i < w; i++)
+                    mask[i] = 0xff;
 
-		protected bool MatchBinary(string b1, string b2, byte[] mask, int addrlen)
-		{
-			int i;
+            if (w < addrlen)
+                mask[w] = (byte)(0xff & (0xff << (8 - b)));
 
-			for (i=0; i<addrlen; i++) 
-			{
-				if(((b1[i]^b2[i]) & mask[i]) > 0) 
-				{
-					return false;
-				}
-			}
+            if (w + 1 < addrlen)
+                for (i = 0; i < addrlen - w - 1; i++)
+                    mask[w + 1 + i] = 0;
 
-			return true;
-		}
+            return;
+        }
 
-		protected byte[] InetPton(AddressFamily af, string src)
-		{
-			if(af == AddressFamily.InterNetwork)			
-				return InetPton4(src);			 
-			else			
-				return InetPton6(src);			
-		}
+        protected bool MatchBinary(string b1, string b2, byte[] mask, int addrlen)
+        {
+            int i;
 
-		protected byte[] InetPton4(string src)
-		{
-			string digits = "0123456789";
-			char ch;
-			byte[] res = new byte[16];
-			int pos = 0, octets = 0;
-			bool saw_digit;
+            for (i = 0; i < addrlen; i++)
+            {
+                if (((b1[i] ^ b2[i]) & mask[i]) > 0)
+                {
+                    return false;
+                }
+            }
 
-			saw_digit = false;
-			octets = 0;			
-			int i = 0;
-			while (i < src.Length) {
-				ch = src[i++];
-				int pch;
+            return true;
+        }
 
-				if ((pch = digits.IndexOf(ch)) >= 0) {
-					byte dig = (byte)(res[pos] * 10 + pch);
-					if (dig > 255)
-						return null;
-					res[pos] = dig;
-					if (!saw_digit) {
-						if (++octets > 4)
-							return null;
-						saw_digit = true;
-					}
-				} else if (ch == '.' && saw_digit) {
-					if (octets == 4)
-						return null;
-					pos++;
-					saw_digit = false;
-				} else
-					return null;
-			}
-			if (octets < 4)
-				return null;
-			return res;
-		}
-		
-		protected byte[] InetPton6(string src)			
-		{
-			string	xdigits = "0123456789abcdef";
-			byte[] res = new byte[NS_IN6ADDRSZ];
-			string curtok;
-			bool saw_xdigit; 
-			int pos = 0, colonp = -1, respos = 0;
-			char ch;
-			int val;
-			src = src.ToLower();
+        protected byte[] InetPton(AddressFamily af, string src)
+        {
+            if (af == AddressFamily.InterNetwork)
+                return InetPton4(src);
+            else
+                return InetPton6(src);
+        }
 
-			/* Leading :: requires some special handling. */
-			if (src[pos] == ':')
-				if (src[++pos] != ':')
-					return null;			
-			curtok = src;
-			saw_xdigit = false;
-			val = 0;
-			while (pos < src.Length - 1) {
-				ch = src[++pos];
-				int pch;
+        protected byte[] InetPton4(string src)
+        {
+            string digits = "0123456789";
+            char ch;
+            byte[] res = new byte[16];
+            int pos = 0, octets = 0;
+            bool saw_digit;
 
-				if ((pch = xdigits.IndexOf(ch)) >= 0) {				
-					val <<= 4;
-					val |= pch;
-					if (val > 0xffff)
-						return null;
-					saw_xdigit = true;
-					continue;
-				}
-				if (ch == ':') {
-					curtok = src;
-					if (!saw_xdigit) {
-						if (colonp > 0)
-							return null;
-						colonp = respos;
-						continue;
-					}
-					if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
-						return null;
-					res[respos++] =  (byte)((val >> 8) & 0xff);
-					res[respos++] =  (byte)(val & 0xff);
-					saw_xdigit = false;
-					val = 0;
-					continue;
-				}
-				if (ch == '.' && ((respos + NS_INADDRSZ) <= NS_IN6ADDRSZ))
-				{
-					byte[] tp = InetPton4(curtok);
-					if( tp != null ) 
-					{
-						respos += NS_INADDRSZ;
-						saw_xdigit = false;
-						break;	/* '\0' was seen by inet_pton4(). */
-					}
-				}
-				return null;
-			}
-			if (saw_xdigit) {
-				if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
-					return null;				
-				res[respos++] =  (byte)((val >> 8) & 0xff);
-				res[respos++] =  (byte)(val & 0xff);
-			}
-			if (colonp > 0) {
-				/*
-				* Since some memmove()'s erroneously fail to handle
-				* overlapping regions, we'll do the shift by hand.
-				*/
-				int n = respos - colonp;
-				int i;
+            saw_digit = false;
+            octets = 0;
+            int i = 0;
+            while (i < src.Length)
+            {
+                ch = src[i++];
+                int pch;
 
-				for (i = 1; i <= n; i++) {
-					res[res.Length - i] = res[colonp + n - i];
-					res[colonp + n - i] = 0;
-				}
-				respos = NS_IN6ADDRSZ;
-			}
-//			if (respos != NS_IN6ADDRSZ)
-//				return null;
-			return res;
-		}
-	}
+                if ((pch = digits.IndexOf(ch)) >= 0)
+                {
+                    byte dig = (byte)(res[pos] * 10 + pch);
+                    if (dig > 255)
+                        return null;
+                    res[pos] = dig;
+                    if (!saw_digit)
+                    {
+                        if (++octets > 4)
+                            return null;
+                        saw_digit = true;
+                    }
+                }
+                else if (ch == '.' && saw_digit)
+                {
+                    if (octets == 4)
+                        return null;
+                    pos++;
+                    saw_digit = false;
+                }
+                else
+                    return null;
+            }
+            if (octets < 4)
+                return null;
+            return res;
+        }
+
+        protected byte[] InetPton6(string src)
+        {
+            string xdigits = "0123456789abcdef";
+            byte[] res = new byte[NS_IN6ADDRSZ];
+            string curtok;
+            bool saw_xdigit;
+            int pos = 0, colonp = -1, respos = 0;
+            char ch;
+            int val;
+            src = src.ToLower();
+
+            /* Leading :: requires some special handling. */
+            if (src[pos] == ':')
+                if (src[++pos] != ':')
+                    return null;
+            curtok = src;
+            saw_xdigit = false;
+            val = 0;
+            while (pos < src.Length - 1)
+            {
+                ch = src[++pos];
+                int pch;
+
+                if ((pch = xdigits.IndexOf(ch)) >= 0)
+                {
+                    val <<= 4;
+                    val |= pch;
+                    if (val > 0xffff)
+                        return null;
+                    saw_xdigit = true;
+                    continue;
+                }
+                if (ch == ':')
+                {
+                    curtok = src;
+                    if (!saw_xdigit)
+                    {
+                        if (colonp > 0)
+                            return null;
+                        colonp = respos;
+                        continue;
+                    }
+                    if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                        return null;
+                    res[respos++] = (byte)((val >> 8) & 0xff);
+                    res[respos++] = (byte)(val & 0xff);
+                    saw_xdigit = false;
+                    val = 0;
+                    continue;
+                }
+                if (ch == '.' && ((respos + NS_INADDRSZ) <= NS_IN6ADDRSZ))
+                {
+                    byte[] tp = InetPton4(curtok);
+                    if (tp != null)
+                    {
+                        respos += NS_INADDRSZ;
+                        saw_xdigit = false;
+                        break;	/* '\0' was seen by inet_pton4(). */
+                    }
+                }
+                return null;
+            }
+            if (saw_xdigit)
+            {
+                if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                    return null;
+                res[respos++] = (byte)((val >> 8) & 0xff);
+                res[respos++] = (byte)(val & 0xff);
+            }
+            if (colonp > 0)
+            {
+                /*
+                * Since some memmove()'s erroneously fail to handle
+                * overlapping regions, we'll do the shift by hand.
+                */
+                int n = respos - colonp;
+                int i;
+
+                for (i = 1; i <= n; i++)
+                {
+                    res[res.Length - i] = res[colonp + n - i];
+                    res[colonp + n - i] = 0;
+                }
+                respos = NS_IN6ADDRSZ;
+            }
+            //			if (respos != NS_IN6ADDRSZ)
+            //				return null;
+            return res;
+        }
+    }
 }

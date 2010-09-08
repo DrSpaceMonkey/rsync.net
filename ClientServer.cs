@@ -18,91 +18,93 @@
 using System;
 using System.IO;
 namespace NetSync
-{	
-	public class ClientServer
-	{		
-		public static void SendListing(IOStream f)
-		{
+{
+    public class ClientServer
+    {
+        public static void SendListing(IOStream f)
+        {
 
-		}
+        }
 
-		public static int RsyncModule(ClientInfo cInfo, int moduleNumber)
-		{
-			string path = Daemon.config.GetModule(moduleNumber).Path;
-			string name = Daemon.config.GetModuleName(moduleNumber);
-			IOStream f = cInfo.IoStream;
-			Options options = cInfo.Options;
-			string[] args = new string[Options.MAX_ARGS];
-			int argc = 0, maxargs = Options.MAX_ARGS;				  			
-			string line = String.Empty;
-			
-			if(path[0] == '/')
-				path = path.Remove(0,1);
-			path = path.Replace("\n",String.Empty);		
+        public static int RsyncModule(ClientInfo cInfo, int moduleNumber)
+        {
+            string path = Daemon.config.GetModule(moduleNumber).Path;
+            string name = Daemon.config.GetModuleName(moduleNumber);
+            IOStream f = cInfo.IoStream;
+            Options options = cInfo.Options;
+            string[] args = new string[Options.MAX_ARGS];
+            int argc = 0, maxargs = Options.MAX_ARGS;
+            string line = String.Empty;
 
-			Access ac = new Access();
-			if (!ac.AllowAccess(options.remoteAddr, options.remoteHost, Daemon.config.GetHostsAllow(moduleNumber), Daemon.config.GetHostsDeny(moduleNumber))) 
-			{
-				Log.Write("rsync denied on module "+name+" from "+options.remoteHost+" ("+options.remoteAddr+")");				
-				f.IOPrintf("@ERROR: access denied to "+name+" from "+options.remoteHost+" ("+options.remoteAddr+")\n");				
-				return -1;
-			}
+            if (path[0] == '/')
+                path = path.Remove(0, 1);
+            path = path.Replace("\n", String.Empty);
 
-			if(!Authentication.AuthServer(cInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD ")){			
-				Log.Write("auth failed on module "+name+" from "+options.remoteHost+" ("+options.remoteAddr+")\n");				
-				f.IOPrintf("@ERROR: auth failed on module "+name+"\n");				
-				return -1;
-			}
-// TODO: path length
-			if(Directory.Exists(path))
-				f.IOPrintf("@RSYNCD: OK\n");
-			else 
-			{
-				try 
-				{
-					// TODO: path length
-					Directory.CreateDirectory(path);
-					f.IOPrintf("@RSYNCD: OK\n");
-				} 
-				catch(Exception){
-					f.IOPrintf("@ERROR: Path not found\n");				
-					MainClass.Exit("@ERROR: Path not found: " + path, cInfo);
-				}
-			}
-			options.amServer = true;	//to fix error in SetupProtocol
-			options.dir = path;
-			
-			while (true) 
-			{
-				line = f.ReadLine();
-				line = line.Substring(0,line.Length-1);
-				if (line.CompareTo(String.Empty) == 0)
-					break;
-				if (argc == maxargs) 
-				{
-					maxargs += Options.MAX_ARGS;
-					MapFile.ReallocArrayString(ref args, maxargs);						
-				}
-				args[argc++] = line;
-			}			
-			args[argc++] = path;
-			
-			options.verbose = 0; 
-			int argsNotUsed = CommandLineParser.ParseArguments(args,options);
-			if (argsNotUsed == -1)
-			{				
-				MainClass.Exit("Error parsing options", cInfo);
-			}
-			string[] args2 = new string[argsNotUsed];
-			for(int i = 0; i < argsNotUsed; i++)
-				args2[i] = args[args.Length - argsNotUsed + i];
-			
-			
-			MainClass.SetupProtocol(cInfo);
-			f.IOStartMultiplexOut();
-			Daemon.StartServer(cInfo, args2);
+            Access ac = new Access();
+            if (!ac.AllowAccess(options.remoteAddr, options.remoteHost, Daemon.config.GetHostsAllow(moduleNumber), Daemon.config.GetHostsDeny(moduleNumber)))
+            {
+                Log.Write("rsync denied on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")");
+                f.IOPrintf("@ERROR: access denied to " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
+                return -1;
+            }
 
-			return -1;
-		}
-	}
+            if (!Authentication.AuthServer(cInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
+            {
+                Log.Write("auth failed on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
+                f.IOPrintf("@ERROR: auth failed on module " + name + "\n");
+                return -1;
+            }
+            // TODO: path length
+            if (Directory.Exists(path))
+                f.IOPrintf("@RSYNCD: OK\n");
+            else
+            {
+                try
+                {
+                    // TODO: path length
+                    Directory.CreateDirectory(path);
+                    f.IOPrintf("@RSYNCD: OK\n");
+                }
+                catch (Exception)
+                {
+                    f.IOPrintf("@ERROR: Path not found\n");
+                    MainClass.Exit("@ERROR: Path not found: " + path, cInfo);
+                }
+            }
+            options.amServer = true;	//to fix error in SetupProtocol
+            options.dir = path;
+
+            while (true)
+            {
+                line = f.ReadLine();
+                line = line.Substring(0, line.Length - 1);
+                if (line.CompareTo(String.Empty) == 0)
+                    break;
+                if (argc == maxargs)
+                {
+                    maxargs += Options.MAX_ARGS;
+                    MapFile.ReallocArrayString(ref args, maxargs);
+                }
+                args[argc++] = line;
+            }
+            args[argc++] = path;
+
+            options.verbose = 0;
+            int argsNotUsed = CommandLineParser.ParseArguments(args, options);
+            if (argsNotUsed == -1)
+            {
+                MainClass.Exit("Error parsing options", cInfo);
+            }
+            string[] args2 = new string[argsNotUsed];
+            for (int i = 0; i < argsNotUsed; i++)
+                args2[i] = args[args.Length - argsNotUsed + i];
+
+
+            MainClass.SetupProtocol(cInfo);
+            f.IOStartMultiplexOut();
+            Daemon.StartServer(cInfo, args2);
+
+            return -1;
+        }
+    }
 }

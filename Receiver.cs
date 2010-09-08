@@ -21,380 +21,386 @@ using System.IO;
 
 namespace NetSync
 {
-	public class Receiver
-	{
-		private Options options;
-		private CheckSum checkSum;
+    public class Receiver
+    {
+        private Options options;
+        private CheckSum checkSum;
 
-		public Receiver(Options opt)
-		{
-			options = opt;
-			checkSum = new CheckSum(options);
-		}
-		
-		private string LocalizePath(ClientInfo cInfo, string path)
-		{
-			string normalized = cInfo.Options.dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
-			string ret=String.Empty;
-			if (path.ToLower().IndexOf(normalized)!=-1)
-				ret = path.Substring(path.ToLower().IndexOf(normalized) + normalized.Length).Replace('/', Path.DirectorySeparatorChar);
+        public Receiver(Options opt)
+        {
+            options = opt;
+            checkSum = new CheckSum(options);
+        }
 
-			if (ret == String.Empty)
-				return path.TrimEnd('\\');
-			if (ret[0] == Path.DirectorySeparatorChar)
-				ret = ret.Substring(1);
+        private string LocalizePath(ClientInfo cInfo, string path)
+        {
+            string normalized = cInfo.Options.dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
+            string ret = String.Empty;
+            if (path.ToLower().IndexOf(normalized) != -1)
+                ret = path.Substring(path.ToLower().IndexOf(normalized) + normalized.Length).Replace('/', Path.DirectorySeparatorChar);
 
-			return ret;
-		}
+            if (ret == String.Empty)
+                return path.TrimEnd('\\');
+            if (ret[0] == Path.DirectorySeparatorChar)
+                ret = ret.Substring(1);
+
+            return ret;
+        }
 
         public int ReceiveFiles(ClientInfo cInfo, List<FileStruct> fileList, string localName)
-		{
-			FStat st = new FStat();
-			FileStruct file;
-			IOStream f = cInfo.IoStream;
-			
-			string fileName;
-			string fNameCmp = String.Empty, fNameTmp = String.Empty;		
-			bool saveMakeBackups = options.makeBackups;
-			int i, phase = 0;
-			bool recv_ok;
+        {
+            FStat st = new FStat();
+            FileStruct file;
+            IOStream f = cInfo.IoStream;
 
-			if (options.verbose > 2)
-				Log.WriteLine("ReceiveFiles(" + fileList.Count + ") starting");		
-			while (true) 
-			{
-				i = f.readInt();
-				if (i == -1) {
-					if (phase != 0)
-						break;
+            string fileName;
+            string fNameCmp = String.Empty, fNameTmp = String.Empty;
+            bool saveMakeBackups = options.makeBackups;
+            int i, phase = 0;
+            bool recv_ok;
 
-					phase = 1;
-					checkSum.cSumLength = CheckSum.SUM_LENGTH;
-					if (options.verbose > 2)
-						Log.WriteLine("ReceiveFiles phase=" + phase);
-					f.writeInt(0); //send_msg DONE
-					if (options.keepPartial)
-						options.makeBackups = false;
-					continue;
-				}
+            if (options.verbose > 2)
+                Log.WriteLine("ReceiveFiles(" + fileList.Count + ") starting");
+            while (true)
+            {
+                i = f.readInt();
+                if (i == -1)
+                {
+                    if (phase != 0)
+                        break;
 
-				if (i < 0 || i >= fileList.Count) {				
-					MainClass.Exit("Invalid file index " + i +" in receiveFiles (count=" + fileList.Count +")", cInfo);
-				}
+                    phase = 1;
+                    checkSum.cSumLength = CheckSum.SUM_LENGTH;
+                    if (options.verbose > 2)
+                        Log.WriteLine("ReceiveFiles phase=" + phase);
+                    f.writeInt(0); //send_msg DONE
+                    if (options.keepPartial)
+                        options.makeBackups = false;
+                    continue;
+                }
 
-				file = (fileList[i]);
+                if (i < 0 || i >= fileList.Count)
+                {
+                    MainClass.Exit("Invalid file index " + i + " in receiveFiles (count=" + fileList.Count + ")", cInfo);
+                }
 
-				Options.stats.currentFileIndex = i;
-				Options.stats.numTransferredFiles++;
-				Options.stats.totalTransferredSize += file.length;			
+                file = (fileList[i]);
 
-				if (localName != null && localName.CompareTo(String.Empty) != 0)
-					fileName = localName;
-				else
-				{
-					fileName = Path.Combine(options.dir,LocalizePath(cInfo, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/"));
-					//fileName = Path.Combine(options.dir, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/");
-					// TODO: path length
-					Directory.CreateDirectory(Path.Combine(options.dir,LocalizePath(cInfo, file.dirName.Replace(":",String.Empty))).Replace("\\", "/"));
-					Log.WriteLine(Path.Combine(options.dir, file.dirName));
-					//FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":",String.Empty)).Replace("\\", "/"));
-				}
+                Options.stats.currentFileIndex = i;
+                Options.stats.numTransferredFiles++;
+                Options.stats.totalTransferredSize += file.length;
 
-				if (options.dryRun) {
-					if (!options.amServer && options.verbose > 0)
-						Log.WriteLine(fileName);
-					continue;
-				}
+                if (localName != null && localName.CompareTo(String.Empty) != 0)
+                    fileName = localName;
+                else
+                {
+                    fileName = Path.Combine(options.dir, LocalizePath(cInfo, file.FNameTo().Replace(":", String.Empty)).Replace("\\", "/"));
+                    //fileName = Path.Combine(options.dir, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/");
+                    // TODO: path length
+                    Directory.CreateDirectory(Path.Combine(options.dir, LocalizePath(cInfo, file.dirName.Replace(":", String.Empty))).Replace("\\", "/"));
+                    Log.WriteLine(Path.Combine(options.dir, file.dirName));
+                    //FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":",String.Empty)).Replace("\\", "/"));
+                }
 
-				if (options.verbose > 2)
-					Log.WriteLine("receiveFiles(" + fileName + ")");
+                if (options.dryRun)
+                {
+                    if (!options.amServer && options.verbose > 0)
+                        Log.WriteLine(fileName);
+                    continue;
+                }
 
-				if (options.partialDir != null && options.partialDir.CompareTo(String.Empty) != 0) {			
-				} else
-					fNameCmp = fileName;
-				
-				FileStream fd1 = null;
-				try
-				{
-					fd1 = new FileStream(fNameCmp, FileMode.Open, FileAccess.Read);
-				}
-				catch(FileNotFoundException)
-				{
-					fNameCmp = fileName;
-					try
-					{
-						fd1 = new FileStream(fNameCmp, FileMode.Open, FileAccess.Read);
-					}
-					catch(FileNotFoundException)
-					{
-					}
-				}  catch(Exception e)
-				{
-					Log.Write(e.Message);
-				}			
-				try
-				{
-					FileInfo fi = new FileInfo(fNameCmp);
-					// TODO: path length
-					st.size = fi.Length;
-				} 
-				catch {}
+                if (options.verbose > 2)
+                    Log.WriteLine("receiveFiles(" + fileName + ")");
 
-				String tempFileName = getTmpName(fileName);
-				FileStream fd2 = null;			
-				fd2 = new FileStream(tempFileName,FileMode.OpenOrCreate,FileAccess.Write);				
+                if (options.partialDir != null && options.partialDir.CompareTo(String.Empty) != 0)
+                {
+                }
+                else
+                    fNameCmp = fileName;
 
-				if (!options.amServer && options.verbose > 0)
-					Log.WriteLine(fileName);
+                FileStream fd1 = null;
+                try
+                {
+                    fd1 = new FileStream(fNameCmp, FileMode.Open, FileAccess.Read);
+                }
+                catch (FileNotFoundException)
+                {
+                    fNameCmp = fileName;
+                    try
+                    {
+                        fd1 = new FileStream(fNameCmp, FileMode.Open, FileAccess.Read);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Write(e.Message);
+                }
+                try
+                {
+                    FileInfo fi = new FileInfo(fNameCmp);
+                    // TODO: path length
+                    st.size = fi.Length;
+                }
+                catch { }
 
-				/* recv file data */
-				recv_ok = ReceiveData(cInfo, fNameCmp, fd1, st.size,
-							fileName, fd2, file.length);
+                String tempFileName = getTmpName(fileName);
+                FileStream fd2 = null;
+                fd2 = new FileStream(tempFileName, FileMode.OpenOrCreate, FileAccess.Write);
 
-				if(fd1 != null)
-					fd1.Close();
-				if(fd2 != null)
-					fd2.Close();
-				// TODO: path length
-				File.Copy(tempFileName, fileName, true);
-				// TODO: path length
-				File.Delete(tempFileName);
-				if (recv_ok  || options.inplace)
-					FinishTransfer(fileName, fNameTmp, file, recv_ok);
-			}
-			options.makeBackups = saveMakeBackups;
+                if (!options.amServer && options.verbose > 0)
+                    Log.WriteLine(fileName);
 
-			if (options.deleteAfter && options.recurse && localName == null && fileList.Count > 0)
-				DeleteFiles(fileList);
+                /* recv file data */
+                recv_ok = ReceiveData(cInfo, fNameCmp, fd1, st.size,
+                            fileName, fd2, file.length);
 
-			if (options.verbose > 2)
-				Log.WriteLine("ReceiveFiles finished");
+                if (fd1 != null)
+                    fd1.Close();
+                if (fd2 != null)
+                    fd2.Close();
+                // TODO: path length
+                File.Copy(tempFileName, fileName, true);
+                // TODO: path length
+                File.Delete(tempFileName);
+                if (recv_ok || options.inplace)
+                    FinishTransfer(fileName, fNameTmp, file, recv_ok);
+            }
+            options.makeBackups = saveMakeBackups;
 
-			return 0;
-		} 
-		
-		public bool ReceiveData(ClientInfo cInfo, string fileNameR, Stream fdR, long sizeR, string fileName, Stream fd, int totalSize)
-		{
-			IOStream f = cInfo.IoStream;
-			byte[] file_sum1 = new byte[CheckSum.MD4_SUM_LENGTH];
-			byte[] file_sum2 = new byte[CheckSum.MD4_SUM_LENGTH];
-			byte[] data = new byte[Match.CHUNK_SIZE];
-			SumStruct sum = new SumStruct();
-			MapFile mapBuf = null;
-			Sender sender = new Sender(options);
-			sender.ReadSumHead(cInfo, ref sum);
-			int offset = 0;
-			UInt32 len;
-			
-			if (fdR != null && sizeR > 0) 
-			{
-				int mapSize =(int) Math.Max(sum.bLength * 2, 16*1024);
-				mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sum.bLength);
-				if (options.verbose > 2) 
-					Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR);;
-			} 
-			Sum s = new Sum(options);
-			s.Init(options.checksumSeed);
-			
-			int i;			
-			Token token = new Token(options);
-			while ((i = token.ReceiveToken(f, ref data, 0)) != 0) 
-			{
-				if (options.doProgress)
-					Progress.ShowProgress(offset, totalSize);
+            if (options.deleteAfter && options.recurse && localName == null && fileList.Count > 0)
+                DeleteFiles(fileList);
 
-				if (i > 0) 
-				{					
-					if (options.verbose > 3) 
-						Log.WriteLine("data recv " + i + " at " + offset);
-					Options.stats.literalData += i;
-					s.Update(data,0,i);					
-					if (fd != null && FileIO.WriteFile(fd,data,0,i) != i)
-						goto report_write_error;
-					offset += i;
-					continue;
-				}
+            if (options.verbose > 2)
+                Log.WriteLine("ReceiveFiles finished");
 
-				i = -(i+1);
-				int offset2 = (int)(i*sum.bLength);
-				len = sum.bLength;
-				if (i == sum.count-1 && sum.remainder != 0)
-					len = sum.remainder;
+            return 0;
+        }
 
-				Options.stats.matchedData += len;
+        public bool ReceiveData(ClientInfo cInfo, string fileNameR, Stream fdR, long sizeR, string fileName, Stream fd, int totalSize)
+        {
+            IOStream f = cInfo.IoStream;
+            byte[] file_sum1 = new byte[CheckSum.MD4_SUM_LENGTH];
+            byte[] file_sum2 = new byte[CheckSum.MD4_SUM_LENGTH];
+            byte[] data = new byte[Match.CHUNK_SIZE];
+            SumStruct sum = new SumStruct();
+            MapFile mapBuf = null;
+            Sender sender = new Sender(options);
+            sender.ReadSumHead(cInfo, ref sum);
+            int offset = 0;
+            UInt32 len;
 
-				if (options.verbose > 3)
-					Log.WriteLine("chunk["+i+"] of size "+len+" at "+offset2+" offset=" + offset);
+            if (fdR != null && sizeR > 0)
+            {
+                int mapSize = (int)Math.Max(sum.bLength * 2, 16 * 1024);
+                mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sum.bLength);
+                if (options.verbose > 2)
+                    Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR); ;
+            }
+            Sum s = new Sum(options);
+            s.Init(options.checksumSeed);
 
-				byte[] map = null;
-				int off = 0;
-				if (mapBuf != null) 
-				{
-					off = mapBuf.MapPtr(offset2,(int)len);
-					map = mapBuf.p;
+            int i;
+            Token token = new Token(options);
+            while ((i = token.ReceiveToken(f, ref data, 0)) != 0)
+            {
+                if (options.doProgress)
+                    Progress.ShowProgress(offset, totalSize);
 
-					token.SeeToken(map, offset, (int)len);
-					s.Update(map, off, (int)len);
-				}
+                if (i > 0)
+                {
+                    if (options.verbose > 3)
+                        Log.WriteLine("data recv " + i + " at " + offset);
+                    Options.stats.literalData += i;
+                    s.Update(data, 0, i);
+                    if (fd != null && FileIO.WriteFile(fd, data, 0, i) != i)
+                        goto report_write_error;
+                    offset += i;
+                    continue;
+                }
 
-				if (options.inplace) 
-				{
-					if (offset == offset2 && fd != null) 
-					{
-						offset += (int)len;
-						if (fd.Seek(len, SeekOrigin.Current) != offset) 
-						{							
-							MainClass.Exit("seek failed on "+ Util.fullFileName(fileName),cInfo);
-						}
-						continue;
-					}
-				}				
-				if (fd != null && FileIO.WriteFile(fd, map, off, (int)len) != (int)len)
-					goto report_write_error;
-				offset += (int)len;
-			}
+                i = -(i + 1);
+                int offset2 = (int)(i * sum.bLength);
+                len = sum.bLength;
+                if (i == sum.count - 1 && sum.remainder != 0)
+                    len = sum.remainder;
 
-			if (options.doProgress)
-				Progress.EndProgress(totalSize);
-			if (fd != null && offset > 0 && FileIO.SparseEnd(fd) != 0) 
-			{				
-				MainClass.Exit("write failed on " + Util.fullFileName(fileName),cInfo);
-			}
+                Options.stats.matchedData += len;
 
-			file_sum1 = s.End();
+                if (options.verbose > 3)
+                    Log.WriteLine("chunk[" + i + "] of size " + len + " at " + offset2 + " offset=" + offset);
 
-			if (mapBuf != null)
-				mapBuf = null;
-			
-			file_sum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
-			if (options.verbose > 2)
-				Log.WriteLine("got fileSum");
-			if (fd != null && Util.MemCmp(file_sum1,0, file_sum2,0, CheckSum.MD4_SUM_LENGTH) != 0)
-				return false;
-			return true;
-			report_write_error:
-			{
-				MainClass.Exit("write failed on " + Util.fullFileName(fileName),cInfo);
-			}
-			return true;
-		}
+                byte[] map = null;
+                int off = 0;
+                if (mapBuf != null)
+                {
+                    off = mapBuf.MapPtr(offset2, (int)len);
+                    map = mapBuf.p;
 
-		public static void FinishTransfer(string fileName,string fileNameTmp, FileStruct file, bool okToSetTime)
-		{
-		}
- 
-		public void deleteOne(string fileName, bool isDir)
-		{
-			SysCall sc = new SysCall(options);
-			if(!isDir)
-			{
+                    token.SeeToken(map, offset, (int)len);
+                    s.Update(map, off, (int)len);
+                }
 
-				if(!sc.robustUnlink(fileName))
-					Log.WriteLine("Can't delete '"+fileName+"' file");
-				else
-					if(options.verbose > 0)
-						Log.WriteLine("deleting file "+fileName);
-			} 
-			else
-			{
-				if(!sc.doRmDir(fileName))
-					Log.WriteLine("Can't delete '"+fileName+"' dir");
-				else
-					if(options.verbose > 0)
-						Log.WriteLine("deleting directory "+fileName);
-			}
-		}
+                if (options.inplace)
+                {
+                    if (offset == offset2 && fd != null)
+                    {
+                        offset += (int)len;
+                        if (fd.Seek(len, SeekOrigin.Current) != offset)
+                        {
+                            MainClass.Exit("seek failed on " + Util.fullFileName(fileName), cInfo);
+                        }
+                        continue;
+                    }
+                }
+                if (fd != null && FileIO.WriteFile(fd, map, off, (int)len) != (int)len)
+                    goto report_write_error;
+                offset += (int)len;
+            }
 
-		public bool isBackupFile(string fileName)
-		{
-			return fileName.EndsWith(options.backupSuffix);
-		}
+            if (options.doProgress)
+                Progress.EndProgress(totalSize);
+            if (fd != null && offset > 0 && FileIO.SparseEnd(fd) != 0)
+            {
+                MainClass.Exit("write failed on " + Util.fullFileName(fileName), cInfo);
+            }
 
-		public string getTmpName(string fileName)
-		{
-			return Path.GetTempFileName();	
-		}
+            file_sum1 = s.End();
+
+            if (mapBuf != null)
+                mapBuf = null;
+
+            file_sum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
+            if (options.verbose > 2)
+                Log.WriteLine("got fileSum");
+            if (fd != null && Util.MemCmp(file_sum1, 0, file_sum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
+                return false;
+            return true;
+        report_write_error:
+            {
+                MainClass.Exit("write failed on " + Util.fullFileName(fileName), cInfo);
+            }
+            return true;
+        }
+
+        public static void FinishTransfer(string fileName, string fileNameTmp, FileStruct file, bool okToSetTime)
+        {
+        }
+
+        public void deleteOne(string fileName, bool isDir)
+        {
+            SysCall sc = new SysCall(options);
+            if (!isDir)
+            {
+
+                if (!sc.robustUnlink(fileName))
+                    Log.WriteLine("Can't delete '" + fileName + "' file");
+                else
+                    if (options.verbose > 0)
+                        Log.WriteLine("deleting file " + fileName);
+            }
+            else
+            {
+                if (!sc.doRmDir(fileName))
+                    Log.WriteLine("Can't delete '" + fileName + "' dir");
+                else
+                    if (options.verbose > 0)
+                        Log.WriteLine("deleting directory " + fileName);
+            }
+        }
+
+        public bool isBackupFile(string fileName)
+        {
+            return fileName.EndsWith(options.backupSuffix);
+        }
+
+        public string getTmpName(string fileName)
+        {
+            return Path.GetTempFileName();
+        }
 
         public void DeleteFiles(List<FileStruct> fileList)
-		{
-			string[] argv = new string[1];
+        {
+            string[] argv = new string[1];
             List<FileStruct> localFileList = null;
-			if(options.cvsExclude)
-				Exclude.AddCvsExcludes();
-			for(int j=0; j<fileList.Count; j++)
-			{
-				if(((fileList[j]).mode & Options.FLAG_TOP_DIR) == 0  || !Util.S_ISDIR((fileList[j]).mode))
-					continue;
-				argv[0] = options.dir +(fileList[j]).FNameTo();	
-				FileList fList = new FileList(options);
-				if((localFileList = fList.sendFileList(null, argv)) == null)
-				   continue;
-				for (int i = localFileList.Count-1; i >= 0; i--) 
-				{					
-					if((localFileList[i]).baseName == null)
-						continue;
-					(localFileList[i]).dirName = (localFileList[i]).dirName.Substring(options.dir.Length);
-					if (FileList.fileListFind(fileList,(localFileList[i])) < 0) 
-					{
-						(localFileList[i]).dirName = options.dir + (localFileList[i]).dirName;
-						deleteOne((localFileList[i]).FNameTo(),Util.S_ISDIR((localFileList[i]).mode));
-					}
-				}
-			}
-		}
-	}
+            if (options.cvsExclude)
+                Exclude.AddCvsExcludes();
+            for (int j = 0; j < fileList.Count; j++)
+            {
+                if (((fileList[j]).mode & Options.FLAG_TOP_DIR) == 0 || !Util.S_ISDIR((fileList[j]).mode))
+                    continue;
+                argv[0] = options.dir + (fileList[j]).FNameTo();
+                FileList fList = new FileList(options);
+                if ((localFileList = fList.sendFileList(null, argv)) == null)
+                    continue;
+                for (int i = localFileList.Count - 1; i >= 0; i--)
+                {
+                    if ((localFileList[i]).baseName == null)
+                        continue;
+                    (localFileList[i]).dirName = (localFileList[i]).dirName.Substring(options.dir.Length);
+                    if (FileList.fileListFind(fileList, (localFileList[i])) < 0)
+                    {
+                        (localFileList[i]).dirName = options.dir + (localFileList[i]).dirName;
+                        deleteOne((localFileList[i]).FNameTo(), Util.S_ISDIR((localFileList[i]).mode));
+                    }
+                }
+            }
+        }
+    }
 
-	
 
-	public class SysCall
-	{
 
-		private Options options;
+    public class SysCall
+    {
 
-		public SysCall(Options opt)
-		{
-			options = opt;
-		}
+        private Options options;
 
-		public bool doRmDir(string pathName)
-		{
-			if(options.dryRun)
-				return true;
-			if(options.readOnly || options.listOnly)
-				return false;
-			try
-			{
-				// TODO: path length
-				Directory.Delete(pathName);
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
+        public SysCall(Options opt)
+        {
+            options = opt;
+        }
 
-		public bool robustUnlink(string fileName)
-		{
-			return doUnlink(fileName);
-		}
+        public bool doRmDir(string pathName)
+        {
+            if (options.dryRun)
+                return true;
+            if (options.readOnly || options.listOnly)
+                return false;
+            try
+            {
+                // TODO: path length
+                Directory.Delete(pathName);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
-		public bool doUnlink(string fileName)
-		{
-			if(options.dryRun)
-				return true;
-			if(options.readOnly || options.listOnly)
-				return false;
-			try
-			{
-				// TODO: path length
-				File.Delete(fileName);
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-	}
+        public bool robustUnlink(string fileName)
+        {
+            return doUnlink(fileName);
+        }
+
+        public bool doUnlink(string fileName)
+        {
+            if (options.dryRun)
+                return true;
+            if (options.readOnly || options.listOnly)
+                return false;
+            try
+            {
+                // TODO: path length
+                File.Delete(fileName);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
 }
