@@ -333,6 +333,10 @@ namespace NetSync
             return stream;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cInfo"></param>
         public static void SetupProtocol(ClientInfo cInfo)
         {
             IOStream f = cInfo.IoStream;

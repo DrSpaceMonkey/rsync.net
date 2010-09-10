@@ -33,17 +33,17 @@ namespace NetSync
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="cInfo"></param>
+        /// <param name="clientInfo"></param>
         /// <param name="moduleNumber"></param>
         /// <returns></returns>
-        public static int RsyncModule(ClientInfo cInfo, int moduleNumber) //@todo Why return something if result not used?
+        public static int RsyncModule(ClientInfo clientInfo, int moduleNumber) //@todo Why return something if result not used?
         {
             string path = Daemon.config.GetModule(moduleNumber).Path;
             string name = Daemon.config.GetModuleName(moduleNumber);
-            IOStream f = cInfo.IoStream;
-            Options options = cInfo.Options;
+            IOStream ioStream = clientInfo.IoStream;
+            Options options = clientInfo.Options;
             string[] args = new string[Options.MAX_ARGS];
-            int argc = 0, maxargs = Options.MAX_ARGS;
+            int argc = 0, maxArgs = Options.MAX_ARGS;
             string line = String.Empty;
 
             if (path[0] == '/')
@@ -56,20 +56,20 @@ namespace NetSync
             if (!ac.AllowAccess(options.remoteAddr, options.remoteHost, Daemon.config.GetHostsAllow(moduleNumber), Daemon.config.GetHostsDeny(moduleNumber)))
             {
                 Log.Write("rsync denied on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")");
-                f.IOPrintf("@ERROR: access denied to " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
+                ioStream.IOPrintf("@ERROR: access denied to " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
                 return -1;
             }
 
-            if (!Authentication.AuthServer(cInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
+            if (!Authentication.AuthServer(clientInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
             {
                 Log.Write("auth failed on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
-                f.IOPrintf("@ERROR: auth failed on module " + name + "\n");
+                ioStream.IOPrintf("@ERROR: auth failed on module " + name + "\n");
                 return -1;
             }
             // TODO: path length
             if (Directory.Exists(path))
             {
-                f.IOPrintf("@RSYNCD: OK\n");
+                ioStream.IOPrintf("@RSYNCD: OK\n");
             }
             else
             {
@@ -77,12 +77,12 @@ namespace NetSync
                 {
                     // TODO: path length
                     Directory.CreateDirectory(path);
-                    f.IOPrintf("@RSYNCD: OK\n");
+                    ioStream.IOPrintf("@RSYNCD: OK\n");
                 }
                 catch (Exception)
                 {
-                    f.IOPrintf("@ERROR: Path not found\n");
-                    MainClass.Exit("@ERROR: Path not found: " + path, cInfo);
+                    ioStream.IOPrintf("@ERROR: Path not found\n");
+                    MainClass.Exit("@ERROR: Path not found: " + path, clientInfo);
                 }
             }
             options.amServer = true;	//to fix error in SetupProtocol
@@ -90,16 +90,16 @@ namespace NetSync
 
             while (true)
             {
-                line = f.ReadLine();
+                line = ioStream.ReadLine();
                 line = line.Substring(0, line.Length - 1);
                 if (line.CompareTo(String.Empty) == 0)
                 {
                     break;
                 }
-                if (argc == maxargs)
+                if (argc == maxArgs)
                 {
-                    maxargs += Options.MAX_ARGS;
-                    MapFile.ReallocArrayString(ref args, maxargs);
+                    maxArgs += Options.MAX_ARGS;
+                    MapFile.ReallocArrayString(ref args, maxArgs);
                 }
                 args[argc++] = line;
             }
@@ -109,7 +109,7 @@ namespace NetSync
             int argsNotUsed = CommandLineParser.ParseArguments(args, options);
             if (argsNotUsed == -1)
             {
-                MainClass.Exit("Error parsing options", cInfo);
+                MainClass.Exit("Error parsing options", clientInfo);
             }
             string[] args2 = new string[argsNotUsed];
             for (int i = 0; i < argsNotUsed; i++)
@@ -117,9 +117,9 @@ namespace NetSync
                 args2[i] = args[args.Length - argsNotUsed + i];
             }
 
-            MainClass.SetupProtocol(cInfo);
-            f.IOStartMultiplexOut();
-            Daemon.StartServer(cInfo, args2);
+            MainClass.SetupProtocol(clientInfo);
+            ioStream.IOStartMultiplexOut();
+            Daemon.StartServer(clientInfo, args2);
 
             return -1;
         }

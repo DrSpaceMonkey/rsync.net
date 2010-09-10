@@ -21,44 +21,44 @@ namespace NetSync
 {
     public class Client
     {
-        public int ClientRun(ClientInfo cInfo, int pid, string[] args)
+        public int ClientRun(ClientInfo clientInfo, int pid, string[] args)
         {
-            Options options = cInfo.Options;
-            IOStream f = cInfo.IoStream;
+            Options options = clientInfo.Options;
+            IOStream ioStream = clientInfo.IoStream;
             FileList fList;
             List<FileStruct> fileList;
 
-            MainClass.SetupProtocol(cInfo);
+            MainClass.SetupProtocol(clientInfo);
             if (options.protocolVersion >= 23 && !options.readBatch)
             {
-                f.IOStartMultiplexIn();
+                ioStream.IOStartMultiplexIn();
             }
             if (options.amSender)
             {
-                f.IOStartBufferingOut();
+                ioStream.IOStartBufferingOut();
 
                 if (options.deleteMode && !options.deleteExcluded)
                 {
                     Exclude excl = new Exclude(options);
-                    excl.SendExcludeList(f);
+                    excl.SendExcludeList(ioStream);
                 }
 
                 if (options.verbose > 3)
                 {
                     Log.Write("File list sent\n");
                 }
-                f.Flush();
+                ioStream.Flush();
                 fList = new FileList(options);
-                fileList = fList.sendFileList(cInfo, args);
+                fileList = fList.sendFileList(clientInfo, args);
                 if (options.verbose > 3)
                 {
                     Log.WriteLine("file list sent");
                 }
-                f.Flush();
+                ioStream.Flush();
                 Sender sender = new Sender(options);
-                sender.SendFiles(fileList, cInfo);
-                f.Flush();
-                f.writeInt(-1);
+                sender.SendFiles(fileList, clientInfo);
+                ioStream.Flush();
+                ioStream.writeInt(-1);
                 return -1;
             }
             options.dir = args[0];
@@ -76,11 +76,11 @@ namespace NetSync
             if (!options.readBatch)
             {
                 Exclude excl = new Exclude(options);
-                excl.SendExcludeList(f);
+                excl.SendExcludeList(ioStream);
             }
             fList = new FileList(options);
-            fileList = fList.receiveFileList(cInfo);
-            return Daemon.DoReceive(cInfo, fileList, null);
+            fileList = fList.receiveFileList(clientInfo);
+            return Daemon.DoReceive(clientInfo, fileList, null);
         }
     }
 }
