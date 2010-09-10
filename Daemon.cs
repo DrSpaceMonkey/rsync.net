@@ -94,8 +94,9 @@ namespace NetSync
         public static void StartAcceptLoop(int port)
         {
             IPAddress localAddr = IPAddress.Parse(ServerOptions.bindAddress);
-            //			Server = new TcpListener(localAddr, port);
-            Server = new TcpListener(port);
+            Server = new TcpListener(localAddr, port); //Switched to this one because TcpListener(port) is obsolete
+            //Server = new TcpListener(port);
+            
             try
             {
                 Server.Start();

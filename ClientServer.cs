@@ -21,12 +21,22 @@ namespace NetSync
 {
     public class ClientServer
     {
-        public static void SendListing(IOStream f)
+        /// <summary>
+        /// Do nothing
+        /// </summary>
+        /// <param name="f"></param>
+        public static void SendListing(IOStream f) //@todo empty method
         {
 
         }
 
-        public static int RsyncModule(ClientInfo cInfo, int moduleNumber)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cInfo"></param>
+        /// <param name="moduleNumber"></param>
+        /// <returns></returns>
+        public static int RsyncModule(ClientInfo cInfo, int moduleNumber) //@todo Why return something if result not used?
         {
             string path = Daemon.config.GetModule(moduleNumber).Path;
             string name = Daemon.config.GetModuleName(moduleNumber);

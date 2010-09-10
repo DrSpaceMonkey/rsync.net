@@ -47,7 +47,9 @@ namespace NetSync
                 Match match = new Match(options);
 
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("SendFiles starting");
+                }
                 while (true)
                 {
                     fileName = String.Empty;
@@ -60,7 +62,9 @@ namespace NetSync
                             checkSum.cSumLength = CheckSum.SUM_LENGTH;
                             f.writeInt(-1);
                             if (options.verbose > 2)
+                            {
                                 Log.WriteLine("SendFiles phase=" + phase);
+                            }
                             options.makeBackups = false;
                             continue;
                         }
@@ -82,19 +86,25 @@ namespace NetSync
                     {
                         fileName = file.baseDir;
                         if (!fileName.EndsWith("/"))
+                        {
                             fileName += "/";
+                        }
                     }
                     fileName2 = file.FNameTo();
                     fileName += file.FNameTo();
                     ShowMessage("uploading " + fileName);
 
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("sendFiles(" + i + ", " + fileName + ")");
+                    }
 
                     if (options.dryRun)
                     {
                         if (!options.amServer && options.verbose != 0)
+                        {
                             Log.WriteLine(fileName2);
+                        }
                         f.writeInt(i);
                         continue;
                     }
@@ -135,17 +145,23 @@ namespace NetSync
                     }
 
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.size);
+                    }
 
                     f.writeInt(i);
                     Generator gen = new Generator(options);
                     gen.WriteSumHead(f, s);
 
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("calling MatchSums " + fileName);
+                    }
 
                     if (!options.amServer && options.verbose != 0)
+                    {
                         Log.WriteLine(fileName2);
+                    }
 
                     Token token = new Token(options);
                     token.SetCompression(fileName);
@@ -166,12 +182,16 @@ namespace NetSync
                     s.sums = null;
 
                     if (options.verbose > 2)
+                    {
                         Log.WriteLine("sender finished " + fileName);
+                    }
                 }
                 options.makeBackups = saveMakeBackups;
 
                 if (options.verbose > 2)
+                {
                     Log.WriteLine("send files finished");
+                }
 
                 match.MatchReport(f);
                 f.writeInt(-1);
@@ -192,10 +212,14 @@ namespace NetSync
             s.sums = null;
 
             if (options.verbose > 3)
+            {
                 Log.WriteLine("count=" + s.count + " n=" + s.bLength + " rem=" + s.remainder);
+            }
 
             if (s.count == 0)
+            {
                 return s;
+            }
 
             s.sums = new SumBuf[s.count];
 
@@ -208,13 +232,19 @@ namespace NetSync
                 s.sums[i].flags = 0;
 
                 if (i == s.count - 1 && s.remainder != 0)
+                {
                     s.sums[i].len = s.remainder;
+                }
                 else
+                {
                     s.sums[i].len = s.bLength;
+                }
                 offset += (int)s.sums[i].len;
 
                 if (options.verbose > 3)
+                {
                     Log.WriteLine("chunk[" + i + "] len=" + s.sums[i].len);
+                }
             }
 
             s.fLength = offset;
@@ -227,7 +257,9 @@ namespace NetSync
             sum.count = f.readInt();
             sum.bLength = (UInt32)f.readInt();
             if (options.protocolVersion < 27)
+            {
                 sum.s2Length = checkSum.cSumLength;
+            }
             else
             {
                 sum.s2Length = f.readInt();
@@ -244,10 +276,14 @@ namespace NetSync
         {
             // TODO: path length
             if (!File.Exists("logo.ico"))
+            {
                 return;
+            }
 
             if (msg.Length > 64)
+            {
                 msg = msg.Substring(0, 60) + "...";
+            }
 
             icon.Icon = new Icon("logo.ico");
             icon.Text = msg;

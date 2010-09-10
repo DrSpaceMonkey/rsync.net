@@ -99,7 +99,7 @@ namespace NetSync
 
         public static string getpassf(string filename)
         {
-            return String.Empty;
+            return String.Empty; //@todo what is the goal of this method?
         }
 
         public static bool AuthServer(ClientInfo cInfo, int moduleNumber, string addr, string leader)

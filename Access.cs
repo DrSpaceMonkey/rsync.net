@@ -21,17 +21,30 @@ using System.Net.Sockets;
 
 namespace NetSync
 {
+    /// <summary>
+    /// Contains methods to check access rigth using ip or hostname
+    /// </summary>
     public class Access
     {
+        static int NS_INT16SZ = 2; //@todo why no a const?
+        static int NS_INADDRSZ = 4; //@todo why no a const?
+        static int NS_IN6ADDRSZ = 16; //@todo why no a const?
 
-        static int NS_INT16SZ = 2;
-        static int NS_INADDRSZ = 4;
-        static int NS_IN6ADDRSZ = 16;
-
+        /// <summary>
+        /// Just creates new instance of Access class
+        /// </summary>
         public Access()
         {
         }
 
+        /// <summary>
+        /// Checks whether 'addr' or 'host' is allowed
+        /// </summary>
+        /// <param name="addr">ip4 or ip6 address</param>
+        /// <param name="host">hostname</param>
+        /// <param name="allowList">pattern of allowed hosts</param>
+        /// <param name="denyList">pattern of denied hosts</param>
+        /// <returns></returns>
         public bool AllowAccess(string addr, string host, string allowList, string denyList)
         {
             if (allowList == null || allowList.CompareTo(String.Empty) == 0)
@@ -78,6 +91,13 @@ namespace NetSync
             return true;
         }
 
+        /// <summary>
+        /// Checks whether 'addr' or 'host' matches 'list' of patterns
+        /// </summary>
+        /// <param name="list">pattern string</param>
+        /// <param name="addr">ip4 or ip6 address</param>
+        /// <param name="host">hostname</param>
+        /// <returns></returns>
         protected bool AccessMatch(string list, string addr, string host)
         {
             char[] separators = { ' ', ',', '\t' };
@@ -101,6 +121,12 @@ namespace NetSync
             return false;
         }
 
+        /// <summary>
+        /// Checks whether 'host' matches pattern 'tok'
+        /// </summary>
+        /// <param name="host">hostname</param>
+        /// <param name="tok">pattern</param>
+        /// <returns>True if matched</returns>
         protected bool MatchHostname(string host, string tok)
         {
             if (host == null)
@@ -110,15 +136,19 @@ namespace NetSync
             return WildMatch.CheckWildMatch(tok, host);
         }
 
-
+        /// <summary>
+        /// Checks whether 'addr' matches pattern 'tok'
+        /// </summary>
+        /// <param name="addr">ip4 or ip6 address</param>
+        /// <param name="tok">pattern</param>
+        /// <returns>True if matched</returns>
         protected bool MatchAddress(string addr, string tok)
         {
-
             IPAddress ipaddr = null, iptok = null;
             string p = String.Empty;
             int len = 0, addrlen = 0;
             byte[] mask = new byte[16];
-            Int64 bits = 0;
+            Int64 bits = 0; //@todo Why int64, not int=int32?
 
             if (addr == null || addr.CompareTo(String.Empty) == 0)
             {
@@ -132,13 +162,13 @@ namespace NetSync
             }
             else
             {
-                len = tok.Length;
+                len = tok.Length; //@todo add 'p = tok;' to avoid empty address problem?
             }
 
             try
             {
                 ipaddr = IPAddress.Parse(addr);
-                iptok = IPAddress.Parse(p);
+                iptok = IPAddress.Parse(p); //@todo Check if there are some problems if tok is just ip without mask?
             }
             catch (Exception)
             {
@@ -179,7 +209,7 @@ namespace NetSync
             {
                 bits = 128;
             }
-
+            
             if (bits >= 0)
             {
                 MakeMask(mask, (int)bits, addrlen);
@@ -188,6 +218,12 @@ namespace NetSync
             return MatchBinary(ipaddr.ToString(), iptok.ToString(), mask, addrlen);
         }
 
+        /// <summary>
+        /// Makes mask from /xx syntax
+        /// </summary>
+        /// <param name="mask">here we put result</param>
+        /// <param name="plen">digits after / in address pattern</param>
+        /// <param name="addrlen"></param>
         protected void MakeMask(byte[] mask, int plen, int addrlen)
         {
             int w, b, i;
@@ -219,6 +255,14 @@ namespace NetSync
             return;
         }
 
+        /// <summary>
+        /// Checks whether b1 and b2 fit mask
+        /// </summary>
+        /// <param name="b1">ipv4 or ipv6 address</param>
+        /// <param name="b2">ipv4 or ipv6 address</param>
+        /// <param name="mask"></param>
+        /// <param name="addrlen"></param>
+        /// <returns>True if matched</returns>
         protected bool MatchBinary(string b1, string b2, byte[] mask, int addrlen)
         {
             int i;
@@ -234,6 +278,12 @@ namespace NetSync
             return true;
         }
 
+        /// <summary>
+        /// Convert string representation of mask to byte array
+        /// </summary>
+        /// <param name="af"></param>
+        /// <param name="src"></param>
+        /// <returns></returns>
         protected byte[] InetPton(AddressFamily af, string src)
         {
             if (af == AddressFamily.InterNetwork)
@@ -246,6 +296,11 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// Convert string representation of mask to byte array for ipv4 if possible
+        /// </summary>
+        /// <param name="src"></param>
+        /// <returns>null if parse failed, otherwise byte[] with mask</returns>
         protected byte[] InetPton4(string src)
         {
             string digits = "0123456789";
@@ -265,7 +320,7 @@ namespace NetSync
                 if ((pch = digits.IndexOf(ch)) >= 0)
                 {
                     byte dig = (byte)(res[pos] * 10 + pch);
-                    if (dig > 255)
+                    if (dig > 255) //@todo byte can't be > 255
                     {
                         return null;
                     }
@@ -300,6 +355,11 @@ namespace NetSync
             return res;
         }
 
+        /// <summary>
+        /// Convert string representation of mask to byte array for ipv6
+        /// </summary>
+        /// <param name="src"></param>
+        /// <returns>null if parse failed, otherwise byte[] with mask</returns>
         protected byte[] InetPton6(string src)
         {
             string xdigits = "0123456789abcdef";
