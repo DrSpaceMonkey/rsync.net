@@ -317,7 +317,7 @@ namespace NetSync
                     {
                         i = wantI;
                     }
-                set_want_i:
+                //set_want_i:
                     wantI = i + 1;
 
                     Matched(f, s, buf, offset, i, _sum);

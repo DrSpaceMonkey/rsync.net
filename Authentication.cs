@@ -25,6 +25,11 @@ namespace NetSync
     {
         public static string password_file = String.Empty;
 
+        /// <summary>
+        /// Encodes message, treated as ASCII, into base64 string
+        /// </summary>
+        /// <param name="message">ASCII string</param>
+        /// <returns></returns>
         public static string base64_encode(string message)
         {
             Encoding asciiEncoding = Encoding.ASCII;
@@ -33,6 +38,12 @@ namespace NetSync
             return Convert.ToBase64String(byteArray);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <param name="opt"></param>
+        /// <returns></returns>
         public static string gen_challenge(string addr, Options opt)
         {
             string challenge = String.Empty;
@@ -55,6 +66,13 @@ namespace NetSync
             return challenge;
         }
 
+        /// <summary>
+        /// Generate hash for passwords
+        /// </summary>
+        /// <param name="indata"></param>
+        /// <param name="challenge"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static string generate_hash(string indata, string challenge, Options options)
         {
             Sum sum = new Sum(options);
@@ -67,6 +85,14 @@ namespace NetSync
             return hash.Substring(0, (buf.Length * 8 + 5) / 6);
         }
 
+        /// <summary>
+        /// Client-side authorization request maker
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="pass"></param>
+        /// <param name="challenge"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static string auth_client(string user, string pass, string challenge, Options options)
         {
             if (String.Compare(user, String.Empty) == 0)
@@ -91,21 +117,38 @@ namespace NetSync
             return pass2;
         }
 
+        /// <summary>
+        /// Request a password from user by Console
+        /// </summary>
+        /// <returns></returns>
         public static string getpass()
         {
             Console.Write("Password: ");
             return Console.ReadLine();
         }
 
+        /// <summary>
+        /// Return String.Empty in any case
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static string getpassf(string filename)
         {
             return String.Empty; //@todo what is the goal of this method?
         }
 
+        /// <summary>
+        /// Server-side authorization check
+        /// </summary>
+        /// <param name="cInfo"></param>
+        /// <param name="moduleNumber"></param>
+        /// <param name="addr"></param>
+        /// <param name="leader"></param>
+        /// <returns></returns>
         public static bool AuthServer(ClientInfo cInfo, int moduleNumber, string addr, string leader)
         {
             string users = Daemon.config.GetAuthUsers(moduleNumber).Trim();
-            string challenge;
+            //string challenge;
             string b64_challenge;
             IOStream f = cInfo.IoStream;
             string line;
@@ -124,9 +167,9 @@ namespace NetSync
                 return true;
             }
 
-            challenge = gen_challenge(addr, cInfo.Options);
+            //challenge = gen_challenge(addr, cInfo.Options); //@todo if challenge is used only once why not remove it?
 
-            b64_challenge = base64_encode(challenge);
+            b64_challenge = base64_encode(gen_challenge(addr, cInfo.Options));
 
             f.IOPrintf(leader + b64_challenge + "\n");
 
@@ -172,17 +215,22 @@ namespace NetSync
             return false;
         }
 
+        /// <summary>
+        /// Gets secret for given Module(by module number) and user
+        /// </summary>
+        /// <param name="moduleNumber"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         static string GetSecret(int moduleNumber, string user)
         {
-            string fname = Path.Combine(Environment.SystemDirectory, Daemon.config.GetSecretsFile(moduleNumber));
-            string secret = null;
-
-            if (fname == null || fname.CompareTo(String.Empty) == 0)
-            {
-                return null;
-            }
+            //if (fname == null || fname.CompareTo(String.Empty) == 0) //@todo Why check if next there is a try/catch and also Path.combine won't return null or emprty string
+            //{
+            //    return null;
+            //}
             try
             {
+                string fname = Path.Combine(Environment.SystemDirectory, Daemon.config.GetSecretsFile(moduleNumber));
+                string secret = null;
                 using (var fd = new System.IO.StreamReader(fname))
                 {
                     while (true)

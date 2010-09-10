@@ -26,9 +26,9 @@ namespace NetSync
     /// </summary>
     public class Access
     {
-        static int NS_INT16SZ = 2; //@todo why no a const?
-        static int NS_INADDRSZ = 4; //@todo why no a const?
-        static int NS_IN6ADDRSZ = 16; //@todo why no a const?
+        private const int NS_INT16SZ = 2; //changed to a const
+        private const int NS_INADDRSZ = 4; //changed to a const
+        private const int NS_IN6ADDRSZ = 16; //changet to a const
 
         /// <summary>
         /// Just creates new instance of Access class
@@ -148,7 +148,7 @@ namespace NetSync
             string p = String.Empty;
             int len = 0, addrlen = 0;
             byte[] mask = new byte[16];
-            Int64 bits = 0; //@todo Why int64, not int=int32?
+            int bits = 0; //changet to int?
 
             if (addr == null || addr.CompareTo(String.Empty) == 0)
             {
@@ -162,13 +162,14 @@ namespace NetSync
             }
             else
             {
-                len = tok.Length; //@todo add 'p = tok;' to avoid empty address problem?
+                len = tok.Length;
+                p = tok;
             }
 
             try
             {
                 ipaddr = IPAddress.Parse(addr);
-                iptok = IPAddress.Parse(p); //@todo Check if there are some problems if tok is just ip without mask?
+                iptok = IPAddress.Parse(p);
             }
             catch (Exception)
             {
@@ -193,7 +194,7 @@ namespace NetSync
                 if ((mask = InetPton(iptok.AddressFamily, tok.Substring(pos + 1, tok.Length - pos - 1))) == null)
                 {
                     mask = new byte[16];
-                    bits = Convert.ToInt64(tok.Substring(pos + 1));
+                    bits = Convert.ToInt32(tok.Substring(pos + 1)); //changed conversion from 64 to 32
                     if (bits == 0)
                     {
                         return true;
@@ -320,10 +321,10 @@ namespace NetSync
                 if ((pch = digits.IndexOf(ch)) >= 0)
                 {
                     byte dig = (byte)(res[pos] * 10 + pch);
-                    if (dig > 255) //@todo byte can't be > 255
-                    {
-                        return null;
-                    }
+                    //if (dig > 255) //useless because byte can't be > 255
+                    //{
+                    //    return null;
+                    //}
                     res[pos] = dig;
                     if (!saw_digit)
                     {

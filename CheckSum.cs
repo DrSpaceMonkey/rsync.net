@@ -20,6 +20,9 @@ using System.IO;
 
 namespace NetSync
 {
+    /// <summary>
+    /// 
+    /// </summary>
     class CheckSum
     {
         private Options options;
@@ -140,6 +143,10 @@ namespace NetSync
 
         }
     }
+
+    /// <summary>
+    /// Calculates MD4
+    /// </summary>
     public class MDFour
     {
         public const UInt32 MASK32 = 0xFFFFFFFF;
@@ -360,6 +367,9 @@ namespace NetSync
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class Sum
     {
         public int sumResidue;

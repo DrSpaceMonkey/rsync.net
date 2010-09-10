@@ -60,7 +60,8 @@ namespace NetSync
         {
             string remoteAddr = Client.RemoteEndPoint.ToString();
             remoteAddr = remoteAddr.Substring(0, remoteAddr.IndexOf(':'));
-            string remoteHost = Dns.GetHostByAddress(IPAddress.Parse(remoteAddr)).HostName;
+            //string remoteHost = Dns.GetHostByAddress(IPAddress.Parse(remoteAddr)).HostName;
+            string remoteHost = Dns.GetHostEntry(IPAddress.Parse(remoteAddr)).HostName;
             ClientInfo.Options.remoteAddr = remoteAddr;
             ClientInfo.Options.remoteHost = remoteHost;
 

@@ -21,6 +21,9 @@ using System.IO;
 
 namespace NetSync
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Configuration
     {
         private string confFile;
@@ -30,11 +33,20 @@ namespace NetSync
         public string port;
         public string address;
 
+        /// <summary>
+        /// Creates new instance and sets confFile to system.directory + cFile
+        /// </summary>
+        /// <param name="cFile"></param>
         public Configuration(string cFile)
         {
             confFile = Path.Combine(Environment.SystemDirectory, Path.GetFileName(cFile));
         }
 
+        /// <summary>
+        /// Finds number of module using its name
+        /// </summary>
+        /// <param name="nameModule"></param>
+        /// <returns></returns>
         public int GetNumberModule(string nameModule)
         {
             lock (this)
@@ -50,6 +62,11 @@ namespace NetSync
             return -1;
         }
 
+        /// <summary>
+        /// Get Module by its number from list od Modules
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public Module GetModule(int numberModule)
         {
             lock (this)
@@ -62,6 +79,11 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// Finds name of module using its number
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public string GetModuleName(int numberModule)
         {
             lock (this)
@@ -70,54 +92,89 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// Checks whether Module, located at given number, is ReadOnly
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public bool ModuleIsReadOnly(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).ReadOnly;
+                return GetModule(numberModule).ReadOnly; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// Checks whether Module, located at given number, is WriteOnly
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public bool ModuleIsWriteOnly(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).WriteOnly;
+                return GetModule(numberModule).WriteOnly; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// Gets string, which contains allowed hosts for Module, located at given number
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public string GetHostsAllow(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).HostsAllow;
+                return GetModule(numberModule).HostsAllow; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// Gets string, which contains denied hosts for Module, located at given number
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public string GetHostsDeny(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).HostsDeny;
+                return GetModule(numberModule).HostsDeny; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// Gets string of allowed users for Module, located at given number
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public string GetAuthUsers(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).AuthUsers;
+                return GetModule(numberModule).AuthUsers; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// Get name of secret file for Module, located at given number
+        /// </summary>
+        /// <param name="numberModule"></param>
+        /// <returns></returns>
         public string GetSecretsFile(int numberModule)
         {
             lock (this)
             {
-                return GetModule(numberModule).SecretsFile;
+                return GetModule(numberModule).SecretsFile; //@todo GetModule may return null and thus nullref exception
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public bool LoadParm(Options options)
         {
             lock (this)

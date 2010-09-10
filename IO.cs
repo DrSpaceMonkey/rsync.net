@@ -419,14 +419,14 @@ namespace NetSync
             byte data;
             byte[] tmp = ReadBuf(1);
             data = tmp[0];
-            if (data == -1)
-            {
-                throw new Exception("Can't read from Stream");
-            }
-            else
-            {
-                return Convert.ToByte(data);
-            }
+            //if (data == -1) //because data is byte which can only be [0, 255]
+            //{
+            //    throw new Exception("Can't read from Stream");
+            //}
+            //else
+            //{
+            return Convert.ToByte(data);
+            //}
         }
 
         public Int64 ReadLongInt()
