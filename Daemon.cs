@@ -234,7 +234,7 @@ namespace NetSync
                 return;
             }
 
-            if (options.relativePaths == 0 && !Util.pushDir(dir))
+            if (!options.relativePaths && !Util.pushDir(dir))
             {
                 MainClass.Exit("push_dir#3 " + dir + "failed", cInfo);
                 return;

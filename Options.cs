@@ -199,10 +199,10 @@ namespace NetSync
                             break;
                         case "--relative":
                         case "-R":
-                            options.relativePaths = 1;
+                            options.relativePaths = true;
                             break;
                         case "--no-relative":
-                            options.relativePaths = 0;
+                            options.relativePaths = false;
                             break;
                         case "--rsh":
                         case "-e":
@@ -354,7 +354,7 @@ namespace NetSync
         public Int64 totalRead = 0;
         public Int64 literalData = 0;
         public Int64 matchedData = 0;
-        public int flistSize = 0;
+        public int fileListSize = 0;
         public int numFiles = 0;
         public int numTransferredFiles = 0;
         public int currentFileIndex = 0;
@@ -370,6 +370,9 @@ namespace NetSync
         }
         public static System.DateTime lastIO = System.DateTime.MinValue;
         //public static System.IO.StreamReader filesFromFD = null;
+        /// <summary>
+        /// Seems to be null all the time
+        /// </summary>
         public static System.IO.Stream filesFromFD = null;
         public static Stats stats = new Stats();
         public const string URL_PREFIX = "rsync://";
@@ -468,7 +471,7 @@ namespace NetSync
         public int verbose = 0;
         public int quiet = 0;
         public bool amSender = false;
-        public int relativePaths = -1;
+        public bool relativePaths = true; //changed to bool and set true as init value
         public string shellCmd = null;
         public int blockSize = 0;
         public int maxDelete = 0;

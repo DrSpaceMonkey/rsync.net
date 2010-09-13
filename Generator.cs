@@ -23,7 +23,7 @@ namespace NetSync
 {
     public class Generator
     {
-        public const int BLOCKSUM_BIAS = 10;
+        private const int BLOCKSUM_BIAS = 10;
         private Options options;
         private CheckSum checkSum;
 
@@ -70,7 +70,7 @@ namespace NetSync
                 {
                     continue;
                 }
-                ReceiveGenerator(localName != null ? localName : file.FNameTo(), file, i, f);
+                ReceiveGenerator(localName != null ? localName : file.GetFullName(), file, i, f);
             }
 
             phase++;
@@ -104,7 +104,7 @@ namespace NetSync
                 {
                     continue;
                 }
-                ReceiveGenerator(localName != null ? localName : file.FNameTo(), file, i, null);
+                ReceiveGenerator(localName != null ? localName : file.GetFullName(), file, i, null);
             }
 
             if (options.verbose > 2)

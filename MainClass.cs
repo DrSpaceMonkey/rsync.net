@@ -34,9 +34,9 @@ namespace NetSync
 
     public class MainClass
     {
-        const string BACKUP_SUFFIX = "~";
-        const string RSYNC_NAME = "rsync";
-        const string RSYNC_VERSION = "1.0";
+        private const string BACKUP_SUFFIX = "~";
+        private const string RSYNC_NAME = "rsync";
+        private const string RSYNC_VERSION = "1.0";
         public static Options opt;
 
         public void Run(string[] args)
@@ -110,7 +110,7 @@ namespace NetSync
                 Log.WriteLine("Total transferred file size: " + Options.stats.totalTransferredSize);
                 Log.WriteLine("Literal data: " + Options.stats.literalData);
                 Log.WriteLine("Matched data: " + Options.stats.matchedData);
-                Log.WriteLine("File list size: " + Options.stats.flistSize);
+                Log.WriteLine("File list size: " + Options.stats.fileListSize);
                 Log.WriteLine("Total bytes written: " + totalWritten);
                 Log.WriteLine("Total bytes received: " + totalRead);
             }
@@ -152,7 +152,7 @@ namespace NetSync
                     options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                     host = host.Substring(0, host.IndexOf(':'));
                 }
-                string[] newArgs = (string[])Util.ArrayDeleteFirstElement(args);
+                string[] newArgs = (string[])Util.DeleteFirstElement(args);
                 return StartSocketClient(host, path, user, newArgs, cInfo);
             }
 
@@ -195,7 +195,7 @@ namespace NetSync
                         options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                         host = host.Substring(0, host.IndexOf(':'));
                     }
-                    string[] newArgs = (string[])Util.ArrayDeleteLastElement(args);
+                    string[] newArgs = (string[])Util.DeleteLastElement(args);
                     return StartSocketClient(host, path, user, newArgs, cInfo);
                 }
                 p = Util.FindColon(args[args.Length - 1]);

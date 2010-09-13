@@ -129,7 +129,7 @@ namespace NetSync
             return index;
         }
 
-        public static object[] ArrayDeleteLastElement(object[] x)
+        public static object[] DeleteLastElement(object[] x)
         {
             object[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
@@ -139,7 +139,7 @@ namespace NetSync
             return y;
         }
 
-        public static object[] ArrayDeleteFirstElement(object[] x)
+        public static object[] DeleteFirstElement(object[] x)
         {
             object[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
@@ -161,11 +161,19 @@ namespace NetSync
             return 0;
         }
 
-        public static void MemCpy(byte[] arr1, int off1, byte[] arr2, int off2, int length)
+        /// <summary>
+        /// Copies 'length' bytes from 'source' starting at 'sourceOffset' to 'dest' starting at 'destOffset'
+        /// </summary>
+        /// <param name="dest"></param>
+        /// <param name="destOffset"></param>
+        /// <param name="source"></param>
+        /// <param name="sourceOffset"></param>
+        /// <param name="length"></param>
+        public static void MemCpy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
         {
             for (int i = 0; i < length; i++)
             {
-                arr1[off1 + i] = arr2[off2 + i];
+                dest[destOffset + i] = source[sourceOffset + i];
             }
         }
 

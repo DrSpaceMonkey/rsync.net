@@ -53,11 +53,11 @@ namespace NetSync
             return ret;
         }
 
-        public int ReceiveFiles(ClientInfo cInfo, List<FileStruct> fileList, string localName)
+        public int ReceiveFiles(ClientInfo clientInfo, List<FileStruct> fileList, string localName)
         {
             FStat st = new FStat();
             FileStruct file;
-            IOStream f = cInfo.IoStream;
+            IOStream ioStream = clientInfo.IoStream;
 
             string fileName;
             string fNameCmp = String.Empty, fNameTmp = String.Empty;
@@ -71,7 +71,7 @@ namespace NetSync
             }
             while (true)
             {
-                i = f.readInt();
+                i = ioStream.readInt();
                 if (i == -1)
                 {
                     if (phase != 0)
@@ -85,7 +85,7 @@ namespace NetSync
                     {
                         Log.WriteLine("ReceiveFiles phase=" + phase);
                     }
-                    f.writeInt(0); //send_msg DONE
+                    ioStream.writeInt(0); //send_msg DONE
                     if (options.keepPartial)
                     {
                         options.makeBackups = false;
@@ -95,7 +95,7 @@ namespace NetSync
 
                 if (i < 0 || i >= fileList.Count)
                 {
-                    MainClass.Exit("Invalid file index " + i + " in receiveFiles (count=" + fileList.Count + ")", cInfo);
+                    MainClass.Exit("Invalid file index " + i + " in receiveFiles (count=" + fileList.Count + ")", clientInfo);
                 }
 
                 file = (fileList[i]);
@@ -110,10 +110,10 @@ namespace NetSync
                 }
                 else
                 {
-                    fileName = Path.Combine(options.dir, LocalizePath(cInfo, file.FNameTo().Replace(":", String.Empty)).Replace("\\", "/"));
+                    fileName = Path.Combine(options.dir, LocalizePath(clientInfo, file.GetFullName().Replace(":", String.Empty)).Replace("\\", "/"));
                     //fileName = Path.Combine(options.dir, file.FNameTo().Replace(":",String.Empty)).Replace("\\", "/");
                     // TODO: path length
-                    Directory.CreateDirectory(Path.Combine(options.dir, LocalizePath(cInfo, file.dirName.Replace(":", String.Empty))).Replace("\\", "/"));
+                    Directory.CreateDirectory(Path.Combine(options.dir, LocalizePath(clientInfo, file.dirName.Replace(":", String.Empty))).Replace("\\", "/"));
                     Log.WriteLine(Path.Combine(options.dir, file.dirName));
                     //FileSystem.Directory.CreateDirectory(Path.Combine(options.dir,file.dirName.Replace(":",String.Empty)).Replace("\\", "/"));
                 }
@@ -178,7 +178,7 @@ namespace NetSync
                 }
 
                 /* recv file data */
-                recv_ok = ReceiveData(cInfo, fNameCmp, fd1, st.size,
+                recv_ok = ReceiveData(clientInfo, fNameCmp, fd1, st.size,
                             fileName, fd2, file.length);
 
                 if (fd1 != null)
@@ -403,7 +403,7 @@ namespace NetSync
                 {
                     continue;
                 }
-                argv[0] = options.dir + (fileList[j]).FNameTo();
+                argv[0] = options.dir + (fileList[j]).GetFullName();
                 FileList fList = new FileList(options);
                 if ((localFileList = fList.sendFileList(null, argv)) == null)
                 {
@@ -419,7 +419,7 @@ namespace NetSync
                     if (FileList.fileListFind(fileList, (localFileList[i])) < 0)
                     {
                         (localFileList[i]).dirName = options.dir + (localFileList[i]).dirName;
-                        deleteOne((localFileList[i]).FNameTo(), Util.S_ISDIR((localFileList[i]).mode));
+                        deleteOne((localFileList[i]).GetFullName(), Util.S_ISDIR((localFileList[i]).mode));
                     }
                 }
             }

@@ -90,8 +90,8 @@ namespace NetSync
                             fileName += "/";
                         }
                     }
-                    fileName2 = file.FNameTo();
-                    fileName += file.FNameTo();
+                    fileName2 = file.GetFullName();
+                    fileName += file.GetFullName();
                     ShowMessage("uploading " + fileName);
 
                     if (options.verbose > 2)

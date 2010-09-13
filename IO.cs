@@ -60,30 +60,73 @@ namespace NetSync
         /// <param name="f"></param>
         public IOStream(Stream f)
         {
-            IOSetSocketFds(f, f);
+            IOSetSocketFields(f, f);
             IOBufInSize = 2 * IO_BUFFER_SIZE;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="len"></param>
         public void CalculationTotalWritten(int len)
         {
             Options.stats.totalWritten += len;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="len"></param>
         public void CalculationTotalRead(int len)
         {
             Options.stats.totalRead += len;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         public UInt32 IVAL(byte[] b, int offset)
         {
             return (UInt32)(b[offset] + (b[offset + 1] << 8) + (b[offset + 2] << 16) + (b[offset + 3] << 24));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="offset"></param>
+        /// <param name="len"></param>
         public void Write(byte[] buf, int offset, int len)
         {
             try
             {
-                WriteFD(buf, offset, len);
+                //WriteFD(buf, offset, len);
+                if (IOBufOut == null)
+                {
+                    sockOut.Write(buf, offset, len);
+                    return;
+                }
+
+                int off = 0;
+                while (len > 0)
+                {
+                    int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
+                    if (n > 0)
+                    {
+                        Util.MemCpy(IOBufOut, IOBufOutCount, buf, offset + off, n);
+                        off += n;
+                        len -= n;
+                        IOBufOutCount += n;
+                    }
+
+                    if (IOBufOutCount == IO_BUFFER_SIZE)
+                    {
+                        Flush();
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -92,36 +135,40 @@ namespace NetSync
             CalculationTotalWritten(len);
         }
 
+        //public void WriteFD(byte[] buf, int offset, int len)
+        //{
 
-        public void WriteFD(byte[] buf, int offset, int len)
-        {
+        //    if (IOBufOut == null)
+        //    {
+        //        sockOut.Write(buf, offset, len);
+        //        return;
+        //    }
 
-            if (IOBufOut == null)
-            {
-                sockOut.Write(buf, offset, len);
-                return;
-            }
+        //    int off = 0;
+        //    while (len > 0)
+        //    {
+        //        int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
+        //        if (n > 0)
+        //        {
+        //            Util.MemCpy(IOBufOut, IOBufOutCount, buf, offset + off, n);
+        //            off += n;
+        //            len -= n;
+        //            IOBufOutCount += n;
+        //        }
 
-            int off = 0;
-            while (len > 0)
-            {
-                int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
-                if (n > 0)
-                {
-                    Util.MemCpy(IOBufOut, IOBufOutCount, buf, offset + off, n);
-                    off += n;
-                    len -= n;
-                    IOBufOutCount += n;
-                }
+        //        if (IOBufOutCount == IO_BUFFER_SIZE)
+        //        {
+        //            Flush();
+        //        }
+        //    }
+        //}
 
-                if (IOBufOutCount == IO_BUFFER_SIZE)
-                {
-                    Flush();
-                }
-            }
-        }
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="buf"></param>
+        /// <param name="len"></param>
         public void MplexWrite(MsgCode code, byte[] buf, int len)
         {
             byte[] buffer = new byte[4096];
@@ -144,6 +191,9 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Flush()
         {
             if (IOBufOutCount == 0 || noFlush)
@@ -162,7 +212,10 @@ namespace NetSync
             IOBufOutCount = 0;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
         public void writeInt(int x)
         {
             byte[] arr = new byte[4];
@@ -173,6 +226,10 @@ namespace NetSync
             Write(arr, 0, 4);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
         public void writeUInt(UInt32 x)
         {
             byte[] arr = new byte[4];
@@ -183,6 +240,10 @@ namespace NetSync
             Write(arr, 0, 4);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="val"></param>
         public void writeByte(byte val)
         {
             byte[] data = new byte[1];
@@ -190,6 +251,10 @@ namespace NetSync
             Write(data, 0, 1);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
         public void WriteLongInt(Int64 x)
         {
             byte[] b = new byte[8];
@@ -272,7 +337,7 @@ namespace NetSync
         /// </summary>
         /// <param name="inSock"></param>
         /// <param name="outSock"></param>
-        public void IOSetSocketFds(Stream inSock, Stream outSock)
+        public void IOSetSocketFields(Stream inSock, Stream outSock)
         {
             sockIn = inSock;
             sockOut = outSock;
@@ -288,10 +353,6 @@ namespace NetSync
             while (true)
             {
                 byte readAByte = readByte();
-                //if (readAByte == -1)
-                //{
-                //    return data.ToString();
-                //}
                 char read = Convert.ToChar(readAByte);
                 if (read != '\r')
                 {
@@ -302,10 +363,14 @@ namespace NetSync
                     break;
                 }
             }
-
             return data.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="len"></param>
+        /// <returns></returns>
         public string ReadSBuf(int len)
         {
             byte[] data = new byte[len];
@@ -313,6 +378,11 @@ namespace NetSync
             return ASCIIEncoding.ASCII.GetString(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="len"></param>
+        /// <returns></returns>
         public byte[] ReadBuf(int len)
         {
             byte[] data = new byte[len];
@@ -340,7 +410,11 @@ namespace NetSync
             return data;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="len"></param>
         public void ReadLoop(byte[] data, int len)
         {
             int off = 0;
@@ -353,6 +427,13 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="off"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
         public int ReadfdUnbuffered(byte[] data, int off, int len)
         {
             int tag, ret = 0;
@@ -421,8 +502,10 @@ namespace NetSync
             return ret;
         }
 
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int readInt()
         {
             byte[] arr = new byte[4];
@@ -430,6 +513,10 @@ namespace NetSync
             return arr[0] + (arr[1] << 8) + (arr[2] << 16) + (arr[3] << 24);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte readByte()
         {
             byte data;
@@ -441,10 +528,14 @@ namespace NetSync
             //}
             //else
             //{
-            return Convert.ToByte(data);
+            return data;
             //}
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public Int64 ReadLongInt()
         {
             Int64 ret;
@@ -462,7 +553,9 @@ namespace NetSync
             return ret;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOStartMultiplexIn()
         {
             Flush();
@@ -470,11 +563,17 @@ namespace NetSync
             IOMultiplexingIn = true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOCloseMultiplexIn()
         {
             IOMultiplexingIn = false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOStartMultiplexOut()
         {
             Flush();
@@ -482,11 +581,17 @@ namespace NetSync
             IOMultiplexingOut = true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOCloseMultiplexOut()
         {
             IOMultiplexingOut = false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOStartBufferingIn()
         {
             if (IOBufIn != null)
@@ -497,7 +602,9 @@ namespace NetSync
             IOBufIn = new byte[IOBufInSize];
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOEndBuffering()
         {
             Flush();
@@ -508,7 +615,9 @@ namespace NetSync
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void IOStartBufferingOut()
         {
             if (IOBufOut != null)
@@ -519,6 +628,9 @@ namespace NetSync
             IOBufOutCount = 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Close()
         {
             sockIn.Close();

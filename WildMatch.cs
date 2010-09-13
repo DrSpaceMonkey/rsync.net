@@ -22,27 +22,39 @@ namespace NetSync
     public class WildMatch
     {
 
-        static int ABORT_ALL = -1;
-        static int ABORT_TO_STARSTAR = -2;
-        static Char NEGATE_CLASS = '!';
+        private const int ABORT_ALL = -1; //@todo to const
+        private const int ABORT_TO_STARSTAR = -2; //@todo to const
+        private const Char NEGATE_CLASS = '!'; //@todo to const?
 
-        /* Find the pattern (pattern) in the text string (text). */
+        /// <summary>
+        /// Find the pattern (pattern) in the text string (text).
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public static bool CheckWildMatch(string pattern, string text)
         {
             return DoMatch(pattern, text) == 1;
         }
 
-        public static bool CC_EQ(string cclass, string litmatch)
+        //public static bool CC_EQ(string cclass, string litmatch) //@todo remove it and use Equals
+        //{
+        //    return cclass.CompareTo(litmatch) == 0;
+        //}
+
+        /// <summary>
+        /// Perfoms match of text and pattern
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        private static int DoMatch(string pattern, string text)
         {
-            return cclass.CompareTo(litmatch) == 0;
-        }
-        private static int DoMatch(string p, string text)
-        {
-            int matched, special;
+            int matched, special; // They have both to be int just because DoMatch can return -1 and -2
             Char ch, prev;
-            for (int k = 0; k < p.Length; k++)
+            for (int k = 0; k < pattern.Length; k++)
             {
-                ch = p[k];
+                ch = pattern[k];
                 if (k > 0)
                 {
                     if (text.Length > 1)
@@ -59,7 +71,7 @@ namespace NetSync
                     case '\\':
                         /* Literal match with following character.  Note that the test
                         * in "default" handles the p[1] == '\0' failure case. */
-                        ch = p[++k];
+                        ch = pattern[++k];
                         /* FALLTHROUGH */
                         goto default;
                     default:
@@ -76,11 +88,11 @@ namespace NetSync
                         }
                         continue;
                     case '*':
-                        if (k + 1 < p.Length)
+                        if (k + 1 < pattern.Length)
                         {
-                            if (p[++k] == '*')
+                            if (pattern[++k] == '*')
                             {
-                                while (p[++k] == '*')
+                                while (pattern[++k] == '*')
                                 {
                                 }
                                 special = 1;
@@ -94,15 +106,15 @@ namespace NetSync
                         {
                             special = 0;
                         }
-                        if (p[k] == '\0')
+                        if (pattern[k] == '\0')
                         {
                             return (special == 1) ? 1 : (text.IndexOf('/') == -1 ? 0 : 1);
                         }
-                        if (p.CompareTo("*") == 0)
+                        if (pattern.Equals("*"))
                         {
                             text = text.Substring(1);
                         }
-                        string r = p.Substring(k);
+                        string r = pattern.Substring(k);
                         for (int t = 0; t < text.Length; )
                         {
                             if ((matched = DoMatch(r, text)) != 0)
@@ -126,20 +138,20 @@ namespace NetSync
                         if (special == 1)
                         {
                             /* Inverted character class. */
-                            ch = p[++k];
+                            ch = pattern[++k];
                         }
                         prev = Char.MinValue;
                         matched = 0;
                         do
                         {
-                            if (k >= p.Length)
+                            if (k >= pattern.Length)
                             {
                                 return ABORT_ALL;
                             }
                             if (ch == '\\')
                             {
-                                ch = p[++k];
-                                if (k > p.Length)
+                                ch = pattern[++k];
+                                if (k > pattern.Length)
                                 {
                                     return ABORT_ALL;
                                 }
@@ -148,13 +160,13 @@ namespace NetSync
                                     matched = 1;
                                 }
                             }
-                            else if (ch == '-' && prev != Char.MinValue && p.Length - k > 1 && p[1] != ']')
+                            else if (ch == '-' && prev != Char.MinValue && pattern.Length - k > 1 && pattern[1] != ']')
                             {
-                                ch = p[++k];
+                                ch = pattern[++k];
                                 if (ch == '\\')
                                 {
-                                    ch = p[++k];
-                                    if (k >= p.Length)
+                                    ch = pattern[++k];
+                                    if (k >= pattern.Length)
                                     {
                                         return ABORT_ALL;
                                     }
@@ -165,20 +177,20 @@ namespace NetSync
                                 }
                                 ch = Char.MinValue; /* This makes "prev" get set to 0. */
                             }
-                            else if (ch == '[' && p[k] == ':')
+                            else if (ch == '[' && pattern[k] == ':')
                             {
                                 int j = 0;
-                                ch = p[k + j + 1];
-                                while (p.Length > k + 1 + j && ch != ']')
+                                ch = pattern[k + j + 1];
+                                while (pattern.Length > k + 1 + j && ch != ']')
                                 {
                                     j++;
-                                    ch = p[k + 1 + j];
+                                    ch = pattern[k + 1 + j];
                                 }
-                                if (k + 1 >= p.Length)
+                                if (k + 1 >= pattern.Length)
                                 {
                                     return ABORT_ALL;
                                 }
-                                if (j == 0 || p[k + j] != ':')
+                                if (j == 0 || pattern[k + j] != ':')
                                 {
                                     /* Didn't find ":]", so treat like a normal set. */
                                     ch = '[';
@@ -192,64 +204,64 @@ namespace NetSync
                                 {
                                     k += j;
                                 }
-                                string s = p.Substring(k - j + 1, j - 1);
-                                if (CC_EQ(s, "alnum"))
+                                string s = pattern.Substring(k - j + 1, j - 1);
+                                if (s.Equals("alnum"))
                                 {
                                     if (Char.IsLetterOrDigit(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "alpha"))
+                                else if (s.Equals("alpha"))
                                 {
                                     if (Char.IsLetter(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "blank"))
+                                else if (s.Equals("blank"))
                                 {
                                     if (Char.IsWhiteSpace(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "digit"))
+                                else if (s.Equals("digit"))
                                 {
                                     if (Char.IsDigit(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "lower"))
+                                else if (s.Equals("lower"))
                                 {
                                     if (Char.IsLower(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "punct"))
+                                else if (s.Equals("punct"))
                                 {
                                     if (Char.IsPunctuation(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "space"))
+                                else if (s.Equals("space"))
                                 {
                                     if (Char.IsWhiteSpace(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "upper"))
+                                else if (s.Equals("upper"))
                                 {
                                     if (Char.IsUpper(text[0]))
                                     {
                                         matched = 1;
                                     }
                                 }
-                                else if (CC_EQ(s, "xdigit"))
+                                else if (s.Equals("xdigit"))
                                 {
                                     if (Char.IsSurrogate(text[0]))
                                     {
@@ -267,7 +279,7 @@ namespace NetSync
                                 matched = 1;
                             }
                             prev = ch;
-                        } while ((ch = p[++k]) != ']');
+                        } while ((ch = pattern[++k]) != ']');
                         if (matched == special || text[0] == '/')
                         {
                             return 0;
