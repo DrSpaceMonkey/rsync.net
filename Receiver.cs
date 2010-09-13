@@ -329,7 +329,7 @@ namespace NetSync
             {
                 Log.WriteLine("got fileSum");
             }
-            if (fd != null && Util.MemCmp(file_sum1, 0, file_sum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
+            if (fd != null && Util.MemCompare(file_sum1, 0, file_sum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
             {
                 return false;
             }

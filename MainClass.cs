@@ -152,7 +152,7 @@ namespace NetSync
                     options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                     host = host.Substring(0, host.IndexOf(':'));
                 }
-                string[] newArgs = (string[])Util.DeleteFirstElement(args);
+                string[] newArgs = Util.DeleteFirstElement(args);
                 return StartSocketClient(host, path, user, newArgs, cInfo);
             }
 
@@ -195,7 +195,7 @@ namespace NetSync
                         options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                         host = host.Substring(0, host.IndexOf(':'));
                     }
-                    string[] newArgs = (string[])Util.DeleteLastElement(args);
+                    string[] newArgs = Util.DeleteLastElement(args);
                     return StartSocketClient(host, path, user, newArgs, cInfo);
                 }
                 p = Util.FindColon(args[args.Length - 1]);

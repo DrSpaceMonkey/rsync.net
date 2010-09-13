@@ -303,7 +303,7 @@ namespace NetSync
                         doneCsum2 = true;
                     }
 
-                    if (Util.MemCmp(sum2, 0, s.sums[i].sum2, 0, s.s2Length) != 0)
+                    if (Util.MemCompare(sum2, 0, s.sums[i].sum2, 0, s.s2Length) != 0)
                     {
                         falseAlarms++;
                         continue;
@@ -313,7 +313,7 @@ namespace NetSync
                         && (!options.inplace || options.makeBackups || s.sums[wantI].offset >= offset
                         || (s.sums[wantI].flags & SUMFLG_SAME_OFFSET) != 0)
                         && sum == s.sums[wantI].sum1
-                        && Util.MemCmp(sum2, 0, s.sums[wantI].sum2, 0, s.s2Length) == 0)
+                        && Util.MemCompare(sum2, 0, s.sums[wantI].sum2, 0, s.s2Length) == 0)
                     {
                         i = wantI;
                     }

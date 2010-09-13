@@ -141,7 +141,7 @@ namespace NetSync
                         break;
                     }
                     fileName = argv[0];
-                    argv = (string[])Util.DeleteFirstElement(argv);
+                    argv = Util.DeleteFirstElement(argv);
                     if (fileName != null && fileName.Equals("."))
                     {
                         continue;

@@ -116,7 +116,7 @@ namespace NetSync
                     int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
                     if (n > 0)
                     {
-                        Util.MemCpy(IOBufOut, IOBufOutCount, buf, offset + off, n);
+                        Util.MemCopy(IOBufOut, IOBufOutCount, buf, offset + off, n);
                         off += n;
                         len -= n;
                         IOBufOutCount += n;
@@ -181,7 +181,7 @@ namespace NetSync
                 n = buffer.Length - 4;
             }
 
-            Util.MemCpy(buffer, 4, buf, 0, n);
+            Util.MemCopy(buffer, 4, buf, 0, n);
             sockOut.Write(buffer, 0, n + 4);
 
             len -= n;
@@ -456,7 +456,7 @@ namespace NetSync
                 if (remaining != 0)
                 {
                     len = Math.Min(len, remaining);
-                    Util.MemCpy(data, off, IOBufIn, IOBufInIndex, len);
+                    Util.MemCopy(data, off, IOBufIn, IOBufInIndex, len);
                     IOBufInIndex += len;
                     remaining -= len;
                     ret = len;

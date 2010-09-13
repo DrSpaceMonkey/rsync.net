@@ -84,21 +84,21 @@ namespace NetSync
         public static string fullFileName(string fileName)
         {
             //...Safe FileName
-            if (fileName.IndexOf(':') != -1 || fileName.StartsWith("\\\\"))
+            if (fileName.IndexOf(':') != -1 || fileName.StartsWith(@"\\"))
             {
                 return fileName;	//absolute
             }
             else
             {
-                return currDir + '\\' + fileName;	//relative
+                return currDir + @"\" + fileName;	//relative
             }
             //...modules
         }
 
         public static string cleanFileName(string fileName, bool collapseDotDot)
         {
-            string cleanedName = fileName.Replace("\\\\", "\\");
-            if (cleanedName.EndsWith("\\"))
+            string cleanedName = fileName.Replace(@"\\", @"\");
+            if (cleanedName.EndsWith(@"\"))
             {
                 cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
             }
@@ -109,11 +109,21 @@ namespace NetSync
             return cleanedName;
         }
 
+        /// <summary>
+        /// Returns "<NULL>", if 's' is null, otherwise returns 's' itself
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static string NS(string s)
         {
             return s == null ? "<NULL>" : s;
         }
 
+        /// <summary>
+        /// Find position of ":" taking into account "/"
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static int FindColon(string s)
         {
             int index = s.IndexOf(":");
@@ -129,9 +139,14 @@ namespace NetSync
             return index;
         }
 
-        public static object[] DeleteLastElement(object[] x)
+        /// <summary>
+        /// Returns array without last element
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        public static string[] DeleteLastElement(string[] x)
         {
-            object[] y = new string[x.Length - 1];
+            string[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
             {
                 y[i] = x[i];
@@ -139,9 +154,14 @@ namespace NetSync
             return y;
         }
 
-        public static object[] DeleteFirstElement(object[] x)
+        /// <summary>
+        /// Returns array without first element
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        public static string[] DeleteFirstElement(string[] x)
         {
-            object[] y = new string[x.Length - 1];
+            string[] y = new string[x.Length - 1];
             for (int i = 0; i < y.Length; i++)
             {
                 y[i] = x[i + 1];
@@ -149,7 +169,17 @@ namespace NetSync
             return y;
         }
 
-        public static int MemCmp(byte[] arr1, int off1, byte[] arr2, int off2, int length)
+        /// <summary>
+        /// Compares two arrays of bytes and return 0, if they equal at intersing positions, otherwise return difference of first
+        /// not equal bytes (arr1[j]-arr2[j])
+        /// </summary>
+        /// <param name="arr1"></param>
+        /// <param name="off1"></param>
+        /// <param name="arr2"></param>
+        /// <param name="off2"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static int MemCompare(byte[] arr1, int off1, byte[] arr2, int off2, int length)
         {
             for (int i = 0; i < length; i++)
             {
@@ -169,7 +199,7 @@ namespace NetSync
         /// <param name="source"></param>
         /// <param name="sourceOffset"></param>
         /// <param name="length"></param>
-        public static void MemCpy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
+        public static void MemCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
         {
             for (int i = 0; i < length; i++)
             {
@@ -177,6 +207,13 @@ namespace NetSync
             }
         }
 
+        /// <summary>
+        /// Compares time of modification for given files
+        /// </summary>
+        /// <param name="file1"></param>
+        /// <param name="file2"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static int CompareModTime(long file1, long file2, Options options)
         {
             if (file2 > file1)
