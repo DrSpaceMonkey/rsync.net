@@ -60,10 +60,10 @@ namespace NetSync
                 currDir = Directory.GetCurrentDirectory();
             }
 
-            if (string.IsNullOrEmpty(dir))
-            {
-                return false;
-            }
+            //if (string.IsNullOrEmpty(dir)) // We can skip this check because try will catch this situation
+            //{
+            //    return false;
+            //}
             //...
             try
             {

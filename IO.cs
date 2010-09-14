@@ -36,8 +36,8 @@ namespace NetSync
     public class IOStream
     {
 
-        private Stream sockOut;
-        private Stream sockIn;
+        private Stream socketOut;
+        private Stream socketIn;
 
         private bool IOMultiplexingIn = false;
         private bool IOMultiplexingOut = false;
@@ -106,10 +106,9 @@ namespace NetSync
         {
             try
             {
-                //WriteFD(buf, offset, len);
                 if (IOBufOut == null)
                 {
-                    sockOut.Write(buffer, offset, length);
+                    socketOut.Write(buffer, offset, length);
                     return;
                 }
 
@@ -138,34 +137,6 @@ namespace NetSync
             CalculationTotalWritten(length);
         }
 
-        //public void WriteFD(byte[] buf, int offset, int len)
-        //{
-
-        //    if (IOBufOut == null)
-        //    {
-        //        sockOut.Write(buf, offset, len);
-        //        return;
-        //    }
-
-        //    int off = 0;
-        //    while (len > 0)
-        //    {
-        //        int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
-        //        if (n > 0)
-        //        {
-        //            Util.MemCpy(IOBufOut, IOBufOutCount, buf, offset + off, n);
-        //            off += n;
-        //            len -= n;
-        //            IOBufOutCount += n;
-        //        }
-
-        //        if (IOBufOutCount == IO_BUFFER_SIZE)
-        //        {
-        //            Flush();
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// 
         /// </summary>
@@ -185,17 +156,17 @@ namespace NetSync
             }
 
             Util.MemoryCopy(localBuffer, 4, buffer, 0, n);
-            sockOut.Write(localBuffer, 0, n + 4);
+            socketOut.Write(localBuffer, 0, n + 4);
 
             count -= n;
             if (count > 0)
             {
-                sockOut.Write(buffer, n, count);
+                socketOut.Write(buffer, n, count);
             }
         }
 
         /// <summary>
-        /// 
+        /// Writes all data from buffer
         /// </summary>
         public void Flush()
         {
@@ -210,41 +181,41 @@ namespace NetSync
             }
             else
             {
-                sockOut.Write(IOBufOut, 0, IOBufOutCount);
+                socketOut.Write(IOBufOut, 0, IOBufOutCount);
             }
             IOBufOutCount = 0;
         }
 
         /// <summary>
-        /// 
+        /// Writes int value to out buffer
         /// </summary>
         /// <param name="x"></param>
         public void writeInt(int x)
         {
-            byte[] arr = new byte[4];
-            arr[0] = (byte)(x & 0xFF);
-            arr[1] = (byte)((x >> 8) & 0xFF);
-            arr[2] = (byte)((x >> 16) & 0xFF);
-            arr[3] = (byte)((x >> 24));
-            Write(arr, 0, 4);
+            byte[] data = new byte[4];
+            data[0] = (byte)(x & 0xFF);
+            data[1] = (byte)((x >> 8) & 0xFF);
+            data[2] = (byte)((x >> 16) & 0xFF);
+            data[3] = (byte)((x >> 24));
+            Write(data, 0, 4);
         }
 
         /// <summary>
-        /// 
+        /// Writes uint value to out buffer
         /// </summary>
         /// <param name="x"></param>
         public void writeUInt(UInt32 x)
         {
-            byte[] arr = new byte[4];
-            arr[0] = (byte)(x & 0xFF);
-            arr[1] = (byte)((x >> 8) & 0xFF);
-            arr[2] = (byte)((x >> 16) & 0xFF);
-            arr[3] = (byte)((x >> 24));
-            Write(arr, 0, 4);
+            byte[] data = new byte[4];
+            data[0] = (byte)(x & 0xFF);
+            data[1] = (byte)((x >> 8) & 0xFF);
+            data[2] = (byte)((x >> 16) & 0xFF);
+            data[3] = (byte)((x >> 24));
+            Write(data, 0, 4);
         }
 
         /// <summary>
-        /// 
+        /// Writes byte value to out buffer
         /// </summary>
         /// <param name="val"></param>
         public void writeByte(byte val)
@@ -255,12 +226,12 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Writes Int64 value to out buffer
         /// </summary>
         /// <param name="x"></param>
         public void WriteLongInt(Int64 x)
         {
-            byte[] b = new byte[8];
+            byte[] data = new byte[8];
 
             if (x <= 0x7FFFFFFF)
             {
@@ -269,38 +240,20 @@ namespace NetSync
             }
 
             writeUInt(0xFFFFFFFF);
-            CheckSum.SIVAL(ref b, 0, (UInt32)(x & 0xFFFFFFFF));
-            CheckSum.SIVAL(ref b, 4, (UInt32)((x >> 32) & 0xFFFFFFFF));
+            CheckSum.SIVAL(ref data, 0, (UInt32)(x & 0xFFFFFFFF));
+            CheckSum.SIVAL(ref data, 4, (UInt32)((x >> 32) & 0xFFFFFFFF));
 
-            Write(b, 0, 8);
+            Write(data, 0, 8);
         }
 
         public void IOPrintf(string message)
         {
             //byte[] data = usen.GetBytes(message);
             //byte[] data = asen.GetBytes(message);
-            byte[] data = Encoding.ASCII.GetBytes(message);
+            byte[] data = Encoding.ASCII.GetBytes(message); //@todo cyrillic
             Write(data, 0, data.Length);
         }
-        /*
-        public void checkTimeOut()
-        {
-            if(Options.ioTimeout == 0)
-                return;
-            if(Options.lastIO == DateTime.MinValue)
-            {
-                Options.lastIO = DateTime.Now;
-                return;
-            }
 
-            if(DateTime.Now.Ticks - Options.lastIO.Ticks >= Options.ioTimeout * 10000000)
-            {
-                if(!Options.amServer && !Options.amDaemon)
-                    Log.WriteLine("io timeout after "+(DateTime.Now.Ticks - Options.lastIO.Ticks)/10000000+" seconds - exiting");
-                Environment.Exit(0);
-            }
-        }
-         */
         public string readFilesFromLine(Stream fd, Options options)
         {
             string fileName = String.Empty;
@@ -342,8 +295,8 @@ namespace NetSync
         /// <param name="outSock"></param>
         public void IOSetSocketFields(Stream inSock, Stream outSock)
         {
-            sockIn = inSock;
-            sockOut = outSock;
+            socketIn = inSock;
+            socketOut = outSock;
         }
 
         /// <summary>
@@ -370,33 +323,33 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Read buffer as string
         /// </summary>
-        /// <param name="len"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public string ReadSBuf(int len)
+        public string ReadSBuf(int length)
         {
-            byte[] data = new byte[len];
-            data = ReadBuf(len);
+            byte[] data = new byte[length];
+            data = ReadBuf(length);
             return ASCIIEncoding.ASCII.GetString(data);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="length"></param>
+        /// <param name="count"></param>
         /// <returns></returns>
-        public byte[] ReadBuf(int length)
+        public byte[] ReadBuf(int count)
         {
-            byte[] data = new byte[length];
+            byte[] data = new byte[count];
             int ret;
             int total = 0;
 
-            while (total < length)
+            while (total < count)
             {
                 try
                 {
-                    ret = ReadfdUnbuffered(data, total, length - total);
+                    ret = ReadFDUnbuffered(data, total, count - total);
                     total += ret;
                 }
                 catch (Exception)
@@ -409,7 +362,7 @@ namespace NetSync
                     return null;
                 }
             }
-            CalculationTotalRead(length);
+            CalculationTotalRead(count);
             return data;
         }
 
@@ -417,16 +370,16 @@ namespace NetSync
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="len"></param>
-        public void ReadLoop(byte[] data, int len)
+        /// <param name="count"></param>
+        public void ReadLoop(byte[] data, int count)
         {
             int off = 0;
-            while (len > 0)
+            while (count > 0)
             {
                 Flush();
-                int n = sockIn.Read(data, off, len);
+                int n = socketIn.Read(data, off, count);
                 off += n;
-                len -= n;
+                count -= n;
             }
         }
 
@@ -435,22 +388,22 @@ namespace NetSync
         /// </summary>
         /// <param name="data"></param>
         /// <param name="offset"></param>
-        /// <param name="length"></param>
+        /// <param name="count"></param>
         /// <returns></returns>
-        public int ReadfdUnbuffered(byte[] data, int offset, int length)
+        public int ReadFDUnbuffered(byte[] data, int offset, int count)
         {
             int tag, ret = 0;
             byte[] line = new byte[1024];
 
             if (IOBufIn == null)
             {
-                return sockIn.Read(data, offset, length);
+                return socketIn.Read(data, offset, count);
             }
 
             if (!IOMultiplexingIn && remaining == 0)
             {
                 Flush();
-                remaining = sockIn.Read(IOBufIn, 0, IOBufInSize);
+                remaining = socketIn.Read(IOBufIn, 0, IOBufInSize);
                 IOBufInIndex = 0;
             }
 
@@ -458,11 +411,11 @@ namespace NetSync
             {
                 if (remaining != 0)
                 {
-                    length = Math.Min(length, remaining);
-                    Util.MemoryCopy(data, offset, IOBufIn, IOBufInIndex, length);
-                    IOBufInIndex += length;
-                    remaining -= length;
-                    ret = length;
+                    count = Math.Min(count, remaining);
+                    Util.MemoryCopy(data, offset, IOBufIn, IOBufInIndex, count);
+                    IOBufInIndex += count;
+                    remaining -= count;
+                    ret = count;
                     break;
                 }
 
@@ -522,17 +475,8 @@ namespace NetSync
         /// <returns></returns>
         public byte readByte()
         {
-            byte data;
             byte[] tmp = ReadBuf(1);
-            data = tmp[0];
-            //if (data == -1) //because data is byte which can only be [0, 255]
-            //{
-            //    throw new Exception("Can't read from Stream");
-            //}
-            //else
-            //{
-            return data;
-            //}
+            return tmp[0];
         }
 
         /// <summary>
@@ -636,8 +580,8 @@ namespace NetSync
         /// </summary>
         public void Close()
         {
-            sockIn.Close();
-            sockOut.Close();
+            socketIn.Close();
+            socketOut.Close();
         }
     }
 }

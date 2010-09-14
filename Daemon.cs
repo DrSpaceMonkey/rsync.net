@@ -218,11 +218,11 @@ namespace NetSync
             }
         }
 
-        static void DoServerSender(ClientInfo cInfo, string[] args)
+        static void DoServerSender(ClientInfo clientInfo, string[] args)
         {
             string dir = args[0];
-            IOStream f = cInfo.IoStream;
-            Options options = cInfo.Options;
+            IOStream ioStream = clientInfo.IoStream;
+            Options options = clientInfo.Options;
 
             if (options.verbose > 2)
             {
@@ -230,39 +230,39 @@ namespace NetSync
             }
             if (options.amDaemon && config.ModuleIsWriteOnly(options.ModuleId))
             {
-                MainClass.Exit("ERROR: module " + config.GetModuleName(options.ModuleId) + " is write only", cInfo);
+                MainClass.Exit("ERROR: module " + config.GetModuleName(options.ModuleId) + " is write only", clientInfo);
                 return;
             }
 
             if (!options.relativePaths && !Util.pushDir(dir))
             {
-                MainClass.Exit("push_dir#3 " + dir + "failed", cInfo);
+                MainClass.Exit("Push_dir#3 " + dir + "failed", clientInfo);
                 return;
             }
 
             FileList fList = new FileList(options);
-            List<FileStruct> fileList = fList.sendFileList(cInfo, args);
+            List<FileStruct> fileList = fList.sendFileList(clientInfo, args);
             if (options.verbose > 3)
             {
-                Log.WriteLine("file list sent");
+                Log.WriteLine("File list sent");
             }
             if (fileList.Count == 0)
             {
-                MainClass.Exit("File list is empty", cInfo);
+                MainClass.Exit("File list is empty", clientInfo);
                 return;
             }
-            f.IOStartBufferingIn();
-            f.IOStartBufferingOut();
+            ioStream.IOStartBufferingIn();
+            ioStream.IOStartBufferingOut();
 
             Sender sender = new Sender(options);
-            sender.SendFiles(fileList, cInfo);
-            f.Flush();
-            MainClass.Report(cInfo);
+            sender.SendFiles(fileList, clientInfo);
+            ioStream.Flush();
+            MainClass.Report(clientInfo);
             if (options.protocolVersion >= 24)
             {
-                f.readInt();
+                ioStream.readInt();
             }
-            f.Flush();
+            ioStream.Flush();
         }
 
         public static void DoServerReceive(ClientInfo cInfo, string[] args)
