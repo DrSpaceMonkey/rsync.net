@@ -39,7 +39,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Generates challenge using time as vector
         /// </summary>
         /// <param name="addr"></param>
         /// <param name="opt"></param>
@@ -48,16 +48,16 @@ namespace NetSync
         {
             string challenge = String.Empty;
             byte[] input = new byte[32];
-            DateTime tv = DateTime.Now;
+            DateTime timeVector = DateTime.Now;
 
             for (int i = 0; i < addr.Length; i++)
             {
                 input[i] = Convert.ToByte(addr[i]);
             }
 
-            CheckSum.SIVAL(ref input, 16, (UInt32)tv.Second);
-            CheckSum.SIVAL(ref input, 20, (UInt32)tv.Hour);
-            CheckSum.SIVAL(ref input, 24, (UInt32)tv.Day);
+            CheckSum.SIVAL(ref input, 16, (UInt32)timeVector.Second);
+            CheckSum.SIVAL(ref input, 20, (UInt32)timeVector.Hour);
+            CheckSum.SIVAL(ref input, 24, (UInt32)timeVector.Day);
 
             Sum sum = new Sum(opt);
             sum.Init(0);
@@ -95,19 +95,19 @@ namespace NetSync
         /// <returns></returns>
         public static string AuthorizeClient(string user, string pass, string challenge, Options options)
         {
-            if (String.Compare(user, String.Empty) == 0)
+            if (String.Empty.Equals(user))
             {
                 user = "nobody";
             }
-            if (pass == null || String.Compare(pass, String.Empty) == 0)
+            if (string.IsNullOrEmpty(pass))
             {
                 pass = GetEmptyPassword(password_file);
             }
-            if (String.Compare(pass, String.Empty) == 0)
+            if (pass.Equals(String.Empty))
             {
                 pass = System.Environment.GetEnvironmentVariable("RSYNC_PASSWORD");
             }
-            if (pass == null || String.Compare(pass, String.Empty) == 0)
+            if (string.IsNullOrEmpty(pass))
             {
                 pass = GetPassword();
             }

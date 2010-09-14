@@ -375,55 +375,170 @@ namespace NetSync
         /// </summary>
         public static System.IO.Stream filesFromFD = null;
         public static Stats stats = new Stats();
+        /// <summary>
+        /// "rsync://"
+        /// </summary>
         public const string URL_PREFIX = "rsync://";
+        /// <summary>
+        /// 873
+        /// </summary>
         public const int RSYNC_PORT = 873;
         public int rsyncPort = RSYNC_PORT;
+        /// <summary>
+        /// 1024
+        /// </summary>
         public const int MAXPATHLEN = 1024;
+        /// <summary>
+        /// 700
+        /// </summary>
         public const int BLOCK_SIZE = 700;
-        //
+        /// <summary>
+        /// 1000
+        /// </summary>
         public const int MAX_ARGS = 1000;
-        //
+        /// <summary>
+        /// 20
+        /// </summary>
         public const int MIN_PROTOCOL_VERSION = 20;
+        /// <summary>
+        /// 25
+        /// </summary>
         public const int OLD_PROTOCOL_VERSION = 25;
+        /// <summary>
+        /// 40
+        /// </summary>
         public const int MAX_PROTOCOL_VERSION = 40;
-        //
+        /// <summary>
+        /// (256 * 1024)
+        /// </summary>
         public const int MAX_MAP_SIZE = (256 * 1024);
-        //
+        /// <summary>
+        /// (1 &lt;&lt; 0)
+        /// </summary>
         public const int FLAG_TOP_DIR = (1 << 0);
+        /// <summary>
+        /// (1 &lt;&lt; 1)
+        /// </summary>
         public const int FLAG_HLINK_EOL = (1 << 1);	/* generator only */
+        /// <summary>
+        /// (1 &lt;&lt; 2)
+        /// </summary>
         public const int FLAG_MOUNT_POINT = (1 << 2);	/* sender only */
-        //
+        /// <summary>
+        /// 0
+        /// </summary>
         public const int NO_EXCLUDES = 0;
+        /// <summary>
+        /// 1
+        /// </summary>
         public const int SERVER_EXCLUDES = 1;
+        /// <summary>
+        /// 2
+        /// </summary>
         public const int ALL_EXCLUDES = 2;
-        //
+        /// <summary>
+        /// 0
+        /// </summary>
         public const int GID_NONE = 0;
+        /// <summary>
+        /// (1 &lt;&lt; 0)
+        /// </summary>
         public const UInt32 XFLG_FATAL_ERRORS = (1 << 0);
+        /// <summary>
+        /// (1 &lt;&lt; 1)
+        /// </summary>
         public const UInt32 XFLG_DEF_INCLUDE = (1 << 1);
+        /// <summary>
+        /// (1 &lt;&lt; 2)
+        /// </summary>
         public const UInt32 XFLG_WORDS_ONLY = (1 << 2);
+        /// <summary>
+        /// (1 &lt;&lt; 3)
+        /// </summary>
         public const UInt32 XFLG_WORD_SPLIT = (1 << 3);
+        /// <summary>
+        /// (1 &lt;&lt; 4)
+        /// </summary>
         public const UInt32 XFLG_DIRECTORY = (1 << 4);
-        //
+        /// <summary>
+        /// (1 &lt;&lt; 0)
+        /// </summary>
         public const UInt32 MATCHFLG_WILD = (1 << 0); /* pattern has '*', '[', and/or '?' */
+        /// <summary>
+        /// 
+        /// </summary>
         public const UInt32 MATCHFLG_WILD2 = (1 << 1); /* pattern has '**' */
+        /// <summary>
+        /// (1 &lt;&lt; 2)
+        /// </summary>
         public const UInt32 MATCHFLG_WILD2_PREFIX = (1 << 2); /* pattern starts with '**' */
+        /// <summary>
+        /// (1 &lt;&lt; 3)
+        /// </summary>
         public const UInt32 MATCHFLG_ABS_PATH = (1 << 3); /* path-match on absolute path */
+        /// <summary>
+        /// (1 &lt;&lt; 4)
+        /// </summary>
         public const UInt32 MATCHFLG_INCLUDE = (1 << 4); /* this is an include, not an exclude */
+        /// <summary>
+        /// (1 &lt;&lt; 5)
+        /// </summary>
         public const UInt32 MATCHFLG_DIRECTORY = (1 << 5); /* this matches only directories */
+        /// <summary>
+        /// (1 &lt;&lt; 6)
+        /// </summary>
         public const UInt32 MATCHFLG_CLEAR_LIST = (1 << 6); /* this item is the "!" token */
-        //
+        /// <summary>
+        /// (1 &lt;&lt; 0)
+        /// </summary>
         public const UInt32 XMIT_TOP_DIR = (1 << 0);
+        /// <summary>
+        /// (1 &lt;&lt; 1)
+        /// </summary>
         public const UInt32 XMIT_SAME_MODE = (1 << 1);
+        /// <summary>
+        /// (1 &lt;&lt; 2)
+        /// </summary>
         public const UInt32 XMIT_EXTENDED_FLAGS = (1 << 2);
+        /// <summary>
+        /// XMIT_EXTENDED_FLAGS = (1 &lt;&lt; 2)
+        /// </summary>
         public const UInt32 XMIT_SAME_RDEV_pre28 = XMIT_EXTENDED_FLAGS; /* Only in protocols < 28 */
+        /// <summary>
+        /// (1 &lt;&lt; 3)
+        /// </summary>
         public const UInt32 XMIT_SAME_UID = (1 << 3);
+        /// <summary>
+        /// (1 &lt;&lt; 4)
+        /// </summary>
         public const UInt32 XMIT_SAME_GID = (1 << 4);
+        /// <summary>
+        /// (1 &lt;&lt; 5)
+        /// </summary>
         public const UInt32 XMIT_SAME_NAME = (1 << 5);
+        /// <summary>
+        /// (1 &lt;&lt; 6)
+        /// </summary>
         public const UInt32 XMIT_LONG_NAME = (1 << 6);
+        /// <summary>
+        /// (1 &lt;&lt; 7)
+        /// </summary>
         public const UInt32 XMIT_SAME_TIME = (1 << 7);
+        /// <summary>
+        /// (1 &lt;&lt; 8)
+        /// </summary>
         public const UInt32 XMIT_SAME_RDEV_MAJOR = (1 << 8);
+        /// <summary>
+        /// (1 &lt;&lt; 9)
+        /// </summary>
         public const UInt32 XMIT_HAS_IDEV_DATA = (1 << 9);
+        /// <summary>
+        /// (1 &lt;&lt; 10)
+        /// </summary>
         public const UInt32 XMIT_SAME_DEV = (1 << 10);
+        /// <summary>
+        /// (1 &lt;&lt; 11)
+        /// </summary>
         public const UInt32 XMIT_RDEV_MINOR_IS_SMALL = (1 << 11);
         //
         public List<ExcludeStruct> excludeList = new List<ExcludeStruct>();

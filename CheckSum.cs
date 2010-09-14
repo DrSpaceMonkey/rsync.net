@@ -32,6 +32,12 @@ namespace NetSync
             options = opt;
         }
 
+        /// <summary>
+        /// Writes bytes of 'x' to 'buf' in reverse order starting from 'pos'
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="pos"></param>
+        /// <param name="x"></param>
         public static void SIVAL(ref byte[] buf, int pos, UInt32 x)
         {
             buf[pos + 0] = (byte)(x & 0xFF);
@@ -40,18 +46,44 @@ namespace NetSync
             buf[pos + 3] = (byte)((x >> 24));
         }
 
+        /// <summary>
+        /// Converts b to int. If b >=0x80 then returns b-256, else returns b
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static int ToInt(byte b)
         {
             return ((b & 0x80) == 0x80) ? (b - 256) : b;
         }
-
-        public int cSumLength = 2;
+        /// <summary>
+        /// Current length of checksum
+        /// </summary>
+        public int length = 2;
+        /// <summary>
+        /// 16
+        /// </summary>
         public const int SUM_LENGTH = 16;
+        /// <summary>
+        /// 0
+        /// </summary>
         public const int CHAR_OFFSET = 0;
+        /// <summary>
+        /// 64
+        /// </summary>
         public const int CSUM_CHUNK = 64;
+        /// <summary>
+        /// 16
+        /// </summary>
         public const int MD4_SUM_LENGTH = 16;
 
-        public static UInt32 GetChecksum1(byte[] buf, int ind, int len)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="pos"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
+        public static UInt32 GetChecksum1(byte[] buf, int pos, int len)
         {
             Int32 i;
             UInt32 s1, s2;
@@ -61,32 +93,39 @@ namespace NetSync
             s1 = s2 = 0;
             for (i = 0; i < (len - 4); i += 4)
             {
-                b1 = ToInt(buf[i + 0 + ind]);
-                b2 = ToInt(buf[i + 1 + ind]);
-                b3 = ToInt(buf[i + 2 + ind]);
-                b4 = ToInt(buf[i + 3 + ind]);
+                b1 = ToInt(buf[i + 0 + pos]);
+                b2 = ToInt(buf[i + 1 + pos]);
+                b3 = ToInt(buf[i + 2 + pos]);
+                b4 = ToInt(buf[i + 3 + pos]);
 
                 s2 += (UInt32)(4 * (s1 + b1) + 3 * b2 + 2 * b3 + b4 + 10 * CHAR_OFFSET);
                 s1 += (UInt32)(b1 + b2 + b3 + b4 + 4 * CHAR_OFFSET);
             }
             for (; i < len; i++)
             {
-                s1 += (UInt32)(ToInt(buf[i + ind]) + CHAR_OFFSET);
+                s1 += (UInt32)(ToInt(buf[i + pos]) + CHAR_OFFSET);
                 s2 += s1;
             }
             UInt32 sum = ((s1 & 0xffff) + (s2 << 16));
             return sum;
         }
 
-        public byte[] GetChecksum2(byte[] buf, int off, int len)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="pos"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
+        public byte[] GetChecksum2(byte[] buf, int pos, int len)
         {
             byte[] buf1 = new byte[len + 4];
             for (int j = 0; j < len; j++)
             {
-                buf1[j] = buf[off + j];
+                buf1[j] = buf[pos + j];
             }
-            MDFour m = new MDFour(options);
-            m.Begin();
+            MDFour mdFour = new MDFour(options);
+            mdFour.Begin();
             if (options.checksumSeed != 0)
             {
                 SIVAL(ref buf1, len, (UInt32)options.checksumSeed);
@@ -95,44 +134,51 @@ namespace NetSync
             int i;
             for (i = 0; i + CSUM_CHUNK <= len; i += CSUM_CHUNK)
             {
-                m.Update(buf1, i, CSUM_CHUNK);
+                mdFour.Update(buf1, i, CSUM_CHUNK);
             }
             if (len - i > 0 || options.protocolVersion >= 27)
             {
-                m.Update(buf1, i, (UInt32)(len - i));
+                mdFour.Update(buf1, i, (UInt32)(len - i));
             }
-            return m.Result();
+            return mdFour.Result();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="sum"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public bool FileCheckSum(string fileName, ref byte[] sum, int size)
         {
             int i;
-            MDFour m = new MDFour(options);
+            MDFour mdFour = new MDFour(options);
             sum = new byte[MD4_SUM_LENGTH];
             try
             {
-                using (var fd = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
 
-                    MapFile buf = new MapFile(fd, size, Options.MAX_MAP_SIZE, CSUM_CHUNK);
-                    m.Begin();
+                    MapFile buf = new MapFile(fileStream, size, Options.MAX_MAP_SIZE, CSUM_CHUNK);
+                    mdFour.Begin();
 
                     for (i = 0; i + CSUM_CHUNK <= size; i += CSUM_CHUNK)
                     {
                         int offset = buf.MapPtr(i, CSUM_CHUNK);
-                        m.Update(buf.p, offset, CSUM_CHUNK);
+                        mdFour.Update(buf.p, offset, CSUM_CHUNK);
                     }
 
                     if (size - i > 0 || options.protocolVersion >= 27)
                     {
                         int offset = buf.MapPtr(i, size - i);
-                        m.Update(buf.p, offset, (UInt32)(size - i));
+                        mdFour.Update(buf.p, offset, (UInt32)(size - i));
                     }
 
-                    sum = m.Result();
+                    sum = mdFour.Result();
 
-                    fd.Close();
-                    buf.UnMapFile();
+                    fileStream.Close();
+                    buf.UnMapFile(); //@todo useless string
                     return true;
                 }
             }

@@ -34,12 +34,12 @@ namespace NetSync
             checkSum = new CheckSum(options);
         }
 
-        public void SendFiles(List<FileStruct> fileList, ClientInfo cInfo)
+        public void SendFiles(List<FileStruct> fileList, ClientInfo clientInfo)
         {
             ShowMessage("Processing...");
             try
             {
-                IOStream f = cInfo.IoStream;
+                IOStream ioStream = clientInfo.IoStream;
                 string fileName = String.Empty, fileName2 = String.Empty;
                 SumStruct s = null;
                 int phase = 0;
@@ -53,14 +53,14 @@ namespace NetSync
                 while (true)
                 {
                     fileName = String.Empty;
-                    int i = f.readInt();
+                    int i = ioStream.readInt();
                     if (i == -1)
                     {
                         if (phase == 0)
                         {
                             phase++;
-                            checkSum.cSumLength = CheckSum.SUM_LENGTH;
-                            f.writeInt(-1);
+                            checkSum.length = CheckSum.SUM_LENGTH;
+                            ioStream.writeInt(-1);
                             if (options.verbose > 2)
                             {
                                 Log.WriteLine("SendFiles phase=" + phase);
@@ -73,7 +73,7 @@ namespace NetSync
 
                     if (i < 0 || i >= fileList.Count)
                     {
-                        MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", cInfo);
+                        MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", clientInfo);
                     }
 
                     FileStruct file = fileList[i];
@@ -82,7 +82,7 @@ namespace NetSync
                     Options.stats.numTransferredFiles++;
                     Options.stats.totalTransferredSize += file.length;
 
-                    if (file.baseDir != null && file.baseDir.CompareTo(String.Empty) != 0)
+                    if (!string.IsNullOrEmpty(file.baseDir))
                     {
                         fileName = file.baseDir;
                         if (!fileName.EndsWith("/"))
@@ -105,12 +105,12 @@ namespace NetSync
                         {
                             Log.WriteLine(fileName2);
                         }
-                        f.writeInt(i);
+                        ioStream.writeInt(i);
                         continue;
                     }
 
                     Stats initialStats = Options.stats;
-                    s = ReceiveSums(cInfo);
+                    s = ReceiveSums(clientInfo);
 
                     Stream fd;
                     try
@@ -149,9 +149,9 @@ namespace NetSync
                         Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.size);
                     }
 
-                    f.writeInt(i);
+                    ioStream.writeInt(i);
                     Generator gen = new Generator(options);
-                    gen.WriteSumHead(f, s);
+                    gen.WriteSumHead(ioStream, s);
 
                     if (options.verbose > 2)
                     {
@@ -166,7 +166,7 @@ namespace NetSync
                     Token token = new Token(options);
                     token.SetCompression(fileName);
 
-                    match.MatchSums(f, s, mbuf, (int)st.size);
+                    match.MatchSums(ioStream, s, mbuf, (int)st.size);
                     Log.LogSend(file, initialStats);
 
                     if (mbuf != null)
@@ -193,8 +193,8 @@ namespace NetSync
                     Log.WriteLine("send files finished");
                 }
 
-                match.MatchReport(f);
-                f.writeInt(-1);
+                match.MatchReport(ioStream);
+                ioStream.writeInt(-1);
             }
             finally
             {
@@ -251,24 +251,24 @@ namespace NetSync
             return s;
         }
 
-        public void ReadSumHead(ClientInfo cInfo, ref SumStruct sum)
+        public void ReadSumHead(ClientInfo clientInfo, ref SumStruct sum)
         {
-            IOStream f = cInfo.IoStream;
-            sum.count = f.readInt();
-            sum.bLength = (UInt32)f.readInt();
+            IOStream ioStream = clientInfo.IoStream;
+            sum.count = ioStream.readInt();
+            sum.bLength = (UInt32)ioStream.readInt();
             if (options.protocolVersion < 27)
             {
-                sum.s2Length = checkSum.cSumLength;
+                sum.s2Length = checkSum.length;
             }
             else
             {
-                sum.s2Length = f.readInt();
+                sum.s2Length = ioStream.readInt();
                 if (sum.s2Length > CheckSum.MD4_SUM_LENGTH)
                 {
-                    MainClass.Exit("Invalid checksum length " + sum.s2Length, cInfo);
+                    MainClass.Exit("Invalid checksum length " + sum.s2Length, clientInfo);
                 }
             }
-            sum.remainder = (UInt32)f.readInt();
+            sum.remainder = (UInt32)ioStream.readInt();
         }
 
         NotifyIcon icon = new NotifyIcon();

@@ -99,7 +99,7 @@ namespace NetSync
                 if (argc == maxArgs)
                 {
                     maxArgs += Options.MAX_ARGS;
-                    MapFile.ReallocArrayString(ref args, maxArgs);
+                    MapFile.ExtendArray(ref args, maxArgs);
                 }
                 args[argc++] = line;
             }

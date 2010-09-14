@@ -92,74 +92,114 @@ namespace NetSync
 
     public class MapFile
     {
-        public byte[] p = null;		/* Window pointer			*/
-        Stream fd;			/* File Descriptor			*/
-        int pSize;		/* Largest window size we allocated	*/
-        int pLen;		/* Latest (rounded) window size		*/
-        int defWindowSize;	/* Default window size			*/
-        public bool status = false;		/* first errno from read errors		*/
-        public int fileSize;	/* File size (from stat)		*/
-        int pOffset;		/* Window start				*/
-        int pFdOffset;	/* offset of cursor in fd ala lseek	*/
+        /// <summary>
+        /// Window pointer
+        /// </summary>
+        public byte[] p = null;
+        /// <summary>
+        /// File Descriptor
+        /// </summary>
+        Stream fileDescriptor;
+        /// <summary>
+        /// Largest window size we allocated
+        /// </summary>
+        int pSize;
+        /// <summary>
+        /// Latest (rounded) window size
+        /// </summary>
+        int pLength;
+        /// <summary>
+        /// Default window size
+        /// </summary>
+        int defaultWindowSize;
+        /// <summary>
+        /// First errno from read errors (Seems to be false all the time)
+        /// </summary>
+        public bool status = false;
+        /// <summary>
+        /// File size (from stat)
+        /// </summary>
+        public int fileSize;
+        /// <summary>
+        /// Window start
+        /// </summary>
+        int pOffset;
+        /// <summary>
+        /// Offset of cursor in file descriptor ala lseek
+        /// </summary>
+        int pFileDescriptorOffset;
 
-        public MapFile(Stream fd, int len, int mapSize, int blockSize)
+        /// <summary>
+        /// Initialyze new instance
+        /// </summary>
+        /// <param name="fileDescriptor"></param>
+        /// <param name="length"></param>
+        /// <param name="mapSize"></param>
+        /// <param name="blockSize"></param>
+        public MapFile(Stream fileDescriptor, int length, int mapSize, int blockSize)
         {
             if (blockSize != 0 && (mapSize % blockSize) != 0)
             {
                 mapSize += blockSize - (mapSize % blockSize);
             }
-            this.fd = fd;
-            this.fileSize = len;
-            this.defWindowSize = mapSize;
+            this.fileDescriptor = fileDescriptor;
+            this.fileSize = length;
+            this.defaultWindowSize = mapSize;
 
         }
 
-        public int MapPtr(int offset, int len) //returns offset in p array
+        /// <summary>
+        /// Returns offset in p array
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public int MapPtr(int offset, int length)
         {
-            int nread;
+            int numberOfReadBytes;
             int windowStart, readStart;
             int windowSize, readSize, readOffset;
 
-            if (len == 0)
+            if (length == 0)
             {
                 return -1;
             }
 
-            if (len > (this.fileSize - offset))
+            if (length > (this.fileSize - offset))
             {
-                len = this.fileSize - offset;
+                length = this.fileSize - offset;
             }
 
-            if (offset >= this.pOffset && offset + len <= this.pOffset + this.pLen)
+            if (offset >= this.pOffset && offset + length <= this.pOffset + this.pLength)
             {
                 return offset - this.pOffset;
             }
 
             windowStart = offset;
-            windowSize = this.defWindowSize;
+            windowSize = this.defaultWindowSize;
             if (windowStart + windowSize > this.fileSize)
             {
                 windowSize = this.fileSize - windowStart;
             }
-            if (offset + len > windowStart + windowSize)
+            if (offset + length > windowStart + windowSize)
             {
-                windowSize = (offset + len) - windowStart;
+                windowSize = (offset + length) - windowStart;
             }
 
             if (windowSize > this.pSize)
             {
-                ReallocArray(ref p, windowSize);
+                ExtendArray(ref p, windowSize);
                 this.pSize = windowSize;
             }
 
             if (windowStart >= this.pOffset &&
-                windowStart < this.pOffset + this.pLen &&
-                windowStart + windowSize >= this.pOffset + this.pLen)
+                windowStart < this.pOffset + this.pLength &&
+                windowStart + windowSize >= this.pOffset + this.pLength)
             {
-                readStart = this.pOffset + this.pLen;
+                readStart = this.pOffset + this.pLength;
                 readOffset = readStart - windowStart;
                 readSize = windowSize - readOffset;
-                MemMove(ref this.p, this.p, (this.pLen - readOffset), readOffset);
+                MemoryMove(ref this.p, this.p, (this.pLength - readOffset), readOffset);
             }
             else
             {
@@ -173,81 +213,109 @@ namespace NetSync
             }
             else
             {
-                if (this.pFdOffset != readStart)
+                if (this.pFileDescriptorOffset != readStart)
                 {
-                    if (this.fd.Seek(readStart, SeekOrigin.Begin) != readStart)
+                    if (this.fileDescriptor.Seek(readStart, SeekOrigin.Begin) != readStart)
                     {
                         MainClass.Exit("Seek failed in MapPtr", null);
                     }
-                    this.pFdOffset = readStart;
+                    this.pFileDescriptorOffset = readStart;
                 }
 
-                if ((nread = fd.Read(this.p, readOffset, readSize)) != readSize)
+                if ((numberOfReadBytes = fileDescriptor.Read(this.p, readOffset, readSize)) != readSize)
                 {
-                    if (nread < 0)
+                    if (numberOfReadBytes < 0) //@todo Read never returns <0 so status is false all the time
                     {
-                        nread = 0;
+                        numberOfReadBytes = 0;
                         status = true;
                     }
-                    FillMem(ref this.p, readOffset + nread, 0, readSize - nread);
+                    FillMemory(ref this.p, readOffset + numberOfReadBytes, 0, readSize - numberOfReadBytes);
                 }
-                this.pFdOffset += nread;
+                this.pFileDescriptorOffset += numberOfReadBytes;
             }
 
             this.pOffset = windowStart;
-            this.pLen = windowSize;
+            this.pLength = windowSize;
             return offset - this.pOffset;
         }
 
+        /// <summary>
+        /// Returns status
+        /// </summary>
+        /// <returns></returns>
         public bool UnMapFile()
         {
             return this.status;
         }
 
-        private void FillMem(ref byte[] data, int offset, byte val, int n)
+        /// <summary>
+        /// Fills 'data' with given 'value'
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="offset"></param>
+        /// <param name="value"></param>
+        /// <param name="length"></param>
+        private void FillMemory(ref byte[] data, int offset, byte value, int length)
         {
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < length; i++)
             {
-                data[offset + i] = val;
+                data[offset + i] = value;
             }
         }
 
-        private void MemMove(ref byte[] dest, byte[] src, int srcInd, int n)
+        /// <summary>
+        /// Moves 'length' bytes in array. So pass the same array as source and destination
+        /// </summary>
+        /// <param name="destination">Destination array</param>
+        /// <param name="source">Source array</param>
+        /// <param name="sourceOffset">Start taking bytes from this offset</param>
+        /// <param name="length">Number of bytes to move</param>
+        private void MemoryMove(ref byte[] destination, byte[] source, int sourceOffset, int length) //it seems that ref is't needed
         {
-            byte[] srcCopy = (byte[])src.Clone();
-            for (int i = 0; i < n; i++)
+            byte[] sourceCopy = (byte[])source.Clone();
+            for (int i = 0; i < length; i++)
             {
-                dest[i] = srcCopy[srcInd + i];
+                destination[i] = sourceCopy[sourceOffset + i];
             }
         }
 
-        public static void ReallocArray(ref byte[] arr, int size)
+        /// <summary>
+        /// Extends array to new [bigger] 'size'
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="size"></param>
+        public static void ExtendArray(ref byte[] array, int size)
         {
-            if (arr == null)
+            if (array == null)
             {
-                arr = new byte[size];
+                array = new byte[size];
             }
             else
             {
-                byte[] arr2 = new byte[arr.Length];
-                arr.CopyTo(arr2, 0);
-                arr = new byte[size];
-                arr2.CopyTo(arr, 0);
+                byte[] tempArray = new byte[array.Length];
+                array.CopyTo(tempArray, 0);
+                array = new byte[size];
+                tempArray.CopyTo(array, 0);
             }
         }
 
-        public static void ReallocArrayString(ref string[] arr, int size)
+        /// <summary>
+        /// Extends array to new [bigger] 'size'
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="size"></param>
+        public static void ExtendArray(ref string[] array, int size)
         {
-            if (arr == null)
+            if (array == null)
             {
-                arr = new string[size];
+                array = new string[size];
             }
             else
             {
-                string[] arr2 = new string[arr.Length];
-                arr.CopyTo(arr2, 0);
-                arr = new string[size];
-                arr2.CopyTo(arr, 0);
+                string[] tempArray = new string[array.Length];
+                array.CopyTo(tempArray, 0);
+                array = new string[size];
+                tempArray.CopyTo(array, 0);
             }
         }
     }

@@ -474,7 +474,7 @@ namespace NetSync
                     case MsgCode.MSG_DATA:
                         if (remaining > IOBufInSize)
                         {
-                            MapFile.ReallocArray(ref IOBufIn, remaining);
+                            MapFile.ExtendArray(ref IOBufIn, remaining);
                             IOBufInSize = remaining;
                         }
                         ReadLoop(IOBufIn, remaining);
@@ -590,7 +590,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Inits IOBufIn if needed
         /// </summary>
         public void IOStartBufferingIn()
         {
@@ -616,7 +616,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Inits new IOBufOut is needed
         /// </summary>
         public void IOStartBufferingOut()
         {
@@ -629,7 +629,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// 
+        /// Close sockets
         /// </summary>
         public void Close()
         {

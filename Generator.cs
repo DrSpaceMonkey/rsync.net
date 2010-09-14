@@ -74,7 +74,7 @@ namespace NetSync
             }
 
             phase++;
-            checkSum.cSumLength = CheckSum.SUM_LENGTH;
+            checkSum.length = CheckSum.SUM_LENGTH;
             if (options.verbose > 2)
             {
                 Log.WriteLine("GenerateFiles phase=" + phase);
@@ -284,11 +284,11 @@ namespace NetSync
 
             if (options.protocolVersion < 27)
             {
-                s2Length = checkSum.cSumLength;
+                s2Length = checkSum.length;
             }
             else
             {
-                if (checkSum.cSumLength == CheckSum.SUM_LENGTH)
+                if (checkSum.length == CheckSum.SUM_LENGTH)
                 {
                     s2Length = CheckSum.SUM_LENGTH;
                 }
@@ -306,7 +306,7 @@ namespace NetSync
                         b--;
                     }
                     s2Length = (b + 1 - 32 + 7) / 8;
-                    s2Length = Math.Max(s2Length, checkSum.cSumLength);
+                    s2Length = Math.Max(s2Length, checkSum.length);
                     s2Length = Math.Min(s2Length, CheckSum.SUM_LENGTH);
                 }
             }

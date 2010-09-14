@@ -122,7 +122,7 @@ namespace NetSync
             if (args[0].StartsWith(Options.URL_PREFIX) && !options.readBatch) //source is remote
             {
                 string path, user = String.Empty;
-                string host = args[0].Substring(Options.URL_PREFIX.Length, args[0].Length - Options.URL_PREFIX.Length);
+                string host = args[0].Substring(Options.URL_PREFIX.Length, args[0].Length - Options.URL_PREFIX.Length); //@todo use 1-param version of Substring
                 if (host.LastIndexOf('@') != -1)
                 {
                     user = host.Substring(0, host.LastIndexOf('@'));

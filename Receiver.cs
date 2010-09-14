@@ -80,7 +80,7 @@ namespace NetSync
                     }
 
                     phase = 1;
-                    checkSum.cSumLength = CheckSum.SUM_LENGTH;
+                    checkSum.length = CheckSum.SUM_LENGTH;
                     if (options.verbose > 2)
                     {
                         Log.WriteLine("ReceiveFiles phase=" + phase);
@@ -213,30 +213,30 @@ namespace NetSync
             return 0;
         }
 
-        public bool ReceiveData(ClientInfo cInfo, string fileNameR, Stream fdR, long sizeR, string fileName, Stream fd, int totalSize)
+        public bool ReceiveData(ClientInfo clientInfo, string fileNameR, Stream fdR, long sizeR, string fileName, Stream fd, int totalSize)
         {
-            IOStream f = cInfo.IoStream;
-            byte[] file_sum1 = new byte[CheckSum.MD4_SUM_LENGTH];
-            byte[] file_sum2 = new byte[CheckSum.MD4_SUM_LENGTH];
+            IOStream f = clientInfo.IoStream;
+            byte[] fileSum1 = new byte[CheckSum.MD4_SUM_LENGTH];
+            byte[] fileSum2 = new byte[CheckSum.MD4_SUM_LENGTH];
             byte[] data = new byte[Match.CHUNK_SIZE];
-            SumStruct sum = new SumStruct();
+            SumStruct sumStruct = new SumStruct();
             MapFile mapBuf = null;
             Sender sender = new Sender(options);
-            sender.ReadSumHead(cInfo, ref sum);
+            sender.ReadSumHead(clientInfo, ref sumStruct);
             int offset = 0;
             UInt32 len;
 
             if (fdR != null && sizeR > 0)
             {
-                int mapSize = (int)Math.Max(sum.bLength * 2, 16 * 1024);
-                mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sum.bLength);
+                int mapSize = (int)Math.Max(sumStruct.bLength * 2, 16 * 1024);
+                mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sumStruct.bLength);
                 if (options.verbose > 2)
                 {
                     Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR);
                 }
             }
-            Sum s = new Sum(options);
-            s.Init(options.checksumSeed);
+            Sum sum = new Sum(options);
+            sum.Init(options.checksumSeed);
 
             int i;
             Token token = new Token(options);
@@ -254,7 +254,7 @@ namespace NetSync
                         Log.WriteLine("data recv " + i + " at " + offset);
                     }
                     Options.stats.literalData += i;
-                    s.Update(data, 0, i);
+                    sum.Update(data, 0, i);
                     if (fd != null && FileIO.WriteFile(fd, data, 0, i) != i)
                     {
                         goto report_write_error;
@@ -264,11 +264,11 @@ namespace NetSync
                 }
 
                 i = -(i + 1);
-                int offset2 = (int)(i * sum.bLength);
-                len = sum.bLength;
-                if (i == sum.count - 1 && sum.remainder != 0)
+                int offset2 = (int)(i * sumStruct.bLength);
+                len = sumStruct.bLength;
+                if (i == sumStruct.count - 1 && sumStruct.remainder != 0)
                 {
-                    len = sum.remainder;
+                    len = sumStruct.remainder;
                 }
 
                 Options.stats.matchedData += len;
@@ -286,7 +286,7 @@ namespace NetSync
                     map = mapBuf.p;
 
                     token.SeeToken(map, offset, (int)len);
-                    s.Update(map, off, (int)len);
+                    sum.Update(map, off, (int)len);
                 }
 
                 if (options.inplace)
@@ -296,7 +296,7 @@ namespace NetSync
                         offset += (int)len;
                         if (fd.Seek(len, SeekOrigin.Current) != offset)
                         {
-                            MainClass.Exit("seek failed on " + Util.fullFileName(fileName), cInfo);
+                            MainClass.Exit("seek failed on " + Util.fullFileName(fileName), clientInfo);
                         }
                         continue;
                     }
@@ -314,29 +314,29 @@ namespace NetSync
             }
             if (fd != null && offset > 0 && FileIO.SparseEnd(fd) != 0)
             {
-                MainClass.Exit("write failed on " + Util.fullFileName(fileName), cInfo);
+                MainClass.Exit("write failed on " + Util.fullFileName(fileName), clientInfo);
             }
 
-            file_sum1 = s.End();
+            fileSum1 = sum.End();
 
             if (mapBuf != null)
             {
                 mapBuf = null;
             }
 
-            file_sum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
+            fileSum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
             if (options.verbose > 2)
             {
                 Log.WriteLine("got fileSum");
             }
-            if (fd != null && Util.MemCompare(file_sum1, 0, file_sum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
+            if (fd != null && Util.MemCompare(fileSum1, 0, fileSum2, 0, CheckSum.MD4_SUM_LENGTH) != 0)
             {
                 return false;
             }
             return true;
         report_write_error:
             {
-                MainClass.Exit("write failed on " + Util.fullFileName(fileName), cInfo);
+                MainClass.Exit("write failed on " + Util.fullFileName(fileName), clientInfo);
             }
             return true;
         }
@@ -399,11 +399,11 @@ namespace NetSync
             }
             for (int j = 0; j < fileList.Count; j++)
             {
-                if (((fileList[j]).mode & Options.FLAG_TOP_DIR) == 0 || !Util.S_ISDIR((fileList[j]).mode))
+                if ((fileList[j].mode & Options.FLAG_TOP_DIR) == 0 || !Util.S_ISDIR(fileList[j].mode))
                 {
                     continue;
                 }
-                argv[0] = options.dir + (fileList[j]).GetFullName();
+                argv[0] = options.dir + fileList[j].GetFullName();
                 FileList fList = new FileList(options);
                 if ((localFileList = fList.sendFileList(null, argv)) == null)
                 {
@@ -411,15 +411,15 @@ namespace NetSync
                 }
                 for (int i = localFileList.Count - 1; i >= 0; i--)
                 {
-                    if ((localFileList[i]).baseName == null)
+                    if (localFileList[i].baseName == null)
                     {
                         continue;
                     }
-                    (localFileList[i]).dirName = (localFileList[i]).dirName.Substring(options.dir.Length);
+                    localFileList[i].dirName = localFileList[i].dirName.Substring(options.dir.Length);
                     if (FileList.fileListFind(fileList, (localFileList[i])) < 0)
                     {
-                        (localFileList[i]).dirName = options.dir + (localFileList[i]).dirName;
-                        deleteOne((localFileList[i]).GetFullName(), Util.S_ISDIR((localFileList[i]).mode));
+                        localFileList[i].dirName = options.dir + localFileList[i].dirName;
+                        deleteOne(localFileList[i].GetFullName(), Util.S_ISDIR(localFileList[i].mode));
                     }
                 }
             }

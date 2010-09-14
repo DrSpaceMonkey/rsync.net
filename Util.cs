@@ -24,8 +24,9 @@ namespace NetSync
     {
         static bool pushDirInitialized = false;
         public static string currDir = null;
+
         /// <summary>
-        /// Checks whether (mode & 0x8000) == 0
+        /// Checks whether (mode binaryAnd 0x8000) == 0
         /// </summary>
         /// <param name="mode"></param>
         /// <returns></returns>
@@ -119,7 +120,8 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Cleans filename to normalize it and remove '..' if needed
+        /// Replaces "\\" by "\", then removes trailing "\" .
+        /// Also if collapseDotDot is true then removes all ".." except for first two symbols of filename.
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="collapseDotDot"></param>
@@ -127,7 +129,7 @@ namespace NetSync
         public static string cleanFileName(string fileName, bool collapseDotDot)
         {
             string cleanedName = fileName.Replace(@"\\", @"\");
-            if (cleanedName.EndsWith(@"\"))
+            if (cleanedName.EndsWith(@"\")) //@todo possibly replace by TrimEnd?
             {
                 cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
             }
