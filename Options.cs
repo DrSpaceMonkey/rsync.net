@@ -552,6 +552,9 @@ namespace NetSync
         public string passwordFile = null;
         public bool ignoreTimes = false;
         public bool sizeOnly = false;
+        /// <summary>
+        /// Allowed difference between two files modification time
+        /// </summary>
         public int modifyWindow = 0;
         public bool usingModifyWindow = false;
         public bool oneFileSystem = false;

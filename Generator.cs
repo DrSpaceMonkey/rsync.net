@@ -347,7 +347,7 @@ namespace NetSync
                 byte[] sum = new byte[CheckSum.MD4_SUM_LENGTH];
                 // TODO: path length
                 checkSum.FileCheckSum(fileName, ref sum, (int)fi.Length);
-                return Util.MemCompare(sum, 0, file.sum, 0, options.protocolVersion < 21 ? 2 : CheckSum.MD4_SUM_LENGTH) == 0;
+                return Util.MemoryCompare(sum, 0, file.sum, 0, options.protocolVersion < 21 ? 2 : CheckSum.MD4_SUM_LENGTH) == 0;
             }
 
             if (options.sizeOnly)
@@ -361,7 +361,7 @@ namespace NetSync
             }
 
             // TODO: path length
-            return Util.CompareModTime(fi.LastWriteTime.Second, file.modTime.Second, options) == 0;
+            return Util.CompareModificationTime(fi.LastWriteTime.Second, file.modTime.Second, options) == 0;
         }
     }
 }

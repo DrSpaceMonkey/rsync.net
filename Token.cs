@@ -48,26 +48,26 @@ namespace NetSync
             }
         }
 
-        public int ReceiveToken(IOStream f, ref byte[] data, int offset)
+        public int ReceiveToken(IOStream ioStream, ref byte[] data, int offset)
         {
-            int tok;
+            int token;
             if (!options.doCompression)
             {
-                tok = SimpleReceiveToken(f, ref data, offset);
+                token = SimpleReceiveToken(ioStream, ref data, offset);
             }
             else
             {
-                tok = ReceiveDeflatedToken(f, data, offset);
+                token = ReceiveDeflatedToken(ioStream, data, offset);
             }
-            return tok;
+            return token;
         }
 
-        public int SimpleReceiveToken(IOStream f, ref byte[] data, int offset)
+        public int SimpleReceiveToken(IOStream ioStream, ref byte[] data, int offset)
         {
             int n;
             if (residue == 0)
             {
-                int i = f.readInt();
+                int i = ioStream.readInt();
                 if (i <= 0)
                 {
                     return i;
@@ -77,7 +77,7 @@ namespace NetSync
 
             n = Math.Min(Match.CHUNK_SIZE, residue);
             residue -= n;
-            data = f.ReadBuf(n);
+            data = ioStream.ReadBuf(n);
             return n;
         }
 

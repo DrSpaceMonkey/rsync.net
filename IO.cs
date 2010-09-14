@@ -49,6 +49,9 @@ namespace NetSync
         private byte[] IOBufIn = null;
         private byte[] IOBufOut = null;
         private int IOBufOutCount = 0;
+        /// <summary>
+        /// False
+        /// </summary>
         private bool noFlush = false;
         //private ASCIIEncoding asen = new ASCIIEncoding();
 
@@ -67,58 +70,58 @@ namespace NetSync
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="len"></param>
-        public void CalculationTotalWritten(int len)
+        /// <param name="length"></param>
+        public void CalculationTotalWritten(int length) //@todo change to private
         {
-            Options.stats.totalWritten += len;
+            Options.stats.totalWritten += length;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="len"></param>
-        public void CalculationTotalRead(int len)
+        /// <param name="length"></param>
+        public void CalculationTotalRead(int length) //@todo change to private
         {
-            Options.stats.totalRead += len;
+            Options.stats.totalRead += length;
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="b"></param>
-        /// <param name="offset"></param>
-        /// <returns></returns>
-        public UInt32 IVAL(byte[] b, int offset)
-        {
-            return (UInt32)(b[offset] + (b[offset + 1] << 8) + (b[offset + 2] << 16) + (b[offset + 3] << 24));
-        }
-
-        /// <summary>
-        /// 
+        /// Converts 4 bytes from 'buf' to UInt32 [in reverse order]
         /// </summary>
         /// <param name="buf"></param>
         /// <param name="offset"></param>
-        /// <param name="len"></param>
-        public void Write(byte[] buf, int offset, int len)
+        /// <returns></returns>
+        public UInt32 IVAL(byte[] buf, int offset) //@todo change to private
+        {
+            return (UInt32)(buf[offset] + (buf[offset + 1] << 8) + (buf[offset + 2] << 16) + (buf[offset + 3] << 24));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public void Write(byte[] buffer, int offset, int length)
         {
             try
             {
                 //WriteFD(buf, offset, len);
                 if (IOBufOut == null)
                 {
-                    sockOut.Write(buf, offset, len);
+                    sockOut.Write(buffer, offset, length);
                     return;
                 }
 
-                int off = 0;
-                while (len > 0)
+                int localOffset = 0;
+                while (length > 0)
                 {
-                    int n = Math.Min(len, IO_BUFFER_SIZE - IOBufOutCount);
+                    int n = Math.Min(length, IO_BUFFER_SIZE - IOBufOutCount);
                     if (n > 0)
                     {
-                        Util.MemCopy(IOBufOut, IOBufOutCount, buf, offset + off, n);
-                        off += n;
-                        len -= n;
+                        Util.MemoryCopy(IOBufOut, IOBufOutCount, buffer, offset + localOffset, n);
+                        localOffset += n;
+                        length -= n;
                         IOBufOutCount += n;
                     }
 
@@ -132,7 +135,7 @@ namespace NetSync
             {
                 Log.Write(e.Message);
             }
-            CalculationTotalWritten(len);
+            CalculationTotalWritten(length);
         }
 
         //public void WriteFD(byte[] buf, int offset, int len)
@@ -167,27 +170,27 @@ namespace NetSync
         /// 
         /// </summary>
         /// <param name="code"></param>
-        /// <param name="buf"></param>
-        /// <param name="len"></param>
-        public void MplexWrite(MsgCode code, byte[] buf, int len)
+        /// <param name="buffer"></param>
+        /// <param name="count"></param>
+        public void MultiplexWrite(MsgCode code, byte[] buffer, int count)
         {
-            byte[] buffer = new byte[4096];
-            int n = len;
+            byte[] localBuffer = new byte[4096];
+            int n = count;
 
-            CheckSum.SIVAL(ref buffer, 0, (UInt32)(((MPLEX_BASE + (int)code) << 24) + len));
+            CheckSum.SIVAL(ref localBuffer, 0, (UInt32)(((MPLEX_BASE + (int)code) << 24) + count));
 
-            if (n > buffer.Length - 4)
+            if (n > localBuffer.Length - 4)
             {
-                n = buffer.Length - 4;
+                n = localBuffer.Length - 4;
             }
 
-            Util.MemCopy(buffer, 4, buf, 0, n);
-            sockOut.Write(buffer, 0, n + 4);
+            Util.MemoryCopy(localBuffer, 4, buffer, 0, n);
+            sockOut.Write(localBuffer, 0, n + 4);
 
-            len -= n;
-            if (len > 0)
+            count -= n;
+            if (count > 0)
             {
-                sockOut.Write(buf, n, len);
+                sockOut.Write(buffer, n, count);
             }
         }
 
@@ -203,7 +206,7 @@ namespace NetSync
 
             if (IOMultiplexingOut)
             {
-                MplexWrite(MsgCode.MSG_DATA, IOBufOut, IOBufOutCount);
+                MultiplexWrite(MsgCode.MSG_DATA, IOBufOut, IOBufOutCount);
             }
             else
             {
@@ -381,19 +384,19 @@ namespace NetSync
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="len"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public byte[] ReadBuf(int len)
+        public byte[] ReadBuf(int length)
         {
-            byte[] data = new byte[len];
+            byte[] data = new byte[length];
             int ret;
             int total = 0;
 
-            while (total < len)
+            while (total < length)
             {
                 try
                 {
-                    ret = ReadfdUnbuffered(data, total, len - total);
+                    ret = ReadfdUnbuffered(data, total, length - total);
                     total += ret;
                 }
                 catch (Exception)
@@ -406,7 +409,7 @@ namespace NetSync
                     return null;
                 }
             }
-            CalculationTotalRead(len);
+            CalculationTotalRead(length);
             return data;
         }
 
@@ -431,17 +434,17 @@ namespace NetSync
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="off"></param>
-        /// <param name="len"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public int ReadfdUnbuffered(byte[] data, int off, int len)
+        public int ReadfdUnbuffered(byte[] data, int offset, int length)
         {
             int tag, ret = 0;
             byte[] line = new byte[1024];
 
             if (IOBufIn == null)
             {
-                return sockIn.Read(data, off, len);
+                return sockIn.Read(data, offset, length);
             }
 
             if (!IOMultiplexingIn && remaining == 0)
@@ -455,11 +458,11 @@ namespace NetSync
             {
                 if (remaining != 0)
                 {
-                    len = Math.Min(len, remaining);
-                    Util.MemCopy(data, off, IOBufIn, IOBufInIndex, len);
-                    IOBufInIndex += len;
-                    remaining -= len;
-                    ret = len;
+                    length = Math.Min(length, remaining);
+                    Util.MemoryCopy(data, offset, IOBufIn, IOBufInIndex, length);
+                    IOBufInIndex += length;
+                    remaining -= length;
+                    ret = length;
                     break;
                 }
 
@@ -484,7 +487,7 @@ namespace NetSync
                     case MsgCode.MSG_ERROR:
                         if (remaining >= line.Length)
                         {
-                            throw new Exception("multiplexing overflow " + tag + ":" + remaining);
+                            throw new Exception("Multiplexing overflow " + tag + ":" + remaining);
                         }
                         ReadLoop(line, remaining);
                         remaining = 0;

@@ -44,9 +44,21 @@ namespace NetSync
 
     public class Match
     {
+        /// <summary>
+        /// 32 * 1024
+        /// </summary>
         public const int CHUNK_SIZE = (32 * 1024);
+        /// <summary>
+        /// 1 &lt;&lt; 16
+        /// </summary>
         public const int TABLESIZE = (1 << 16);
+        /// <summary>
+        /// -1
+        /// </summary>
         public const int NULL_TAG = -1;
+        /// <summary>
+        /// 1 &lt;&lt; 0
+        /// </summary>
         public const byte SUMFLG_SAME_OFFSET = (1 << 0);
         private int falseAlarms;
         private int tagHits;
@@ -303,7 +315,7 @@ namespace NetSync
                         doneCsum2 = true;
                     }
 
-                    if (Util.MemCompare(sum2, 0, s.sums[i].sum2, 0, s.s2Length) != 0)
+                    if (Util.MemoryCompare(sum2, 0, s.sums[i].sum2, 0, s.s2Length) != 0)
                     {
                         falseAlarms++;
                         continue;
@@ -313,7 +325,7 @@ namespace NetSync
                         && (!options.inplace || options.makeBackups || s.sums[wantI].offset >= offset
                         || (s.sums[wantI].flags & SUMFLG_SAME_OFFSET) != 0)
                         && sum == s.sums[wantI].sum1
-                        && Util.MemCompare(sum2, 0, s.sums[wantI].sum2, 0, s.s2Length) == 0)
+                        && Util.MemoryCompare(sum2, 0, s.sums[wantI].sum2, 0, s.s2Length) == 0)
                     {
                         i = wantI;
                     }
@@ -375,7 +387,7 @@ namespace NetSync
             Log.WriteLine(report);
             if (options.amServer)
             {
-                f.MplexWrite(MsgCode.MSG_INFO, ASCIIEncoding.ASCII.GetBytes(report), report.Length);
+                f.MultiplexWrite(MsgCode.MSG_INFO, ASCIIEncoding.ASCII.GetBytes(report), report.Length);
             }
         }
     }

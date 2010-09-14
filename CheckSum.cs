@@ -33,17 +33,17 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Writes bytes of 'x' to 'buf' in reverse order starting from 'pos'
+        /// Writes bytes of 'x' to 'buf' [in reverse order] starting from 'offset'
         /// </summary>
         /// <param name="buf"></param>
-        /// <param name="pos"></param>
+        /// <param name="offset"></param>
         /// <param name="x"></param>
-        public static void SIVAL(ref byte[] buf, int pos, UInt32 x)
+        public static void SIVAL(ref byte[] buf, int offset, UInt32 x)
         {
-            buf[pos + 0] = (byte)(x & 0xFF);
-            buf[pos + 1] = (byte)((x >> 8) & 0xFF);
-            buf[pos + 2] = (byte)((x >> 16) & 0xFF);
-            buf[pos + 3] = (byte)((x >> 24));
+            buf[offset + 0] = (byte)(x & 0xFF);
+            buf[offset + 1] = (byte)((x >> 8) & 0xFF);
+            buf[offset + 2] = (byte)((x >> 16) & 0xFF);
+            buf[offset + 3] = (byte)((x >> 24));
         }
 
         /// <summary>

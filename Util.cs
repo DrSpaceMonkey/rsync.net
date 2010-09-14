@@ -26,22 +26,17 @@ namespace NetSync
         public static string currDir = null;
 
         /// <summary>
-        /// Checks whether (mode binaryAnd 0x8000) == 0
+        /// Checks the file 'mode' to see whether the file is a directory. If so it returns True
         /// </summary>
         /// <param name="mode"></param>
         /// <returns></returns>
         public static bool S_ISDIR(uint mode)
         {
-            //if ((mode & 0x8000) == 0)
-            //{
-            //    return true;
-            //}
-            //return false;
             return (mode & 0x8000) == 0;
         }
 
         /// <summary>
-        /// Just return first param
+        /// Just return first parameter
         /// </summary>
         /// <param name="p"></param>
         /// <param name="rootDir"></param>
@@ -51,6 +46,11 @@ namespace NetSync
         {
             return p;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         public static bool pushDir(string dir)
         {
             if (!pushDirInitialized)
@@ -210,7 +210,7 @@ namespace NetSync
         /// <param name="off2"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static int MemCompare(byte[] arr1, int off1, byte[] arr2, int off2, int length)
+        public static int MemoryCompare(byte[] arr1, int off1, byte[] arr2, int off2, int length)
         {
             for (int i = 0; i < length; i++)
             {
@@ -230,7 +230,7 @@ namespace NetSync
         /// <param name="source"></param>
         /// <param name="sourceOffset"></param>
         /// <param name="length"></param>
-        public static void MemCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
+        public static void MemoryCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
         {
             for (int i = 0; i < length; i++)
             {
@@ -241,21 +241,21 @@ namespace NetSync
         /// <summary>
         /// Compares time of modification for given files
         /// </summary>
-        /// <param name="file1"></param>
-        /// <param name="file2"></param>
+        /// <param name="file1ModificationTime"></param>
+        /// <param name="file2ModificationTime"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static int CompareModTime(long file1, long file2, Options options)
+        public static int CompareModificationTime(long file1ModificationTime, long file2ModificationTime, Options options)
         {
-            if (file2 > file1)
+            if (file2ModificationTime > file1ModificationTime)
             {
-                if (file2 - file1 <= options.modifyWindow)
+                if (file2ModificationTime - file1ModificationTime <= options.modifyWindow)
                 {
                     return 0;
                 }
                 return -1;
             }
-            if (file1 - file2 <= options.modifyWindow)
+            if (file1ModificationTime - file2ModificationTime <= options.modifyWindow)
             {
                 return 0;
             }
