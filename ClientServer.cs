@@ -60,7 +60,7 @@ namespace NetSync
                 return -1;
             }
 
-            if (!Authentication.AuthServer(clientInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
+            if (!Authentication.AuthorizeServer(clientInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
             {
                 Log.Write("auth failed on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
                 ioStream.IOPrintf("@ERROR: auth failed on module " + name + "\n");

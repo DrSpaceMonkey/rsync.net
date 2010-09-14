@@ -30,7 +30,7 @@ namespace NetSync
         /// </summary>
         /// <param name="message">ASCII string</param>
         /// <returns></returns>
-        public static string base64_encode(string message)
+        public static string Base64Encode(string message)
         {
             Encoding asciiEncoding = Encoding.ASCII;
             byte[] byteArray = new byte[asciiEncoding.GetByteCount(message)];
@@ -44,7 +44,7 @@ namespace NetSync
         /// <param name="addr"></param>
         /// <param name="opt"></param>
         /// <returns></returns>
-        public static string gen_challenge(string addr, Options opt)
+        public static string GenerateChallenge(string addr, Options opt)
         {
             string challenge = String.Empty;
             byte[] input = new byte[32];
@@ -73,7 +73,7 @@ namespace NetSync
         /// <param name="challenge"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static string generate_hash(string indata, string challenge, Options options)
+        public static string GenerateHash(string indata, string challenge, Options options)
         {
             Sum sum = new Sum(options);
 
@@ -93,7 +93,7 @@ namespace NetSync
         /// <param name="challenge"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static string auth_client(string user, string pass, string challenge, Options options)
+        public static string AuthorizeClient(string user, string pass, string challenge, Options options)
         {
             if (String.Compare(user, String.Empty) == 0)
             {
@@ -101,7 +101,7 @@ namespace NetSync
             }
             if (pass == null || String.Compare(pass, String.Empty) == 0)
             {
-                pass = getpassf(password_file);
+                pass = GetEmptyPassword(password_file);
             }
             if (String.Compare(pass, String.Empty) == 0)
             {
@@ -109,9 +109,9 @@ namespace NetSync
             }
             if (pass == null || String.Compare(pass, String.Empty) == 0)
             {
-                pass = getpass();
+                pass = GetPassword();
             }
-            string pass2 = generate_hash(pass, challenge, options);
+            string pass2 = GenerateHash(pass, challenge, options);
             Log.WriteLine(user + " " + pass2);
 
             return pass2;
@@ -121,7 +121,7 @@ namespace NetSync
         /// Request a password from user by Console
         /// </summary>
         /// <returns></returns>
-        public static string getpass()
+        public static string GetPassword()
         {
             Console.Write("Password: ");
             return Console.ReadLine();
@@ -132,7 +132,7 @@ namespace NetSync
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public static string getpassf(string filename)
+        public static string GetEmptyPassword(string filename)
         {
             return String.Empty; //@todo what is the goal of this method?
         }
@@ -140,17 +140,17 @@ namespace NetSync
         /// <summary>
         /// Server-side authorization check
         /// </summary>
-        /// <param name="cInfo"></param>
+        /// <param name="clientInfo"></param>
         /// <param name="moduleNumber"></param>
         /// <param name="addr"></param>
         /// <param name="leader"></param>
         /// <returns></returns>
-        public static bool AuthServer(ClientInfo cInfo, int moduleNumber, string addr, string leader)
+        public static bool AuthorizeServer(ClientInfo clientInfo, int moduleNumber, string addr, string leader)
         {
             string users = Daemon.config.GetAuthUsers(moduleNumber).Trim();
             //string challenge;
-            string b64_challenge;
-            IOStream f = cInfo.IoStream;
+            string b64Challenge;
+            IOStream ioStream = clientInfo.IoStream;
             string line;
 
             string user = String.Empty;
@@ -158,22 +158,18 @@ namespace NetSync
             string pass = String.Empty;
             string pass2 = String.Empty;
             string[] listUsers;
-            string tok = String.Empty;
-
+            string token = String.Empty;
 
             /* if no auth list then allow anyone in! */
-            if (users == null || users.CompareTo(String.Empty) == 0)
+            if (string.IsNullOrEmpty(users))
             {
                 return true;
             }
 
-            //challenge = gen_challenge(addr, cInfo.Options); //@todo if challenge is used only once why not remove it?
+            b64Challenge = Base64Encode(GenerateChallenge(addr, clientInfo.Options));
+            ioStream.IOPrintf(leader + b64Challenge + "\n");
 
-            b64_challenge = base64_encode(gen_challenge(addr, cInfo.Options));
-
-            f.IOPrintf(leader + b64_challenge + "\n");
-
-            line = f.ReadLine();
+            line = ioStream.ReadLine();
 
             if (line.IndexOf(' ') > 0)
             {
@@ -188,15 +184,15 @@ namespace NetSync
 
             for (int i = 0; i < listUsers.Length; i++)
             {
-                tok = listUsers[i];
-                if (user.CompareTo(tok) == 0)
+                token = listUsers[i];
+                if (user.Equals(token))
                 {
                     break;
                 }
-                tok = null;
+                token = null;
             }
 
-            if (tok == null || tok.CompareTo(String.Empty) == 0)
+            if (string.IsNullOrEmpty(token))
             {
                 return false;
             }
@@ -206,9 +202,9 @@ namespace NetSync
                 return false;
             }
 
-            pass2 = generate_hash(secret, b64_challenge, cInfo.Options);
+            pass2 = GenerateHash(secret, b64Challenge, clientInfo.Options);
 
-            if (pass.CompareTo(pass2) == 0)
+            if (pass.Equals(pass2))
             {
                 return true;
             }
@@ -229,29 +225,29 @@ namespace NetSync
             //}
             try
             {
-                string fname = Path.Combine(Environment.SystemDirectory, Daemon.config.GetSecretsFile(moduleNumber));
+                string fileName = Path.Combine(Environment.SystemDirectory, Daemon.config.GetSecretsFile(moduleNumber));
                 string secret = null;
-                using (var fd = new System.IO.StreamReader(fname))
+                using (var streamReader = new System.IO.StreamReader(fileName))
                 {
                     while (true)
                     {
-                        string line = fd.ReadLine();
+                        string line = streamReader.ReadLine();
                         if (line == null)
                         {
                             break;
                         }
                         line.Trim();
-                        if (line.CompareTo(String.Empty) != 0 && (line[0] != ';' && line[0] != '#'))
+                        if (!line.Equals(String.Empty) && line[0] != ';' && line[0] != '#')
                         {
                             string[] userp = line.Split(':');
-                            if (userp[0].Trim().CompareTo(user) == 0)
+                            if (userp[0].Trim().Equals(user))
                             {
                                 secret = userp[1].Trim();
                                 break;
                             }
                         }
                     }
-                    fd.Close();
+                    streamReader.Close();
                     return secret;
                 }
             }
@@ -259,8 +255,6 @@ namespace NetSync
             {
                 return null;
             }
-
         }
     }
-
 }

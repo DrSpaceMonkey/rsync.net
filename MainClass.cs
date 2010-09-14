@@ -290,7 +290,7 @@ namespace NetSync
                         pass = user.Substring(user.IndexOf(':') + 1);
                         user = user.Substring(0, user.IndexOf(':'));
                     }
-                    f.IOPrintf(user + " " + Authentication.auth_client(user, pass, line.Substring(18).Replace("\n", String.Empty), options) + "\n");
+                    f.IOPrintf(user + " " + Authentication.AuthorizeClient(user, pass, line.Substring(18).Replace("\n", String.Empty), options) + "\n");
                     continue;
                 }
 

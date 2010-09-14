@@ -24,16 +24,29 @@ namespace NetSync
     {
         static bool pushDirInitialized = false;
         public static string currDir = null;
+        /// <summary>
+        /// Checks whether (mode & 0x8000) == 0
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <returns></returns>
         public static bool S_ISDIR(uint mode)
         {
-            if ((mode & 0x8000) == 0)
-            {
-                return true;
-            }
-            return false;
+            //if ((mode & 0x8000) == 0)
+            //{
+            //    return true;
+            //}
+            //return false;
+            return (mode & 0x8000) == 0;
         }
 
-        public static string sanitizePath(string p, string rootDir, int depth)
+        /// <summary>
+        /// Just return first param
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="rootDir"></param>
+        /// <param name="depth"></param>
+        /// <returns></returns>
+        public static string sanitizePath(string p, string rootDir, int depth) //@todo remove it if possible
         {
             return p;
         }
@@ -46,7 +59,7 @@ namespace NetSync
                 currDir = Directory.GetCurrentDirectory();
             }
 
-            if (dir == null || dir.CompareTo(String.Empty) == 0)
+            if (string.IsNullOrEmpty(dir))
             {
                 return false;
             }
@@ -66,6 +79,11 @@ namespace NetSync
             return true;
         }
 
+        /// <summary>
+        /// Cd given 'dir' if possible
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         public static bool popDir(string dir)
         {
             try
@@ -81,6 +99,11 @@ namespace NetSync
             return true;
         }
 
+        /// <summary>
+        /// If relative filename or dirname is given then convert it to absolute
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public static string fullFileName(string fileName)
         {
             //...Safe FileName
@@ -95,6 +118,12 @@ namespace NetSync
             //...modules
         }
 
+        /// <summary>
+        /// Cleans filename to normalize it and remove '..' if needed
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="collapseDotDot"></param>
+        /// <returns></returns>
         public static string cleanFileName(string fileName, bool collapseDotDot)
         {
             string cleanedName = fileName.Replace(@"\\", @"\");
