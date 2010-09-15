@@ -349,7 +349,7 @@ namespace NetSync
             {
                 try
                 {
-                    ret = ReadFDUnbuffered(data, total, count - total);
+                    ret = ReadSocketUnbuffered(data, total, count - total);
                     total += ret;
                 }
                 catch (Exception)
@@ -373,31 +373,31 @@ namespace NetSync
         /// <param name="count"></param>
         public void ReadLoop(byte[] data, int count)
         {
-            int off = 0;
+            int offset = 0;
             while (count > 0)
             {
                 Flush();
-                int n = socketIn.Read(data, off, count);
-                off += n;
+                int n = socketIn.Read(data, offset, count);
+                offset += n;
                 count -= n;
             }
         }
 
         /// <summary>
-        /// 
+        /// Reads socket to buffer
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="buffer"></param>
         /// <param name="offset"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public int ReadFDUnbuffered(byte[] data, int offset, int count)
+        public int ReadSocketUnbuffered(byte[] buffer, int offset, int count)
         {
             int tag, ret = 0;
             byte[] line = new byte[1024];
 
             if (IOBufIn == null)
             {
-                return socketIn.Read(data, offset, count);
+                return socketIn.Read(buffer, offset, count);
             }
 
             if (!IOMultiplexingIn && remaining == 0)
@@ -412,7 +412,7 @@ namespace NetSync
                 if (remaining != 0)
                 {
                     count = Math.Min(count, remaining);
-                    Util.MemoryCopy(data, offset, IOBufIn, IOBufInIndex, count);
+                    Util.MemoryCopy(buffer, offset, IOBufIn, IOBufInIndex, count);
                     IOBufInIndex += count;
                     remaining -= count;
                     ret = count;
