@@ -42,7 +42,7 @@ namespace NetSync
         /// <param name="rootDir"></param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public static string sanitizePath(string p, string rootDir, int depth) //@todo remove it if possible
+        public static string sanitizePath(string p, string rootDir, int depth) //@todo_long remove it if possible
         {
             return p;
         }
@@ -129,10 +129,11 @@ namespace NetSync
         public static string cleanFileName(string fileName, bool collapseDotDot)
         {
             string cleanedName = fileName.Replace(@"\\", @"\");
-            if (cleanedName.EndsWith(@"\")) //@todo possibly replace by TrimEnd?
-            {
-                cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
-            }
+            //if (cleanedName.EndsWith(@"\")) //@fixed possibly replace by TrimEnd?
+            //{
+            //    cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
+            //}
+            cleanedName = cleanedName.TrimEnd('\\');
             if (collapseDotDot)
             {
                 cleanedName = cleanedName.Substring(0, 2) + cleanedName.Substring(2).Replace("..", String.Empty);
@@ -223,16 +224,16 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Copies 'length' bytes from 'source' starting at 'sourceOffset' to 'dest' starting at 'destOffset'
+        /// Copies 'count' bytes from 'source' starting at 'sourceOffset' to 'dest' starting at 'destOffset'
         /// </summary>
         /// <param name="dest"></param>
         /// <param name="destOffset"></param>
         /// <param name="source"></param>
         /// <param name="sourceOffset"></param>
-        /// <param name="length"></param>
-        public static void MemoryCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int length) //@todo change source and dest
+        /// <param name="count"></param>
+        public static void MemoryCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int count)
         {
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < count; i++)
             {
                 dest[destOffset + i] = source[sourceOffset + i];
             }

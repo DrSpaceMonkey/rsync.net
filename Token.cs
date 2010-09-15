@@ -77,7 +77,7 @@ namespace NetSync
 
             n = Math.Min(Match.CHUNK_SIZE, residue);
             residue -= n;
-            data = ioStream.ReadBuf(n);
+            data = ioStream.ReadBuffer(n);
             return n;
         }
 

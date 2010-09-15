@@ -178,7 +178,7 @@ namespace NetSync
                     sum = mdFour.Result();
 
                     fileStream.Close();
-                    buf.UnMapFile(); //@todo useless string
+                    //buf.UnMapFile(); //@fixed useless string
                     return true;
                 }
             }

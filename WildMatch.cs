@@ -22,9 +22,9 @@ namespace NetSync
     public class WildMatch
     {
 
-        private const int ABORT_ALL = -1; //@todo to const
-        private const int ABORT_TO_STARSTAR = -2; //@todo to const
-        private const Char NEGATE_CLASS = '!'; //@todo to const?
+        private const int ABORT_ALL = -1; //@fixed to const
+        private const int ABORT_TO_STARSTAR = -2; //@fixed to const
+        private const Char NEGATE_CLASS = '!'; //@fixed to const?
 
         /// <summary>
         /// Find the pattern (pattern) in the text string (text).
@@ -37,7 +37,7 @@ namespace NetSync
             return DoMatch(pattern, text) == 1;
         }
 
-        //public static bool CC_EQ(string cclass, string litmatch) //@todo remove it and use Equals
+        //public static bool CC_EQ(string cclass, string litmatch) //@fixed remove it and use Equals
         //{
         //    return cclass.CompareTo(litmatch) == 0;
         //}

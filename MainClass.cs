@@ -122,7 +122,8 @@ namespace NetSync
             if (args[0].StartsWith(Options.URL_PREFIX) && !options.readBatch) //source is remote
             {
                 string path, user = String.Empty;
-                string host = args[0].Substring(Options.URL_PREFIX.Length, args[0].Length - Options.URL_PREFIX.Length); //@todo use 1-param version of Substring
+                //string host = args[0].Substring(Options.URL_PREFIX.Length, args[0].Length - Options.URL_PREFIX.Length); //@fixed use 1-param version of Substring
+                string host = args[0].Substring(Options.URL_PREFIX.Length);
                 if (host.LastIndexOf('@') != -1)
                 {
                     user = host.Substring(0, host.LastIndexOf('@'));
@@ -401,6 +402,9 @@ namespace NetSync
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static void Usage()
         {
             PrintRsyncVersion();
@@ -492,7 +496,7 @@ namespace NetSync
         }
 
 
-        public static void Exit(string message, ClientInfo cInfo)
+        public static void Exit(string message, ClientInfo clientInfo)
         {
             Log.Write(message);
 
@@ -503,9 +507,9 @@ namespace NetSync
             }
             else
             {
-                if (cInfo != null && cInfo.IoStream != null && cInfo.IoStream.ClientThread != null)
+                if (clientInfo != null && clientInfo.IoStream != null && clientInfo.IoStream.ClientThread != null)
                 {
-                    cInfo.IoStream.ClientThread.Abort();
+                    clientInfo.IoStream.ClientThread.Abort();
                 }
             }
         }
@@ -514,20 +518,37 @@ namespace NetSync
 
     class Log
     {
+        /// <summary>
+        /// Writes string to log adding newLine character at the end
+        /// </summary>
+        /// <param name="str"></param>
         public static void WriteLine(string str)
         {
             LogWrite(str + Environment.NewLine);
         }
 
+        /// <summary>
+        /// Writes string to log
+        /// </summary>
+        /// <param name="str"></param>
         public static void Write(string str)
         {
             LogWrite(str);
         }
 
+        /// <summary>
+        /// Empty method at this moment
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="initialStats"></param>
         public static void LogSend(FileStruct file, Stats initialStats)
         {
         }
 
+        /// <summary>
+        /// Writes string to logFile or to console if client
+        /// </summary>
+        /// <param name="str"></param>
         private static void LogWrite(string str)
         {
 
@@ -545,7 +566,7 @@ namespace NetSync
                     }
                 }
                 str = "[ " + DateTime.Now + " ] " + str;
-                Daemon.ServerOptions.logFile.Write(Encoding.ASCII.GetBytes(str), 0, str.Length);
+                Daemon.ServerOptions.logFile.Write(Encoding.ASCII.GetBytes(str), 0, str.Length); //@todo cyrillic
                 Daemon.ServerOptions.logFile.Flush();
             }
             else

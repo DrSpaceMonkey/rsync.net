@@ -134,7 +134,7 @@ namespace NetSync
         /// <returns></returns>
         public static string GetEmptyPassword(string filename)
         {
-            return String.Empty; //@todo what is the goal of this method?
+            return String.Empty; //@fixed what is the goal of this method? ok, just empty pass
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace NetSync
         /// <returns></returns>
         static string GetSecret(int moduleNumber, string user)
         {
-            //if (fname == null || fname.CompareTo(String.Empty) == 0) //@todo Why check if next there is a try/catch and also Path.combine won't return null or emprty string
+            //if (fname == null || fname.CompareTo(String.Empty) == 0) //@fixed Why check if next there is a try/catch and also Path.combine won't return null or emprty string
             //{
             //    return null;
             //}

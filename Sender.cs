@@ -227,7 +227,7 @@ namespace NetSync
             {
                 s.sums[i] = new SumBuf();
                 s.sums[i].sum1 = (UInt32)f.readInt();
-                s.sums[i].sum2 = f.ReadBuf(s.s2Length);
+                s.sums[i].sum2 = f.ReadBuffer(s.s2Length);
                 s.sums[i].offset = offset;
                 s.sums[i].flags = 0;
 

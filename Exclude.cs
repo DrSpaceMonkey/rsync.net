@@ -397,19 +397,23 @@ namespace NetSync
             f.writeInt(0);
         }
 
-        public void ReceiveExcludeList(IOStream f)
+        /// <summary>
+        /// Receives exclude list from stream
+        /// </summary>
+        /// <param name="ioStream"></param>
+        public void ReceiveExcludeList(IOStream ioStream)
         {
             string line = String.Empty;
-            int l;
-            while ((l = f.readInt()) != 0)
+            int length;
+            while ((length = ioStream.readInt()) != 0)
             {
-                if (l >= Options.MAXPATHLEN + 3)
+                if (length >= Options.MAXPATHLEN + 3)
                 {
-                    Log.Write("overflow: recv_exclude_list");
+                    Log.Write("Overflow: recv_exclude_list");
                     continue;
                 }
 
-                line = f.ReadSBuf(l);
+                line = ioStream.ReadStringFromBuffer(length);
                 AddExclude(ref options.excludeList, line, 0);
             }
         }

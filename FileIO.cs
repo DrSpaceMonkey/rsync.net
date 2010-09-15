@@ -224,11 +224,11 @@ namespace NetSync
 
                 if ((numberOfReadBytes = fileDescriptor.Read(this.p, readOffset, readSize)) != readSize)
                 {
-                    if (numberOfReadBytes < 0) //@todo Read never returns <0 so status is false all the time
-                    {
-                        numberOfReadBytes = 0;
-                        status = true;
-                    }
+                    //if (numberOfReadBytes < 0) //@fixed Read never returns <0 so status is false all the time
+                    //{
+                    //    numberOfReadBytes = 0;
+                    //    status = true;
+                    //}
                     FillMemory(ref this.p, readOffset + numberOfReadBytes, 0, readSize - numberOfReadBytes);
                 }
                 this.pFileDescriptorOffset += numberOfReadBytes;

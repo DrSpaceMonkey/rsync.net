@@ -104,9 +104,9 @@ namespace NetSync
             }
 
             string dir, oldDir;
-            string lastPath = String.Empty; //@todo seems to be Empty all the time
+            string lastPath = String.Empty; //@todo_long seems to be Empty all the time
             string fileName = String.Empty;            
-            bool useFFFD = false; //@todo seems to be false all the time
+            bool useFFFD = false; //@todo_long seems to be false all the time
             if (showFileListProgress() && ioStream != null)
             {
                 startFileListProgress("building file list");
@@ -116,7 +116,7 @@ namespace NetSync
             if (ioStream != null)
             {
                 ioStream.IOStartBufferingOut();
-                if (Options.filesFromFD != null) //@todo seems to be unused because filesFromFD seems to be null all the time
+                if (Options.filesFromFD != null) //@todo_long seems to be unused because filesFromFD seems to be null all the time
                 {
                     if (!string.IsNullOrEmpty(argv[0]) && !Util.pushDir(argv[0]))
                     {
@@ -127,7 +127,7 @@ namespace NetSync
             }
             while (true)
             {
-                if (useFFFD) //@todo seems to be unused because useFFFD seems to be false all the time
+                if (useFFFD) //@todo_long seems to be unused because useFFFD seems to be false all the time
                 {
                     if ((fileName = ioStream.readFilesFromLine(Options.filesFromFD, options)).Length == 0)
                     {
@@ -183,8 +183,8 @@ namespace NetSync
                     {
                         string fileDir = fileName.Substring(0, fileName.LastIndexOf('/'));
                         string slash = fileName;
-                        int i = 0; //@todo seems to be 0 all the time
-                        while (i < fileDir.Length && i < lastPath.Length && fileDir[i] == lastPath[i]) //@todo seems that it is never executed because lastPath is allways Empty
+                        int i = 0; //@todo_long seems to be 0 all the time
+                        while (i < fileDir.Length && i < lastPath.Length && fileDir[i] == lastPath[i]) //@todo_long seems that it is never executed because lastPath is allways Empty
                         {
                             if (fileDir[i] == '/')
                             {
@@ -192,7 +192,7 @@ namespace NetSync
                             }
                             i++;
                         }
-                        if (i != fileName.LastIndexOf('/') || (i < lastPath.Length && lastPath[i] != '/'))//@todo seems to be executed unconditionally because i=0 and fileName.LastIndexOf('/') > 0
+                        if (i != fileName.LastIndexOf('/') || (i < lastPath.Length && lastPath[i] != '/'))//@todo_long seems to be executed unconditionally because i=0 and fileName.LastIndexOf('/') > 0
                         {
                             bool copyLinksSaved = options.copyLinks;
                             bool recurseSaved = options.recurse;
@@ -468,7 +468,7 @@ namespace NetSync
                 return null;
             }
             string thisName = Util.cleanFileName(fileName, false);
-            if (options.sanitizePath) //@todo It is useless for this moment
+            if (options.sanitizePath) //@todo_long It is useless for this moment
             {
                 thisName = Util.sanitizePath(thisName, String.Empty, 0);
             }
@@ -563,7 +563,7 @@ namespace NetSync
             }
 
             string thisName = lastName.Substring(0, l1);
-            thisName += f.ReadSBuf(l2);
+            thisName += f.ReadStringFromBuffer(l2);
             lastName = thisName;
 
             thisName = Util.cleanFileName(thisName, false);
@@ -609,7 +609,7 @@ namespace NetSync
             if (options.alwaysChecksum && !Util.S_ISDIR(mode))
             {
                 sum = new byte[CheckSum.MD4_SUM_LENGTH];
-                sum = f.ReadBuf(options.protocolVersion < 21 ? 2 : CheckSum.MD4_SUM_LENGTH);
+                sum = f.ReadBuffer(options.protocolVersion < 21 ? 2 : CheckSum.MD4_SUM_LENGTH);
             }
 
             FileStruct fs = new FileStruct();

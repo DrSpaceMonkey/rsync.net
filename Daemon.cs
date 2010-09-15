@@ -144,10 +144,10 @@ namespace NetSync
             }
         }
 
-        public static int StartDaemon(ClientInfo cInfo)
+        public static int StartDaemon(ClientInfo clientInfo)
         {
-            IOStream stream = cInfo.IoStream;
-            Options options = cInfo.Options;
+            IOStream stream = clientInfo.IoStream;
+            Options options = clientInfo.Options;
             options.amDaemon = true;
 
             stream.IOPrintf("@RSYNCD: " + options.protocolVersion + "\n");
@@ -187,12 +187,12 @@ namespace NetSync
             if (i < 0)
             {
                 stream.IOPrintf("@ERROR: Unknown module " + line);
-                MainClass.Exit("@ERROR: Unknown module " + line, cInfo);
+                MainClass.Exit("@ERROR: Unknown module " + line, clientInfo);
             }
             options.doStats = true;
             options.ModuleId = i;
-            ClientServer.RsyncModule(cInfo, i);
-            cInfo.IoStream.Close();
+            ClientServer.RsyncModule(clientInfo, i);
+            clientInfo.IoStream.Close();
             return 1;
         }
 

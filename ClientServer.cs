@@ -25,7 +25,7 @@ namespace NetSync
         /// Do nothing
         /// </summary>
         /// <param name="f"></param>
-        public static void SendListing(IOStream f) //@todo empty method
+        public static void SendListing(IOStream f) //@todo_long empty method
         {
 
         }
@@ -36,7 +36,7 @@ namespace NetSync
         /// <param name="clientInfo"></param>
         /// <param name="moduleNumber"></param>
         /// <returns></returns>
-        public static int RsyncModule(ClientInfo clientInfo, int moduleNumber) //@todo Why return something if result not used?
+        public static void RsyncModule(ClientInfo clientInfo, int moduleNumber) //@fixed Why return something if result not used?
         {
             string path = Daemon.config.GetModule(moduleNumber).Path;
             string name = Daemon.config.GetModuleName(moduleNumber);
@@ -57,14 +57,14 @@ namespace NetSync
             {
                 Log.Write("rsync denied on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")");
                 ioStream.IOPrintf("@ERROR: access denied to " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
-                return -1;
+                return;
             }
 
             if (!Authentication.AuthorizeServer(clientInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
             {
                 Log.Write("auth failed on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
                 ioStream.IOPrintf("@ERROR: auth failed on module " + name + "\n");
-                return -1;
+                return;
             }
             // TODO: path length
             if (Directory.Exists(path))
@@ -120,8 +120,6 @@ namespace NetSync
             MainClass.SetupProtocol(clientInfo);
             ioStream.IOStartMultiplexOut();
             Daemon.StartServer(clientInfo, args2);
-
-            return -1;
         }
     }
 }

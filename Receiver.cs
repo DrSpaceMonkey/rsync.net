@@ -324,7 +324,7 @@ namespace NetSync
                 mapBuf = null;
             }
 
-            fileSum2 = f.ReadBuf(CheckSum.MD4_SUM_LENGTH);
+            fileSum2 = f.ReadBuffer(CheckSum.MD4_SUM_LENGTH);
             if (options.verbose > 2)
             {
                 Log.WriteLine("got fileSum");
