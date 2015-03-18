@@ -18,15 +18,16 @@
 
 using System;
 using System.IO;
+
 namespace NetSync
 {
-    public class Util
+    public static class Util
     {
-        static bool _pushDirInitialized = false;
-        public static string CurrDir = null;
+        private static bool _pushDirInitialized;
+        public static string CurrDir;
 
         /// <summary>
-        /// Checks the file 'mode' to see whether the file is a directory. If so it returns True
+        ///     Checks the file 'mode' to see whether the file is a directory. If so it returns True
         /// </summary>
         /// <param name="mode"></param>
         /// <returns></returns>
@@ -36,7 +37,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Just return first parameter
+        ///     Just return first parameter
         /// </summary>
         /// <param name="p"></param>
         /// <param name="rootDir"></param>
@@ -46,8 +47,8 @@ namespace NetSync
         {
             return p;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
@@ -81,7 +82,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Cd given 'dir' if possible
+        ///     Cd given 'dir' if possible
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
@@ -101,27 +102,18 @@ namespace NetSync
         }
 
         /// <summary>
-        /// If relative filename or dirname is given then convert it to absolute
+        ///     If relative filename or dirname is given then convert it to absolute
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
         public static string FullFileName(string fileName)
         {
-            //...Safe FileName
-            if (fileName.IndexOf(':') != -1 || fileName.StartsWith(@"\\"))
-            {
-                return fileName;	//absolute
-            }
-            else
-            {
-                return CurrDir + @"\" + fileName;	//relative
-            }
-            //...modules
+            return new Uri(fileName).IsAbsoluteUri ? fileName : Path.GetFullPath(fileName);
         }
 
         /// <summary>
-        /// Replaces "\\" by "\", then removes trailing "\" .
-        /// Also if collapseDotDot is true then removes all ".." except for first two symbols of filename.
+        ///     Replaces "\\" by "\", then removes trailing "\" .
+        ///     Also if collapseDotDot is true then removes all ".." except for first two symbols of filename.
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="collapseDotDot"></param>
@@ -142,7 +134,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Returns "<NULL>", if 's' is null, otherwise returns 's' itself
+        ///     Returns "<NULL>", if 's' is null, otherwise returns 's' itself
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -152,7 +144,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Find position of ":" taking into account "/"
+        ///     Find position of ":" taking into account "/"
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -172,7 +164,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Returns array without last element
+        ///     Returns array without last element
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
@@ -187,7 +179,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Returns array without first element
+        ///     Returns array without first element
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
@@ -202,8 +194,9 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Compares two arrays of bytes and return 0, if they equal at intersing positions, otherwise return difference of first
-        /// not equal bytes (arr1[j]-arr2[j])
+        ///     Compares two arrays of bytes and return 0, if they equal at intersing positions, otherwise return difference of
+        ///     first
+        ///     not equal bytes (arr1[j]-arr2[j])
         /// </summary>
         /// <param name="arr1"></param>
         /// <param name="off1"></param>
@@ -224,7 +217,7 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Copies 'count' bytes from 'source' starting at 'sourceOffset' to 'dest' starting at 'destOffset'
+        ///     Copies 'count' bytes from 'source' starting at 'sourceOffset' to 'dest' starting at 'destOffset'
         /// </summary>
         /// <param name="dest"></param>
         /// <param name="destOffset"></param>
@@ -240,13 +233,14 @@ namespace NetSync
         }
 
         /// <summary>
-        /// Compares time of modification for given files
+        ///     Compares time of modification for given files
         /// </summary>
         /// <param name="file1ModificationTime"></param>
         /// <param name="file2ModificationTime"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static int CompareModificationTime(long file1ModificationTime, long file2ModificationTime, Options options)
+        public static int CompareModificationTime(long file1ModificationTime, long file2ModificationTime,
+            Options options)
         {
             if (file2ModificationTime > file1ModificationTime)
             {
@@ -261,6 +255,11 @@ namespace NetSync
                 return 0;
             }
             return 1;
+        }
+
+        public static string Coaleced(this string value)
+        {
+            return (value ?? string.Empty).Trim();
         }
     }
 }

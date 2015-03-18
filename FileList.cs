@@ -18,7 +18,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace NetSync
@@ -39,31 +38,8 @@ namespace NetSync
 
         public string GetFullName()
         {
-            var fullName = String.Empty;
 
-            if (string.IsNullOrEmpty(BaseName))
-            {
-                BaseName = null;
-            }
-            if (string.IsNullOrEmpty(DirName))
-            {
-                DirName = null;
-            }
-
-            if (DirName != null && BaseName != null)
-            {
-                fullName = DirName + "/" + BaseName;
-            }
-            else if (BaseName != null)
-            {
-                fullName = BaseName;
-            }
-            else if (DirName != null)
-            {
-                fullName = DirName;
-            }
-            return fullName;
-
+            return Path.Combine(DirName.Coaleced(), BaseName.Coaleced());
         }
     }
 
@@ -519,12 +495,12 @@ namespace NetSync
                 fileStruct.Gid = 0;
                 fileStruct.Uid = 0;
 
-                if (_options.AlwaysChecksum)
-                    if (!_checkSum.FileCheckSum(thisName, fileStruct.Length))
-                    {
-                        Log.Write("Skipping file " + thisName);
-                        return null;
-                    }
+                var sumLen = _options.AlwaysChecksum ? CheckSum.Md4SumLength : 0;
+                if (sumLen != 0 && (_checkSum.FileCheckSum(thisName, fileStruct.Length) != null))
+                {
+                    Log.Write("Skipping file " + thisName);
+                    return null;
+                }
 
                 Options.Stats.TotalSize += fileStruct.Length;
 

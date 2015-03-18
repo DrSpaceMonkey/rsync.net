@@ -459,7 +459,7 @@ namespace NetSync
                     {
                         Daemon.ServerOptions.LogFile =
                             new FileStream(Path.Combine(Environment.SystemDirectory, "rsyncd.log"),
-                                FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);
+                                FileMode.Append, FileAccess.Write); //FileMode.OpenOrCreate | FileMode.Append is redundant
                     }
                     catch (Exception)
                     {

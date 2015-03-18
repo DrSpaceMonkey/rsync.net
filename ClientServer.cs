@@ -36,7 +36,8 @@ namespace NetSync
         /// <param name="clientInfo"></param>
         /// <param name="moduleNumber"></param>
         /// <returns></returns>
-        public static void RsyncModule(ClientInfo clientInfo, int moduleNumber) //@fixed Why return something if result not used?
+        public static void RsyncModule(ClientInfo clientInfo, int moduleNumber)
+            //@fixed Why return something if result not used?
         {
             var path = Daemon.Config.GetModule(moduleNumber).Path;
             var name = Daemon.Config.GetModuleName(moduleNumber);
@@ -53,16 +54,21 @@ namespace NetSync
             path = path.Replace("\n", String.Empty);
 
             var ac = new Access();
-            if (!ac.AllowAccess(options.RemoteAddr, options.RemoteHost, Daemon.Config.GetHostsAllow(moduleNumber), Daemon.Config.GetHostsDeny(moduleNumber)))
+            if (
+                !ac.AllowAccess(options.RemoteAddr, options.RemoteHost, Daemon.Config.GetHostsAllow(moduleNumber),
+                    Daemon.Config.GetHostsDeny(moduleNumber)))
             {
-                Log.Write("rsync denied on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")");
-                ioStream.IoPrintf("@ERROR: access denied to " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")\n");
+                Log.Write("rsync denied on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr +
+                          ")");
+                ioStream.IoPrintf("@ERROR: access denied to " + name + " from " + options.RemoteHost + " (" +
+                                  options.RemoteAddr + ")\n");
                 return;
             }
 
             if (!Authentication.AuthorizeServer(clientInfo, moduleNumber, options.RemoteAddr, "@RSYNCD: AUTHREQD "))
             {
-                Log.Write("auth failed on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")\n");
+                Log.Write("auth failed on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr +
+                          ")\n");
                 ioStream.IoPrintf("@ERROR: auth failed on module " + name + "\n");
                 return;
             }
@@ -85,39 +91,40 @@ namespace NetSync
                     WinRsync.Exit("@ERROR: Path not found: " + path, clientInfo);
                 }
             }
-            options.AmServer = true;	//to fix error in SetupProtocol
+            options.AmServer = true; //to fix error in SetupProtocol
             options.Dir = path;
 
-            while (true)
+            do
             {
                 line = ioStream.ReadLine();
                 line = line.Substring(0, line.Length - 1);
-                if (line.CompareTo(String.Empty) == 0)
-                {
-                    break;
-                }
                 if (argc == maxArgs)
                 {
                     maxArgs += Options.MaxArgs;
                     MapFile.ExtendArray(ref args, maxArgs);
                 }
                 args[argc++] = line;
-            }
+            } while (!string.IsNullOrEmpty(line));
+
             args[argc++] = path;
 
             options.Verbose = 0;
+
+            /*
 
             var argsNotUsed = CommandLineParser.ParseArguments(args, options);
             if (argsNotUsed == -1)
             {
                 WinRsync.Exit("Error parsing options", clientInfo);
             }
+
             var args2 = new string[argsNotUsed];
             for (var i = 0; i < argsNotUsed; i++)
             {
                 args2[i] = args[args.Length - argsNotUsed + i];
             }
-
+            
+            */
 
             WinRsync.SetupProtocol(clientInfo);
             ioStream.IoStartMultiplexOut();
