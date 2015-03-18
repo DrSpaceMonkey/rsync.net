@@ -101,13 +101,13 @@ namespace NetSync
         protected bool AccessMatch(string list, string addr, string host)
         {
             char[] separators = { ' ', ',', '\t' };
-            string[] list2 = list.ToLower().Split(separators);
+            var list2 = list.ToLower().Split(separators);
             if (host != null)
             {
                 host = host.ToLower();
             }
 
-            for (int i = 0; i < list2.Length; i++)
+            for (var i = 0; i < list2.Length; i++)
             {
                 if (list2[i].CompareTo(String.Empty) == 0)
                 {
@@ -145,16 +145,16 @@ namespace NetSync
         protected bool MatchAddress(string addr, string tok)
         {
             IPAddress ipaddr = null, iptok = null;
-            string p = String.Empty;
+            var p = String.Empty;
             int len = 0, addrlen = 0;
-            byte[] mask = new byte[16];
-            int bits = 0; //changet to int?
+            var mask = new byte[16];
+            var bits = 0; //changet to int?
 
             if (addr == null || addr.CompareTo(String.Empty) == 0)
             {
                 return false;
             }
-            int pos = tok.IndexOf('/');
+            var pos = tok.IndexOf('/');
             if (pos > 0)
             {
                 p = tok.Substring(0, pos);
@@ -304,15 +304,15 @@ namespace NetSync
         /// <returns>null if parse failed, otherwise byte[] with mask</returns>
         protected byte[] InetPton4(string src)
         {
-            string digits = "0123456789";
+            var digits = "0123456789";
             char ch;
-            byte[] res = new byte[16];
+            var res = new byte[16];
             int pos = 0, octets = 0;
             bool sawDigit;
 
             sawDigit = false;
             octets = 0;
-            int i = 0;
+            var i = 0;
             while (i < src.Length)
             {
                 ch = src[i++];
@@ -320,7 +320,7 @@ namespace NetSync
 
                 if ((pch = digits.IndexOf(ch)) >= 0)
                 {
-                    byte dig = (byte)(res[pos] * 10 + pch);
+                    var dig = (byte)(res[pos] * 10 + pch);
                     //if (dig > 255) //useless because byte can't be > 255
                     //{
                     //    return null;
@@ -363,8 +363,8 @@ namespace NetSync
         /// <returns>null if parse failed, otherwise byte[] with mask</returns>
         protected byte[] InetPton6(string src)
         {
-            string xdigits = "0123456789abcdef";
-            byte[] res = new byte[NsIn6Addrsz];
+            var xdigits = "0123456789abcdef";
+            var res = new byte[NsIn6Addrsz];
             string curtok;
             bool sawXdigit;
             int pos = 0, colonp = -1, respos = 0;
@@ -423,7 +423,7 @@ namespace NetSync
                 }
                 if (ch == '.' && ((respos + NsInaddrsz) <= NsIn6Addrsz))
                 {
-                    byte[] tp = InetPton4(curtok);
+                    var tp = InetPton4(curtok);
                     if (tp != null)
                     {
                         respos += NsInaddrsz;
@@ -448,7 +448,7 @@ namespace NetSync
                 * Since some memmove()'s erroneously fail to handle
                 * overlapping regions, we'll do the shift by hand.
                 */
-                int n = respos - colonp;
+                var n = respos - colonp;
                 int i;
 
                 for (i = 1; i <= n; i++)

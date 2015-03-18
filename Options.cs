@@ -25,9 +25,9 @@ namespace NetSync
     {
         public static int ParseArguments(string[] args, Options options)
         {
-            int argsNotUsed = 0;
-            int i = 0;
-            Exclude excl = new Exclude(options);
+            var argsNotUsed = 0;
+            var i = 0;
+            var excl = new Exclude(options);
             while (i < args.Length)
             {
                 try
@@ -94,7 +94,7 @@ namespace NetSync
                             break;
                         case "--exclude-from":
                         case "--include-from":
-                            string arg = args[i];
+                            var arg = args[i];
                             excl.AddExcludeFile(ref options.ExcludeList, args[++i],
                                     (arg.CompareTo("--exclude-from") == 0) ? 0 : (int)Options.XflgDefInclude);
                             break;
@@ -330,8 +330,8 @@ namespace NetSync
             if (mergeArgs != null && mergeArgs.StartsWith("-") && mergeArgs.Substring(1).IndexOf('-') == -1)
             {
                 mergeArgs = mergeArgs.Substring(1);
-                string[] args = new string[mergeArgs.Length];
-                for (int i = 0; i < mergeArgs.Length; i++)
+                var args = new string[mergeArgs.Length];
+                for (var i = 0; i < mergeArgs.Length; i++)
                 {
                     args[i] = "-" + mergeArgs[i];
                 }
@@ -647,9 +647,9 @@ namespace NetSync
 
         public int ServerOptions(string[] args)
         {
-            int argc = 0;
+            var argc = 0;
             args[argc++] = "--server";
-            for (int i = 0; i < Verbose; i++)
+            for (var i = 0; i < Verbose; i++)
             {
                 args[argc++] = "-v";
             }

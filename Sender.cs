@@ -39,12 +39,12 @@ namespace NetSync
             ShowMessage("Processing...");
             try
             {
-                IoStream ioStream = clientInfo.IoStream;
+                var ioStream = clientInfo.IoStream;
                 string fileName = String.Empty, fileName2 = String.Empty;
                 SumStruct s = null;
-                int phase = 0;
-                bool saveMakeBackups = _options.MakeBackups;
-                Match match = new Match(_options);
+                var phase = 0;
+                var saveMakeBackups = _options.MakeBackups;
+                var match = new Match(_options);
 
                 if (_options.Verbose > 2)
                 {
@@ -53,7 +53,7 @@ namespace NetSync
                 while (true)
                 {
                     fileName = String.Empty;
-                    int i = ioStream.ReadInt();
+                    var i = ioStream.ReadInt();
                     if (i == -1)
                     {
                         if (phase == 0)
@@ -76,7 +76,7 @@ namespace NetSync
                         WinRsync.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", clientInfo);
                     }
 
-                    FileStruct file = fileList[i];
+                    var file = fileList[i];
 
                     Options.Stats.CurrentFileIndex = i;
                     Options.Stats.NumTransferredFiles++;
@@ -109,7 +109,7 @@ namespace NetSync
                         continue;
                     }
 
-                    Stats initialStats = Options.Stats;
+                    var initialStats = Options.Stats;
                     s = ReceiveSums(clientInfo);
 
                     Stream fd;
@@ -130,8 +130,8 @@ namespace NetSync
                         continue;
                     }
 
-                    FStat st = new FStat();
-                    FileInfo fi = new FileInfo(fileName);
+                    var st = new FStat();
+                    var fi = new FileInfo(fileName);
                     // TODO: path length
                     st.MTime = fi.LastWriteTime;
                     // TODO: path length
@@ -140,7 +140,7 @@ namespace NetSync
                     MapFile mbuf = null;
                     if (st.Size != 0)
                     {
-                        int mapSize = (int)Math.Max(s.BLength * 3, Options.MaxMapSize);
+                        var mapSize = (int)Math.Max(s.BLength * 3, Options.MaxMapSize);
                         mbuf = new MapFile(fd, (int)st.Size, mapSize, (int)s.BLength);
                     }
 
@@ -150,7 +150,7 @@ namespace NetSync
                     }
 
                     ioStream.WriteInt(i);
-                    Generator gen = new Generator(_options);
+                    var gen = new Generator(_options);
                     gen.WriteSumHead(ioStream, s);
 
                     if (_options.Verbose > 2)
@@ -163,7 +163,7 @@ namespace NetSync
                         Log.WriteLine(fileName2);
                     }
 
-                    Token token = new Token(_options);
+                    var token = new Token(_options);
                     token.SetCompression(fileName);
 
                     match.MatchSums(ioStream, s, mbuf, (int)st.Size);
@@ -171,7 +171,7 @@ namespace NetSync
 
                     if (mbuf != null)
                     {
-                        bool j = mbuf.UnMapFile();
+                        var j = mbuf.UnMapFile();
                         if (j)
                         {
                             Log.WriteLine("read errors mapping " + Util.FullFileName(fileName));
@@ -204,10 +204,10 @@ namespace NetSync
 
         public SumStruct ReceiveSums(ClientInfo cInfo)
         {
-            IoStream f = cInfo.IoStream;
-            SumStruct s = new SumStruct();
+            var f = cInfo.IoStream;
+            var s = new SumStruct();
             int i;
-            int offset = 0;
+            var offset = 0;
             ReadSumHead(cInfo, ref s);
             s.Sums = null;
 
@@ -253,7 +253,7 @@ namespace NetSync
 
         public void ReadSumHead(ClientInfo clientInfo, ref SumStruct sum)
         {
-            IoStream ioStream = clientInfo.IoStream;
+            var ioStream = clientInfo.IoStream;
             sum.Count = ioStream.ReadInt();
             sum.BLength = (UInt32)ioStream.ReadInt();
             if (_options.ProtocolVersion < 27)

@@ -257,7 +257,7 @@ namespace NetSync
         /// <param name="length"></param>
         private void FillMemory(ref byte[] data, int offset, byte value, int length)
         {
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 data[offset + i] = value;
             }
@@ -272,8 +272,8 @@ namespace NetSync
         /// <param name="length">Number of bytes to move</param>
         private void MemoryMove(ref byte[] destination, byte[] source, int sourceOffset, int length) //it seems that ref is't needed
         {
-            byte[] sourceCopy = (byte[])source.Clone();
-            for (int i = 0; i < length; i++)
+            var sourceCopy = (byte[])source.Clone();
+            for (var i = 0; i < length; i++)
             {
                 destination[i] = sourceCopy[sourceOffset + i];
             }
@@ -292,7 +292,7 @@ namespace NetSync
             }
             else
             {
-                byte[] tempArray = new byte[array.Length];
+                var tempArray = new byte[array.Length];
                 array.CopyTo(tempArray, 0);
                 array = new byte[size];
                 tempArray.CopyTo(array, 0);
@@ -312,7 +312,7 @@ namespace NetSync
             }
             else
             {
-                string[] tempArray = new string[array.Length];
+                var tempArray = new string[array.Length];
                 array.CopyTo(tempArray, 0);
                 array = new string[size];
                 tempArray.CopyTo(array, 0);

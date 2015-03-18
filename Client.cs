@@ -23,8 +23,8 @@ namespace NetSync
     {
         public int ClientRun(ClientInfo clientInfo, int pid, string[] args)
         {
-            Options options = clientInfo.Options;
-            IoStream ioStream = clientInfo.IoStream;
+            var options = clientInfo.Options;
+            var ioStream = clientInfo.IoStream;
             FileList fList;
             List<FileStruct> fileList;
 
@@ -39,7 +39,7 @@ namespace NetSync
 
                 if (options.DeleteMode && !options.DeleteExcluded)
                 {
-                    Exclude excl = new Exclude(options);
+                    var excl = new Exclude(options);
                     excl.SendExcludeList(ioStream);
                 }
 
@@ -55,7 +55,7 @@ namespace NetSync
                     Log.WriteLine("file list sent");
                 }
                 ioStream.Flush();
-                Sender sender = new Sender(options);
+                var sender = new Sender(options);
                 sender.SendFiles(fileList, clientInfo);
                 ioStream.Flush();
                 ioStream.WriteInt(-1);
@@ -75,7 +75,7 @@ namespace NetSync
             }
             if (!options.ReadBatch)
             {
-                Exclude excl = new Exclude(options);
+                var excl = new Exclude(options);
                 excl.SendExcludeList(ioStream);
             }
             fList = new FileList(options);

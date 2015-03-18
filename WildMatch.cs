@@ -52,7 +52,7 @@ namespace NetSync
         {
             int matched, special; // They have both to be int just because DoMatch can return -1 and -2
             Char ch, prev;
-            for (int k = 0; k < pattern.Length; k++)
+            for (var k = 0; k < pattern.Length; k++)
             {
                 ch = pattern[k];
                 if (k > 0)
@@ -114,8 +114,8 @@ namespace NetSync
                         {
                             text = text.Substring(1);
                         }
-                        string r = pattern.Substring(k);
-                        for (int t = 0; t < text.Length; )
+                        var r = pattern.Substring(k);
+                        for (var t = 0; t < text.Length; )
                         {
                             if ((matched = DoMatch(r, text)) != 0)
                             {
@@ -179,7 +179,7 @@ namespace NetSync
                             }
                             else if (ch == '[' && pattern[k] == ':')
                             {
-                                int j = 0;
+                                var j = 0;
                                 ch = pattern[k + j + 1];
                                 while (pattern.Length > k + 1 + j && ch != ']')
                                 {
@@ -204,7 +204,7 @@ namespace NetSync
                                 {
                                     k += j;
                                 }
-                                string s = pattern.Substring(k - j + 1, j - 1);
+                                var s = pattern.Substring(k - j + 1, j - 1);
                                 if (s.Equals("alnum"))
                                 {
                                     if (Char.IsLetterOrDigit(text[0]))

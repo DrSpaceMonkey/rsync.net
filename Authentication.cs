@@ -32,8 +32,8 @@ namespace NetSync
         /// <returns></returns>
         public static string Base64Encode(string message)
         {
-            Encoding asciiEncoding = Encoding.ASCII;
-            byte[] byteArray = new byte[asciiEncoding.GetByteCount(message)];
+            var asciiEncoding = Encoding.ASCII;
+            var byteArray = new byte[asciiEncoding.GetByteCount(message)];
             byteArray = asciiEncoding.GetBytes(message);
             return Convert.ToBase64String(byteArray);
         }
@@ -46,11 +46,11 @@ namespace NetSync
         /// <returns></returns>
         public static string GenerateChallenge(string addr, Options opt)
         {
-            string challenge = String.Empty;
-            byte[] input = new byte[32];
-            DateTime timeVector = DateTime.Now;
+            var challenge = String.Empty;
+            var input = new byte[32];
+            var timeVector = DateTime.Now;
 
-            for (int i = 0; i < addr.Length; i++)
+            for (var i = 0; i < addr.Length; i++)
             {
                 input[i] = Convert.ToByte(addr[i]);
             }
@@ -59,7 +59,7 @@ namespace NetSync
             CheckSum.Sival(ref input, 20, (UInt32)timeVector.Hour);
             CheckSum.Sival(ref input, 24, (UInt32)timeVector.Day);
 
-            Sum sum = new Sum(opt);
+            var sum = new Sum(opt);
             sum.Init(0);
             sum.Update(input, 0, input.Length);
             challenge = Encoding.ASCII.GetString(sum.End());
@@ -75,13 +75,13 @@ namespace NetSync
         /// <returns></returns>
         public static string GenerateHash(string indata, string challenge, Options options)
         {
-            Sum sum = new Sum(options);
+            var sum = new Sum(options);
 
             sum.Init(0);
             sum.Update(Encoding.ASCII.GetBytes(indata), 0, indata.Length);
             sum.Update(Encoding.ASCII.GetBytes(challenge), 0, challenge.Length);
-            byte[] buf = sum.End();
-            string hash = Convert.ToBase64String(buf);
+            var buf = sum.End();
+            var hash = Convert.ToBase64String(buf);
             return hash.Substring(0, (buf.Length * 8 + 5) / 6);
         }
 
@@ -111,7 +111,7 @@ namespace NetSync
             {
                 pass = GetPassword();
             }
-            string pass2 = GenerateHash(pass, challenge, options);
+            var pass2 = GenerateHash(pass, challenge, options);
             Log.WriteLine(user + " " + pass2);
 
             return pass2;
@@ -147,18 +147,18 @@ namespace NetSync
         /// <returns></returns>
         public static bool AuthorizeServer(ClientInfo clientInfo, int moduleNumber, string addr, string leader)
         {
-            string users = Daemon.Config.GetAuthUsers(moduleNumber).Trim();
+            var users = Daemon.Config.GetAuthUsers(moduleNumber).Trim();
             //string challenge;
             string b64Challenge;
-            IoStream ioStream = clientInfo.IoStream;
+            var ioStream = clientInfo.IoStream;
             string line;
 
-            string user = String.Empty;
-            string secret = String.Empty;
-            string pass = String.Empty;
-            string pass2 = String.Empty;
+            var user = String.Empty;
+            var secret = String.Empty;
+            var pass = String.Empty;
+            var pass2 = String.Empty;
             string[] listUsers;
-            string token = String.Empty;
+            var token = String.Empty;
 
             /* if no auth list then allow anyone in! */
             if (string.IsNullOrEmpty(users))
@@ -182,7 +182,7 @@ namespace NetSync
             }
             listUsers = users.Split(',');
 
-            for (int i = 0; i < listUsers.Length; i++)
+            for (var i = 0; i < listUsers.Length; i++)
             {
                 token = listUsers[i];
                 if (user.Equals(token))
@@ -225,13 +225,13 @@ namespace NetSync
             //}
             try
             {
-                string fileName = Path.Combine(Environment.SystemDirectory, Daemon.Config.GetSecretsFile(moduleNumber));
+                var fileName = Path.Combine(Environment.SystemDirectory, Daemon.Config.GetSecretsFile(moduleNumber));
                 string secret = null;
                 using (var streamReader = new StreamReader(fileName))
                 {
                     while (true)
                     {
-                        string line = streamReader.ReadLine();
+                        var line = streamReader.ReadLine();
                         if (line == null)
                         {
                             break;
@@ -239,7 +239,7 @@ namespace NetSync
                         line.Trim();
                         if (!line.Equals(String.Empty) && line[0] != ';' && line[0] != '#')
                         {
-                            string[] userp = line.Split(':');
+                            var userp = line.Split(':');
                             if (userp[0].Trim().Equals(user))
                             {
                                 secret = userp[1].Trim();

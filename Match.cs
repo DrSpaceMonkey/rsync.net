@@ -96,12 +96,12 @@ namespace NetSync
 
         public void BuildHashTable(SumStruct s)
         {
-            for (int i = 0; i < s.Count; i++)
+            for (var i = 0; i < s.Count; i++)
             {
                 _targets.Add(new Target());
             }
 
-            for (int i = 0; i < s.Count; i++)
+            for (var i = 0; i < s.Count; i++)
             {
                 _targets[i].I = i;
                 _targets[i].T = GetTag(s.Sums[i].Sum1);
@@ -109,13 +109,13 @@ namespace NetSync
 
             _targets.Sort(0, s.Count, new TargetComparer());
 
-            for (int i = 0; i < Tablesize; i++)
+            for (var i = 0; i < Tablesize; i++)
             {
                 _tagTable[i] = NullTag;
             }
 
 
-            for (int i = s.Count; i-- > 0; )
+            for (var i = s.Count; i-- > 0; )
             {
                 _tagTable[((Target)_targets[i]).T] = i;
             }
@@ -123,7 +123,7 @@ namespace NetSync
 
         public void MatchSums(IoStream f, SumStruct s, MapFile buf, int len)
         {
-            byte[] fileSum = new byte[CheckSum.Md4SumLength];
+            var fileSum = new byte[CheckSum.Md4SumLength];
 
             _lastMatch = 0;
             _falseAlarms = 0;
@@ -131,7 +131,7 @@ namespace NetSync
             _matches = 0;
             _dataTransfer = 0;
 
-            Sum sum = new Sum(_options);
+            var sum = new Sum(_options);
             sum.Init(_options.ChecksumSeed);
 
             if (len > 0 && s.Count > 0)
@@ -152,9 +152,9 @@ namespace NetSync
             }
             else
             {
-                for (int j = 0; j < len - ChunkSize; j += ChunkSize)
+                for (var j = 0; j < len - ChunkSize; j += ChunkSize)
                 {
-                    int n1 = Math.Min(ChunkSize, (len - ChunkSize) - j);
+                    var n1 = Math.Min(ChunkSize, (len - ChunkSize) - j);
                     Matched(f, s, buf, j + n1, -2, sum);
                 }
                 Matched(f, s, buf, len, -1, sum);
@@ -187,7 +187,7 @@ namespace NetSync
 
         public void Matched(IoStream f, SumStruct s, MapFile buf, int offset, int i, Sum sum)
         {
-            int n = offset - _lastMatch;
+            var n = offset - _lastMatch;
             int j;
 
             if (_options.Verbose > 2 && i >= 0)
@@ -195,7 +195,7 @@ namespace NetSync
                 Log.WriteLine("match at " + offset + " last_match=" + _lastMatch + " j=" + i + " len=" + s.Sums[i].Len + " n=" + n);
             }
 
-            Token token = new Token(_options);
+            var token = new Token(_options);
             token.SendToken(f, i, buf, _lastMatch, n, (int)(i < 0 ? 0 : s.Sums[i].Len));
             _dataTransfer += n;
 
@@ -207,8 +207,8 @@ namespace NetSync
 
             for (j = 0; j < n; j += ChunkSize)
             {
-                int n1 = Math.Min(ChunkSize, n - j);
-                int off = buf.MapPtr(_lastMatch + j, n1);
+                var n1 = Math.Min(ChunkSize, n - j);
+                var off = buf.MapPtr(_lastMatch + j, n1);
                 sum.Update(buf.P, off, n1);
             }
 
@@ -236,7 +236,7 @@ namespace NetSync
             int offset, end, backup;
             UInt32 k;
             int wantI;
-            byte[] sum2 = new byte[CheckSum.SumLength];
+            var sum2 = new byte[CheckSum.SumLength];
             UInt32 s1, s2, sum;
             int more;
             byte[] map;
@@ -248,10 +248,10 @@ namespace NetSync
             }
 
             k = (UInt32)Math.Min(len, s.BLength);
-            int off = buf.MapPtr(0, (int)k);
+            var off = buf.MapPtr(0, (int)k);
             map = buf.P;
 
-            UInt32 g = s.Sums[0].Sum1;
+            var g = s.Sums[0].Sum1;
             sum = CheckSum.GetChecksum1(map, off, (int)k);
             s1 = sum & 0xFFFF;
             s2 = sum >> 16;
@@ -269,9 +269,9 @@ namespace NetSync
 
             do
             {
-                UInt32 t = GetTag2(s1, s2);
-                bool doneCsum2 = false;
-                int j = _tagTable[t];
+                var t = GetTag2(s1, s2);
+                var doneCsum2 = false;
+                var j = _tagTable[t];
 
                 if (_options.Verbose > 4)
                 {
@@ -288,7 +288,7 @@ namespace NetSync
                 do
                 {
                     UInt32 l;
-                    int i = ((Target)_targets[j]).I;
+                    var i = ((Target)_targets[j]).I;
 
                     if (sum != s.Sums[i].Sum1)
                     {
@@ -310,7 +310,7 @@ namespace NetSync
                     {
                         off = buf.MapPtr(offset, (int)l);
                         map = buf.P;
-                        CheckSum cs = new CheckSum(_options);
+                        var cs = new CheckSum(_options);
                         sum2 = cs.GetChecksum2(map, off, (int)l);
                         doneCsum2 = true;
                     }
@@ -381,7 +381,7 @@ namespace NetSync
                 return;
             }
 
-            string report = "total: matches=" + _totalMatches + "  tagHits=" + _totalTagHits + "  falseAlarms=" +
+            var report = "total: matches=" + _totalMatches + "  tagHits=" + _totalTagHits + "  falseAlarms=" +
                 _totalFalseAlarms + " data=" + Options.Stats.LiteralData;
 
             Log.WriteLine(report);

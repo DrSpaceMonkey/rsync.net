@@ -118,10 +118,10 @@ namespace NetSync
                     return;
                 }
 
-                int localOffset = 0;
+                var localOffset = 0;
                 while (length > 0)
                 {
-                    int n = Math.Min(length, IoBufferSize - _ioBufOutCount);
+                    var n = Math.Min(length, IoBufferSize - _ioBufOutCount);
                     if (n > 0)
                     {
                         Util.MemoryCopy(_ioBufOut, _ioBufOutCount, buffer, offset + localOffset, n);
@@ -151,8 +151,8 @@ namespace NetSync
         /// <param name="count"></param>
         public void MultiplexWrite(MsgCode code, byte[] buffer, int count)
         {
-            byte[] localBuffer = new byte[4096];
-            int n = count;
+            var localBuffer = new byte[4096];
+            var n = count;
 
             CheckSum.Sival(ref localBuffer, 0, (UInt32)(((MplexBase + (int)code) << 24) + count));
 
@@ -198,7 +198,7 @@ namespace NetSync
         /// <param name="x"></param>
         public void WriteInt(int x)
         {
-            byte[] data = new byte[4];
+            var data = new byte[4];
             data[0] = (byte)(x & 0xFF);
             data[1] = (byte)((x >> 8) & 0xFF);
             data[2] = (byte)((x >> 16) & 0xFF);
@@ -212,7 +212,7 @@ namespace NetSync
         /// <param name="x"></param>
         public void WriteUInt(UInt32 x)
         {
-            byte[] data = new byte[4];
+            var data = new byte[4];
             data[0] = (byte)(x & 0xFF);
             data[1] = (byte)((x >> 8) & 0xFF);
             data[2] = (byte)((x >> 16) & 0xFF);
@@ -226,7 +226,7 @@ namespace NetSync
         /// <param name="val"></param>
         public void WriteByte(byte val)
         {
-            byte[] data = new byte[1];
+            var data = new byte[1];
             data[0] = val;
             Write(data, 0, 1);
         }
@@ -237,7 +237,7 @@ namespace NetSync
         /// <param name="x"></param>
         public void WriteLongInt(Int64 x)
         {
-            byte[] data = new byte[8];
+            var data = new byte[8];
 
             if (x <= 0x7FFFFFFF)
             {
@@ -260,7 +260,7 @@ namespace NetSync
         {
             //byte[] data = usen.GetBytes(message);
             //byte[] data = asen.GetBytes(message);
-            byte[] data = Encoding.ASCII.GetBytes(message); //@todo cyrillic
+            var data = Encoding.ASCII.GetBytes(message); //@todo cyrillic
             Write(data, 0, data.Length);
         }
 
@@ -272,14 +272,14 @@ namespace NetSync
         /// <returns></returns>
         public string ReadFilesFromLine(Stream stream, Options options)
         {
-            string fileName = String.Empty;
-            bool readingRemotely = options.RemoteFilesFromFile != null;
-            bool nulls = options.EolNulls || readingRemotely;
+            var fileName = String.Empty;
+            var readingRemotely = options.RemoteFilesFromFile != null;
+            var nulls = options.EolNulls || readingRemotely;
             while (true)
             {
                 while (true)
                 {
-                    int readByte = stream.ReadByte();
+                    var readByte = stream.ReadByte();
                     if (readByte == -1)
                     {
                         break;
@@ -321,11 +321,11 @@ namespace NetSync
         /// <returns></returns>
         public string ReadLine()
         {
-            StringBuilder data = new StringBuilder();
+            var data = new StringBuilder();
             while (true)
             {
-                byte readAByte = ReadByte();
-                char read = Convert.ToChar(readAByte);
+                var readAByte = ReadByte();
+                var read = Convert.ToChar(readAByte);
                 if (read != '\r')
                 {
                     data.Append(read);
@@ -345,7 +345,7 @@ namespace NetSync
         /// <returns></returns>
         public string ReadStringFromBuffer(int count)
         {
-            byte[] data = new byte[count];
+            var data = new byte[count];
             data = ReadBuffer(count);
             return Encoding.ASCII.GetString(data); //@todo cyrillic
         }
@@ -357,9 +357,9 @@ namespace NetSync
         /// <returns></returns>
         public byte[] ReadBuffer(int count)
         {
-            byte[] buffer = new byte[count];
+            var buffer = new byte[count];
             int bytesRead;
-            int total = 0;
+            var total = 0;
 
             while (total < count)
             {
@@ -389,11 +389,11 @@ namespace NetSync
         /// <param name="count"></param>
         public void ReadLoop(byte[] buffer, int count)
         {
-            int offset = 0;
+            var offset = 0;
             while (count > 0)
             {
                 Flush();
-                int n = _socketIn.Read(buffer, offset, count);
+                var n = _socketIn.Read(buffer, offset, count);
                 offset += n;
                 count -= n;
             }
@@ -409,7 +409,7 @@ namespace NetSync
         public int ReadSocketUnbuffered(byte[] buffer, int offset, int count)
         {
             int tag, result = 0;
-            byte[] line = new byte[1024];
+            var line = new byte[1024];
 
             if (_ioBufIn == null)
             {
@@ -480,7 +480,7 @@ namespace NetSync
         /// <returns></returns>
         public int ReadInt()
         {
-            byte[] arr = new byte[4];
+            var arr = new byte[4];
             arr = ReadBuffer(4);
             return arr[0] + (arr[1] << 8) + (arr[2] << 16) + (arr[3] << 24);
         }
@@ -501,7 +501,7 @@ namespace NetSync
         public Int64 ReadLongInt()
         {
             Int64 result;
-            byte[] b = new byte[8];
+            var b = new byte[8];
             result = ReadInt();
 
             if ((UInt32)result != 0xffffffff)

@@ -106,7 +106,7 @@ namespace NetSync
                 s1 += (UInt32)(ToInt(buf[i + pos]) + CharOffset);
                 s2 += s1;
             }
-            UInt32 sum = ((s1 & 0xffff) + (s2 << 16));
+            var sum = ((s1 & 0xffff) + (s2 << 16));
             return sum;
         }
 
@@ -119,12 +119,12 @@ namespace NetSync
         /// <returns></returns>
         public byte[] GetChecksum2(byte[] buf, int pos, int len)
         {
-            byte[] buf1 = new byte[len + 4];
-            for (int j = 0; j < len; j++)
+            var buf1 = new byte[len + 4];
+            for (var j = 0; j < len; j++)
             {
                 buf1[j] = buf[pos + j];
             }
-            MdFour mdFour = new MdFour(_options);
+            var mdFour = new MdFour(_options);
             mdFour.Begin();
             if (_options.ChecksumSeed != 0)
             {
@@ -147,45 +147,34 @@ namespace NetSync
         /// 
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="sum"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public bool FileCheckSum(string fileName, ref byte[] sum, int size)
+        public byte[] FileCheckSum(string fileName, int size)
         {
-            int i;
-            MdFour mdFour = new MdFour(_options);
-            sum = new byte[Md4SumLength];
-            try
+            var mdFour = new MdFour(_options);
+
+            using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                var buf = new MapFile(fileStream, size, Options.MaxMapSize, CsumChunk);
+                mdFour.Begin();
+
+                int i;
+                for (i = 0; i + CsumChunk <= size; i += CsumChunk)
                 {
-
-                    MapFile buf = new MapFile(fileStream, size, Options.MaxMapSize, CsumChunk);
-                    mdFour.Begin();
-
-                    for (i = 0; i + CsumChunk <= size; i += CsumChunk)
-                    {
-                        int offset = buf.MapPtr(i, CsumChunk);
-                        mdFour.Update(buf.P, offset, CsumChunk);
-                    }
-
-                    if (size - i > 0 || _options.ProtocolVersion >= 27)
-                    {
-                        int offset = buf.MapPtr(i, size - i);
-                        mdFour.Update(buf.P, offset, (UInt32)(size - i));
-                    }
-
-                    sum = mdFour.Result();
-
-                    fileStream.Close();
-                    //buf.UnMapFile(); //@fixed useless string
-                    return true;
+                    var offset = buf.MapPtr(i, CsumChunk);
+                    mdFour.Update(buf.P, offset, CsumChunk);
                 }
+
+                if (size - i > 0 || _options.ProtocolVersion >= 27)
+                {
+                    var offset = buf.MapPtr(i, size - i);
+                    mdFour.Update(buf.P, offset, (UInt32) (size - i));
+                }
+
+                fileStream.Close();
+                return mdFour.Result();
             }
-            catch (Exception)
-            {
-            }
-            return false;
 
         }
     }
@@ -320,7 +309,7 @@ namespace NetSync
 
         public byte[] Result()
         {
-            byte[] ret = new byte[16];
+            var ret = new byte[16];
             Copy4(ref ret, 0, A);
             Copy4(ref ret, 4, B);
             Copy4(ref ret, 8, C);
@@ -338,7 +327,7 @@ namespace NetSync
 
         private void Copy64(ref UInt32[] m, int ind, byte[] inData, int ind2)
         {
-            for (int i = 0; i < 16; i++)
+            for (var i = 0; i < 16; i++)
             {
                 m[i + ind] = (UInt32)((inData[i * 4 + 3 + ind2] << 24) | (inData[i * 4 + 2 + ind2] << 16) | (inData[i * 4 + 1 + ind2] << 8) | (inData[i * 4 + 0 + ind2] << 0));
             }
@@ -346,15 +335,15 @@ namespace NetSync
 
         public void Tail(byte[] inData, int ind, UInt32 n)
         {
-            UInt32[] m = new UInt32[16];
+            var m = new UInt32[16];
             TotalN += n << 3;
             if (TotalN < (n << 3))
             {
                 TotalN2++;
             }
             TotalN2 += n >> 29;
-            byte[] buf = new byte[128];
-            for (int i = 0; i < n; i++)
+            var buf = new byte[128];
+            for (var i = 0; i < n; i++)
             {
                 buf[i] = inData[ind + i];
             }
@@ -385,14 +374,14 @@ namespace NetSync
 
         public void Update(byte[] inData, int ind, UInt32 n)
         {
-            UInt32[] m = new UInt32[16];
+            var m = new UInt32[16];
 
             if (n == 0)
             {
                 Tail(inData, ind, 0);
             }
 
-            int i = 0;
+            var i = 0;
             while (n >= 64)
             {
                 Copy64(ref m, 0, inData, ind + i);
@@ -421,7 +410,7 @@ namespace NetSync
         public int SumResidue;
         public byte[] Sumrbuf = new byte[CheckSum.CsumChunk];
         public MdFour Md;
-        private Options _options;
+        private readonly Options _options;
 
         public Sum(Options opt)
         {
@@ -431,7 +420,7 @@ namespace NetSync
 
         public void Init(int seed)
         {
-            byte[] s = new byte[4];
+            var s = new byte[4];
             Md.Begin();
             SumResidue = 0;
             CheckSum.Sival(ref s, 0, (UInt32)seed);
@@ -440,10 +429,10 @@ namespace NetSync
 
         public void Update(byte[] p, int ind, int len)
         {
-            int pPos = 0;
+            var pPos = 0;
             if (len + SumResidue < CheckSum.CsumChunk)
             {
-                for (int j = 0; j < len; j++)
+                for (var j = 0; j < len; j++)
                 {
                     Sumrbuf[SumResidue + j] = p[j + ind];
                 }
@@ -453,8 +442,8 @@ namespace NetSync
 
             if (SumResidue != 0)
             {
-                int min = Math.Min(CheckSum.CsumChunk - SumResidue, len);
-                for (int j = 0; j < min; j++)
+                var min = Math.Min(CheckSum.CsumChunk - SumResidue, len);
+                for (var j = 0; j < min; j++)
                 {
                     Sumrbuf[SumResidue + j] = p[j + ind];
                 }
@@ -466,7 +455,7 @@ namespace NetSync
             int i;
             for (i = 0; i + CheckSum.CsumChunk <= len; i += CheckSum.CsumChunk)
             {
-                for (int j = 0; j < CheckSum.CsumChunk; j++)
+                for (var j = 0; j < CheckSum.CsumChunk; j++)
                 {
                     Sumrbuf[j] = p[pPos + i + j + ind];
                 }
@@ -476,7 +465,7 @@ namespace NetSync
             if (len - i > 0)
             {
                 SumResidue = len - i;
-                for (int j = 0; j < SumResidue; j++)
+                for (var j = 0; j < SumResidue; j++)
                 {
                     Sumrbuf[j] = p[pPos + i + j + ind];
                 }

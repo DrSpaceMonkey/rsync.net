@@ -51,7 +51,7 @@ namespace NetSync
         {
             lock (this)
             {
-                for (int i = 0; i < Modules.Count; i++)
+                for (var i = 0; i < Modules.Count; i++)
                 {
                     if (Modules[i].Name == nameModule)
                     {
@@ -200,7 +200,7 @@ namespace NetSync
                         {
                             while (true)
                             {
-                                string line = cf.ReadLine();
+                                var line = cf.ReadLine();
                                 if (line == null)
                                 {
                                     break;
@@ -211,7 +211,7 @@ namespace NetSync
                                     if (line[0] == '[' && line[line.Length - 1] == ']')
                                     {
                                         line = line.TrimStart('[').TrimEnd(']');
-                                        int numberModule = -1;
+                                        var numberModule = -1;
                                         if ((numberModule = GetNumberModule(line)) >= 0)
                                         {
                                             mod = GetModule(numberModule);
@@ -226,7 +226,7 @@ namespace NetSync
                                     {
                                         if (mod != null)
                                         {
-                                            string[] parm = line.Split('=');
+                                            var parm = line.Split('=');
                                             if (parm.Length > 2)
                                             {
                                                 continue;
@@ -265,7 +265,7 @@ namespace NetSync
                                         }
                                         else
                                         {
-                                            string[] parm = line.Split('=');
+                                            var parm = line.Split('=');
                                             if (parm.Length > 2)
                                             {
                                                 continue;
@@ -275,7 +275,7 @@ namespace NetSync
                                             switch (parm[0])
                                             {
                                                 case "log file":
-                                                    string logFile = parm[1];
+                                                    var logFile = parm[1];
                                                     try
                                                     {
                                                         options.LogFile = new FileStream(logFile, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);

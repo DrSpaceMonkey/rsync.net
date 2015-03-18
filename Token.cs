@@ -67,7 +67,7 @@ namespace NetSync
             int n;
             if (Residue == 0)
             {
-                int i = ioStream.ReadInt();
+                var i = ioStream.ReadInt();
                 if (i <= 0)
                 {
                     return i;
@@ -106,12 +106,12 @@ namespace NetSync
         {
             if (n > 0)
             {
-                int l = 0;
+                var l = 0;
                 while (l < n)
                 {
-                    int n1 = Math.Min(Match.ChunkSize, n - l);
+                    var n1 = Math.Min(Match.ChunkSize, n - l);
                     f.WriteInt(n1);
-                    int off = buf.MapPtr(offset + l, n1);
+                    var off = buf.MapPtr(offset + l, n1);
                     f.Write(buf.P, off, n1);
                     l += n1;
                 }

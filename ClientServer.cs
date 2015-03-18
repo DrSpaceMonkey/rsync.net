@@ -38,13 +38,13 @@ namespace NetSync
         /// <returns></returns>
         public static void RsyncModule(ClientInfo clientInfo, int moduleNumber) //@fixed Why return something if result not used?
         {
-            string path = Daemon.Config.GetModule(moduleNumber).Path;
-            string name = Daemon.Config.GetModuleName(moduleNumber);
-            IoStream ioStream = clientInfo.IoStream;
-            Options options = clientInfo.Options;
-            string[] args = new string[Options.MaxArgs];
+            var path = Daemon.Config.GetModule(moduleNumber).Path;
+            var name = Daemon.Config.GetModuleName(moduleNumber);
+            var ioStream = clientInfo.IoStream;
+            var options = clientInfo.Options;
+            var args = new string[Options.MaxArgs];
             int argc = 0, maxArgs = Options.MaxArgs;
-            string line = String.Empty;
+            var line = String.Empty;
 
             if (path[0] == '/')
             {
@@ -52,7 +52,7 @@ namespace NetSync
             }
             path = path.Replace("\n", String.Empty);
 
-            Access ac = new Access();
+            var ac = new Access();
             if (!ac.AllowAccess(options.RemoteAddr, options.RemoteHost, Daemon.Config.GetHostsAllow(moduleNumber), Daemon.Config.GetHostsDeny(moduleNumber)))
             {
                 Log.Write("rsync denied on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")");
@@ -107,13 +107,13 @@ namespace NetSync
 
             options.Verbose = 0;
 
-            int argsNotUsed = CommandLineParser.ParseArguments(args, options);
+            var argsNotUsed = CommandLineParser.ParseArguments(args, options);
             if (argsNotUsed == -1)
             {
                 WinRsync.Exit("Error parsing options", clientInfo);
             }
-            string[] args2 = new string[argsNotUsed];
-            for (int i = 0; i < argsNotUsed; i++)
+            var args2 = new string[argsNotUsed];
+            for (var i = 0; i < argsNotUsed; i++)
             {
                 args2[i] = args[args.Length - argsNotUsed + i];
             }

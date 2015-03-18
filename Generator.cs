@@ -51,7 +51,7 @@ namespace NetSync
         public void GenerateFiles(IoStream f, List<FileStruct> fileList, string localName)
         {
             int i;
-            int phase = 0;
+            var phase = 0;
 
 
             if (_options.Verbose > 2)
@@ -61,7 +61,7 @@ namespace NetSync
 
             for (i = 0; i < fileList.Count; i++)
             {
-                FileStruct file = (fileList[i]);
+                var file = (fileList[i]);
                 if (file.BaseName == null)
                 {
                     continue;
@@ -99,7 +99,7 @@ namespace NetSync
             * */
             for (i = 0; i < fileList.Count; i++)
             {
-                FileStruct file = (fileList[i]);
+                var file = (fileList[i]);
                 if (file.BaseName != null || Util.S_ISDIR(file.Mode))
                 {
                     continue;
@@ -126,7 +126,7 @@ namespace NetSync
                 Log.WriteLine("Receive Generator(" + fileName + "," + i + ")\n");
             }
             int statRet;
-            FStat st = new FStat();
+            var st = new FStat();
             if (_options.DryRun)
             {
                 statRet = -1;
@@ -136,7 +136,7 @@ namespace NetSync
                 statRet = 0;
                 try
                 {
-                    FileInfo fi = new FileInfo(fileName);
+                    var fi = new FileInfo(fileName);
                     // TODO: path length
                     st.Size = fi.Length;
                     // TODO: path length
@@ -157,7 +157,7 @@ namespace NetSync
                 }
                 return;
             }
-            string fNameCmp = fileName;
+            var fNameCmp = fileName;
             if (_options.WholeFile > 0)
             {
                 f.WriteInt(i);
@@ -205,7 +205,7 @@ namespace NetSync
         {
             long i;
             MapFile mapBuf;
-            SumStruct sum = new SumStruct();
+            var sum = new SumStruct();
             long offset = 0;
 
             SumSizesSqroot(sum, (UInt64)len);
@@ -223,11 +223,11 @@ namespace NetSync
 
             for (i = 0; i < sum.Count; i++)
             {
-                UInt32 n1 = (UInt32)Math.Min(len, sum.BLength);
-                int off = mapBuf.MapPtr((int)offset, (int)n1);
-                byte[] map = mapBuf.P;
-                UInt32 sum1 = CheckSum.GetChecksum1(map, off, (int)n1);
-                byte[] sum2 = new byte[CheckSum.SumLength];
+                var n1 = (UInt32)Math.Min(len, sum.BLength);
+                var off = mapBuf.MapPtr((int)offset, (int)n1);
+                var map = mapBuf.P;
+                var sum1 = CheckSum.GetChecksum1(map, off, (int)n1);
+                var sum2 = new byte[CheckSum.SumLength];
 
                 sum2 = _checkSum.GetChecksum2(map, off, (int)n1);
                 if (_options.Verbose > 3)
@@ -294,7 +294,7 @@ namespace NetSync
                 }
                 else
                 {
-                    int b = BlocksumBias;
+                    var b = BlocksumBias;
                     l = len;
                     while ((l = (l >> 1)) != 0)
                     {
@@ -333,7 +333,7 @@ namespace NetSync
                 return false;
             }
 
-            FileInfo fi = new FileInfo(fileName);
+            var fi = new FileInfo(fileName);
             // TODO: path length
             if (fi.Length != file.Length)
             {
@@ -344,9 +344,9 @@ namespace NetSync
             of the file time to determine whether to sync */
             if (_options.AlwaysChecksum)
             {
-                byte[] sum = new byte[CheckSum.Md4SumLength];
+                //byte[] sum = new byte[CheckSum.Md4SumLength];
                 // TODO: path length
-                _checkSum.FileCheckSum(fileName, ref sum, (int)fi.Length);
+                var sum = _checkSum.FileCheckSum(fileName, (int)fi.Length);
                 return Util.MemoryCompare(sum, 0, file.Sum, 0, _options.ProtocolVersion < 21 ? 2 : CheckSum.Md4SumLength) == 0;
             }
 

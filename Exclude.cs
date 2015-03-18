@@ -49,7 +49,7 @@ namespace NetSync
         public static void AddCvsExcludes() { }
         public void AddExcludeFile(ref List<ExcludeStruct> exclList, string fileName, int xFlags)
         {
-            bool wordSplit = (xFlags & Options.XflgWordSplit) != 0;
+            var wordSplit = (xFlags & Options.XflgWordSplit) != 0;
             TextReader f;
             // TODO: path length
             if (fileName == null || fileName.CompareTo(String.Empty) == 0 || !File.Exists(fileName))
@@ -77,7 +77,7 @@ namespace NetSync
             }
             while (true)
             {
-                string line = f.ReadLine();
+                var line = f.ReadLine();
                 if (line == null)
                 {
                     break;
@@ -97,8 +97,8 @@ namespace NetSync
             {
                 return;
             }
-            string cp = pattern;
-            int len = 0;
+            var cp = pattern;
+            var len = 0;
             while (true)
             {
                 if (len >= cp.Length)
@@ -130,9 +130,9 @@ namespace NetSync
 
         public void MakeExlude(ref List<ExcludeStruct> exclList, string pat, UInt32 mFlags)
         {
-            int exLen = 0;
-            int patLen = pat.Length;
-            ExcludeStruct ret = new ExcludeStruct();
+            var exLen = 0;
+            var patLen = pat.Length;
+            var ret = new ExcludeStruct();
             if (_options.ExcludePathPrefix != null)
             {
                 mFlags |= Options.MatchflgAbsPath;
@@ -172,7 +172,7 @@ namespace NetSync
                 mFlags |= Options.MatchflgDirectory;
             }
 
-            for (int i = 0; i < ret.Pattern.Length; i++)
+            for (var i = 0; i < ret.Pattern.Length; i++)
             {
                 if (ret.Pattern[i] == '/')
                 {
@@ -186,7 +186,7 @@ namespace NetSync
         static string GetExcludeToken(string p, out int len, out uint mFlags, int xFlags)
         {
             len = 0;
-            string s = p;
+            var s = p;
             mFlags = 0;
             if (p.CompareTo(String.Empty) == 0)
             {
@@ -215,7 +215,7 @@ namespace NetSync
             }
             if ((xFlags & Options.XflgWordSplit) != 0)
             {
-                int i = 0;
+                var i = 0;
                 while (i < s.Length && s[i] == ' ')
                 {
                     i++;
@@ -239,7 +239,7 @@ namespace NetSync
         */
         public int CheckExclude(List<ExcludeStruct> listp, string name, int nameIsDir)
         {
-            foreach (ExcludeStruct ex in listp)
+            foreach (var ex in listp)
             {
                 if (CheckOneExclude(name, ex, nameIsDir))
                 {
@@ -252,8 +252,8 @@ namespace NetSync
 
         static bool CheckOneExclude(string name, ExcludeStruct ex, int nameIsDir)
         {
-            int matchStart = 0;
-            string pattern = ex.Pattern;
+            var matchStart = 0;
+            var pattern = ex.Pattern;
 
             if (name.CompareTo(String.Empty) == 0)
             {
@@ -326,8 +326,8 @@ namespace NetSync
             }
             else
             {
-                int l1 = name.Length;
-                int l2 = pattern.Length;
+                var l1 = name.Length;
+                var l2 = pattern.Length;
                 if (l2 <= l1 &&
                     name.Substring(l1 - l2).CompareTo(pattern) == 0 &&
                     (l1 == l2 || name[l1 - (l2 + 1)] == '/'))
@@ -361,7 +361,7 @@ namespace NetSync
                 AddExclude(ref _options.ExcludeList, "/*/*", 0);
             }
 
-            foreach (ExcludeStruct ent in _options.ExcludeList)
+            foreach (var ent in _options.ExcludeList)
             {
                 int l;
                 string p;
@@ -403,7 +403,7 @@ namespace NetSync
         /// <param name="ioStream"></param>
         public void ReceiveExcludeList(IoStream ioStream)
         {
-            string line = String.Empty;
+            var line = String.Empty;
             int length;
             while ((length = ioStream.ReadInt()) != 0)
             {

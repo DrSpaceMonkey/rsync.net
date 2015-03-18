@@ -128,7 +128,7 @@ namespace NetSync
         /// <returns></returns>
         public static string CleanFileName(string fileName, bool collapseDotDot)
         {
-            string cleanedName = fileName.Replace(@"\\", @"\");
+            var cleanedName = fileName.Replace(@"\\", @"\");
             //if (cleanedName.EndsWith(@"\")) //@fixed possibly replace by TrimEnd?
             //{
             //    cleanedName = cleanedName.Substring(0, cleanedName.Length - 1);
@@ -158,12 +158,12 @@ namespace NetSync
         /// <returns></returns>
         public static int FindColon(string s)
         {
-            int index = s.IndexOf(":");
+            var index = s.IndexOf(":");
             if (index == -1)
             {
                 return -1;
             }
-            int slashIndex = s.IndexOf("/");
+            var slashIndex = s.IndexOf("/");
             if (slashIndex != -1 && slashIndex < index)
             {
                 return -1;
@@ -178,8 +178,8 @@ namespace NetSync
         /// <returns></returns>
         public static string[] DeleteLastElement(string[] x)
         {
-            string[] y = new string[x.Length - 1];
-            for (int i = 0; i < y.Length; i++)
+            var y = new string[x.Length - 1];
+            for (var i = 0; i < y.Length; i++)
             {
                 y[i] = x[i];
             }
@@ -193,8 +193,8 @@ namespace NetSync
         /// <returns></returns>
         public static string[] DeleteFirstElement(string[] x)
         {
-            string[] y = new string[x.Length - 1];
-            for (int i = 0; i < y.Length; i++)
+            var y = new string[x.Length - 1];
+            for (var i = 0; i < y.Length; i++)
             {
                 y[i] = x[i + 1];
             }
@@ -213,7 +213,7 @@ namespace NetSync
         /// <returns></returns>
         public static int MemoryCompare(byte[] arr1, int off1, byte[] arr2, int off2, int length)
         {
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 if (arr1[off1 + i] != arr2[off2 + i])
                 {
@@ -233,7 +233,7 @@ namespace NetSync
         /// <param name="count"></param>
         public static void MemoryCopy(byte[] dest, int destOffset, byte[] source, int sourceOffset, int count)
         {
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 dest[destOffset + i] = source[sourceOffset + i];
             }

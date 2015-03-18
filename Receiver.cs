@@ -34,8 +34,8 @@ namespace NetSync
 
         private string LocalizePath(ClientInfo cInfo, string path)
         {
-            string normalized = cInfo.Options.Dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
-            string ret = String.Empty;
+            var normalized = cInfo.Options.Dir.Replace('\\', '/').Replace(":", String.Empty).ToLower();
+            var ret = String.Empty;
             if (path.ToLower().IndexOf(normalized) != -1)
             {
                 ret = path.Substring(path.ToLower().IndexOf(normalized) + normalized.Length).Replace('/', Path.DirectorySeparatorChar);
@@ -55,13 +55,13 @@ namespace NetSync
 
         public int ReceiveFiles(ClientInfo clientInfo, List<FileStruct> fileList, string localName)
         {
-            FStat st = new FStat();
+            var st = new FStat();
             FileStruct file;
-            IoStream ioStream = clientInfo.IoStream;
+            var ioStream = clientInfo.IoStream;
 
             string fileName;
             string fNameCmp = String.Empty, fNameTmp = String.Empty;
-            bool saveMakeBackups = _options.MakeBackups;
+            var saveMakeBackups = _options.MakeBackups;
             int i, phase = 0;
             bool recvOk;
 
@@ -162,13 +162,13 @@ namespace NetSync
                 }
                 try
                 {
-                    FileInfo fi = new FileInfo(fNameCmp);
+                    var fi = new FileInfo(fNameCmp);
                     // TODO: path length
                     st.Size = fi.Length;
                 }
                 catch { }
 
-                String tempFileName = GetTmpName(fileName);
+                var tempFileName = GetTmpName(fileName);
                 FileStream fd2 = null;
                 fd2 = new FileStream(tempFileName, FileMode.OpenOrCreate, FileAccess.Write);
 
@@ -215,31 +215,31 @@ namespace NetSync
 
         public bool ReceiveData(ClientInfo clientInfo, string fileNameR, Stream fdR, long sizeR, string fileName, Stream fd, int totalSize)
         {
-            IoStream f = clientInfo.IoStream;
-            byte[] fileSum1 = new byte[CheckSum.Md4SumLength];
-            byte[] fileSum2 = new byte[CheckSum.Md4SumLength];
-            byte[] data = new byte[Match.ChunkSize];
-            SumStruct sumStruct = new SumStruct();
+            var f = clientInfo.IoStream;
+            var fileSum1 = new byte[CheckSum.Md4SumLength];
+            var fileSum2 = new byte[CheckSum.Md4SumLength];
+            var data = new byte[Match.ChunkSize];
+            var sumStruct = new SumStruct();
             MapFile mapBuf = null;
-            Sender sender = new Sender(_options);
+            var sender = new Sender(_options);
             sender.ReadSumHead(clientInfo, ref sumStruct);
-            int offset = 0;
+            var offset = 0;
             UInt32 len;
 
             if (fdR != null && sizeR > 0)
             {
-                int mapSize = (int)Math.Max(sumStruct.BLength * 2, 16 * 1024);
+                var mapSize = (int)Math.Max(sumStruct.BLength * 2, 16 * 1024);
                 mapBuf = new MapFile(fdR, (int)sizeR, mapSize, (int)sumStruct.BLength);
                 if (_options.Verbose > 2)
                 {
                     Log.WriteLine("recv mapped " + fileNameR + " of size " + sizeR);
                 }
             }
-            Sum sum = new Sum(_options);
+            var sum = new Sum(_options);
             sum.Init(_options.ChecksumSeed);
 
             int i;
-            Token token = new Token(_options);
+            var token = new Token(_options);
             while ((i = token.ReceiveToken(f, ref data, 0)) != 0)
             {
                 if (_options.DoProgress)
@@ -264,7 +264,7 @@ namespace NetSync
                 }
 
                 i = -(i + 1);
-                int offset2 = (int)(i * sumStruct.BLength);
+                var offset2 = (int)(i * sumStruct.BLength);
                 len = sumStruct.BLength;
                 if (i == sumStruct.Count - 1 && sumStruct.Remainder != 0)
                 {
@@ -279,7 +279,7 @@ namespace NetSync
                 }
 
                 byte[] map = null;
-                int off = 0;
+                var off = 0;
                 if (mapBuf != null)
                 {
                     off = mapBuf.MapPtr(offset2, (int)len);
@@ -347,7 +347,7 @@ namespace NetSync
 
         public void DeleteOne(string fileName, bool isDir)
         {
-            SysCall sc = new SysCall(_options);
+            var sc = new SysCall(_options);
             if (!isDir)
             {
 
@@ -391,25 +391,25 @@ namespace NetSync
 
         public void DeleteFiles(List<FileStruct> fileList)
         {
-            string[] argv = new string[1];
+            var argv = new string[1];
             List<FileStruct> localFileList = null;
             if (_options.CvsExclude)
             {
                 Exclude.AddCvsExcludes();
             }
-            for (int j = 0; j < fileList.Count; j++)
+            for (var j = 0; j < fileList.Count; j++)
             {
                 if ((fileList[j].Mode & Options.FlagTopDir) == 0 || !Util.S_ISDIR(fileList[j].Mode))
                 {
                     continue;
                 }
                 argv[0] = _options.Dir + fileList[j].GetFullName();
-                FileList fList = new FileList(_options);
+                var fList = new FileList(_options);
                 if ((localFileList = fList.SendFileList(null, argv)) == null)
                 {
                     continue;
                 }
-                for (int i = localFileList.Count - 1; i >= 0; i--)
+                for (var i = localFileList.Count - 1; i >= 0; i--)
                 {
                     if (localFileList[i].BaseName == null)
                     {

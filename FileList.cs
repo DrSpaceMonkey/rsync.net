@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace NetSync
@@ -38,7 +39,7 @@ namespace NetSync
 
         public string GetFullName()
         {
-            string fullName = String.Empty;
+            var fullName = String.Empty;
 
             if (string.IsNullOrEmpty(BaseName))
             {
@@ -104,15 +105,15 @@ namespace NetSync
             }
 
             string dir, oldDir;
-            string lastPath = String.Empty; //@todo_long seems to be Empty all the time
-            string fileName = String.Empty;            
-            bool useFffd = false; //@todo_long seems to be false all the time
+            var lastPath = String.Empty; //@todo_long seems to be Empty all the time
+            var fileName = String.Empty;            
+            var useFffd = false; //@todo_long seems to be false all the time
             if (ShowFileListProgress() && ioStream != null)
             {
                 StartFileListProgress("building file list");
             }
-            Int64 startWrite = Options.Stats.TotalWritten;
-            List<FileStruct> fileList = new List<FileStruct>();
+            var startWrite = Options.Stats.TotalWritten;
+            var fileList = new List<FileStruct>();
             if (ioStream != null)
             {
                 ioStream.IoStartBufferingOut();
@@ -163,7 +164,7 @@ namespace NetSync
 
                 if (!_options.RelativePaths)
                 {
-                    int index = fileName.LastIndexOf('/');
+                    var index = fileName.LastIndexOf('/');
                     if (index != -1)
                     {
                         if (index == 0)
@@ -181,9 +182,9 @@ namespace NetSync
                 {
                     if (ioStream != null && _options.ImpliedDirs && fileName.LastIndexOf('/') > 0)
                     {
-                        string fileDir = fileName.Substring(0, fileName.LastIndexOf('/'));
-                        string slash = fileName;
-                        int i = 0; //@todo_long seems to be 0 all the time
+                        var fileDir = fileName.Substring(0, fileName.LastIndexOf('/'));
+                        var slash = fileName;
+                        var i = 0; //@todo_long seems to be 0 all the time
                         while (i < fileDir.Length && i < lastPath.Length && fileDir[i] == lastPath[i]) //@todo_long seems that it is never executed because lastPath is allways Empty
                         {
                             if (fileDir[i] == '/')
@@ -194,8 +195,8 @@ namespace NetSync
                         }
                         if (i != fileName.LastIndexOf('/') || (i < lastPath.Length && lastPath[i] != '/'))//@todo_long seems to be executed unconditionally because i=0 and fileName.LastIndexOf('/') > 0
                         {
-                            bool copyLinksSaved = _options.CopyLinks;
-                            bool recurseSaved = _options.Recurse;
+                            var copyLinksSaved = _options.CopyLinks;
+                            var recurseSaved = _options.Recurse;
                             _options.CopyLinks = _options.CopyUnsafeLinks;
                             _options.Recurse = true;
                             int j;
@@ -272,15 +273,15 @@ namespace NetSync
         /// <returns></returns>
         public List<FileStruct> ReceiveFileList(ClientInfo clientInfo)
         {
-            IoStream ioStream = clientInfo.IoStream;
-            List<FileStruct> fileList = new List<FileStruct>();
+            var ioStream = clientInfo.IoStream;
+            var fileList = new List<FileStruct>();
 
             if (ShowFileListProgress())
             {
                 StartFileListProgress("receiving file list");
             }
 
-            Int64 startRead = Options.Stats.TotalRead;
+            var startRead = Options.Stats.TotalRead;
 
             UInt32 flags;
             while ((flags = ioStream.ReadByte()) != 0)
@@ -289,7 +290,7 @@ namespace NetSync
                 {
                     flags |= (UInt32)(ioStream.ReadByte() << 8);
                 }
-                FileStruct file = ReceiveFileEntry(flags, clientInfo);
+                var file = ReceiveFileEntry(flags, clientInfo);
                 if (file == null)
                 {
                     continue;
@@ -346,7 +347,7 @@ namespace NetSync
 
         public static int UStringCompare(string s1, string s2)
         {
-            int i = 0;
+            var i = 0;
             while (s1.Length > i && s2.Length > i && s1[i] == s2[i])
             {
                 i++;
@@ -381,8 +382,8 @@ namespace NetSync
             }
             while (low != high)
             {
-                int mid = (low + high) / 2;
-                int ret = FileCompare(fileList[FileListUp(fileList, mid)], file);
+                var mid = (low + high) / 2;
+                var ret = FileCompare(fileList[FileListUp(fileList, mid)], file);
                 if (ret == 0)
                 {
                     return FileListUp(fileList, mid);
@@ -416,9 +417,9 @@ namespace NetSync
         public void OutputFileList(List<FileStruct> fileList)
         {
             string uid = String.Empty, gid = String.Empty;
-            for (int i = 0; i < fileList.Count; i++)
+            for (var i = 0; i < fileList.Count; i++)
             {
-                FileStruct file = fileList[i];
+                var file = fileList[i];
                 if ((_options.AmRoot || _options.AmSender) && _options.PreserveUid)
                 {
                     uid = " uid=" + file.Uid;
@@ -435,7 +436,7 @@ namespace NetSync
 
         public void SendFileName(IoStream ioStream, List<FileStruct> fileList, string fileName, bool recursive, UInt32 baseFlags)
         {
-            FileStruct file = MakeFile(fileName, fileList, ioStream == null && _options.DeleteExcluded ? Options.ServerExcludes : Options.AllExcludes);
+            var file = MakeFile(fileName, fileList, ioStream == null && _options.DeleteExcluded ? Options.ServerExcludes : Options.AllExcludes);
             if (file == null)
             {
                 return;
@@ -467,12 +468,12 @@ namespace NetSync
             {
                 return null;
             }
-            string thisName = Util.CleanFileName(fileName, false);
+            var thisName = Util.CleanFileName(fileName, false);
             if (_options.SanitizePath) //@todo_long It is useless for this moment
             {
                 thisName = Util.SanitizePath(thisName, String.Empty, 0);
             }
-            FileStruct fileStruct = new FileStruct();
+            var fileStruct = new FileStruct();
             // TODO: path length
             if (Directory.Exists(thisName))
             {
@@ -485,7 +486,7 @@ namespace NetSync
                     fileStruct.Uid = 0;
                     fileStruct.Mode = 0x4000 | 0x16B;
                     // TODO: path length
-                    DirectoryInfo di = new DirectoryInfo(thisName);
+                    var di = new DirectoryInfo(thisName);
                     if ((di.Attributes & FileAttributes.ReadOnly) != FileAttributes.ReadOnly)
                     {
                         fileStruct.Mode |= 0x92;
@@ -502,8 +503,8 @@ namespace NetSync
                     return null;
                 }
                 fileStruct.BaseName = Path.GetFileName(thisName);
-                fileStruct.DirName = Path.GetDirectoryName(thisName).Replace(@"\", "/").TrimEnd('/');
-                FileInfo fi = new FileInfo(thisName);
+                fileStruct.DirName = Path.GetFullPath(Path.GetDirectoryName(thisName));
+                var fi = new FileInfo(thisName);
 
                 // TODO: path length
                 fileStruct.Length = (int)fi.Length;
@@ -518,9 +519,8 @@ namespace NetSync
                 fileStruct.Gid = 0;
                 fileStruct.Uid = 0;
 
-                int sumLen = _options.AlwaysChecksum ? CheckSum.Md4SumLength : 0;
-                if (sumLen != 0)
-                    if (!_checkSum.FileCheckSum(thisName, ref fileStruct.Sum, fileStruct.Length))
+                if (_options.AlwaysChecksum)
+                    if (!_checkSum.FileCheckSum(thisName, fileStruct.Length))
                     {
                         Log.Write("Skipping file " + thisName);
                         return null;
@@ -540,7 +540,7 @@ namespace NetSync
                 _lastName = String.Empty;
                 return null;
             }
-            IoStream f = clientInfo.IoStream;
+            var f = clientInfo.IoStream;
 
             int l1 = 0, l2 = 0;
 
@@ -562,7 +562,7 @@ namespace NetSync
                 WinRsync.Exit("overflow: lastname=" + _lastName, clientInfo);
             }
 
-            string thisName = _lastName.Substring(0, l1);
+            var thisName = _lastName.Substring(0, l1);
             thisName += f.ReadStringFromBuffer(l2);
             _lastName = thisName;
 
@@ -572,8 +572,8 @@ namespace NetSync
                 thisName = Util.SanitizePath(thisName, String.Empty, 0);
             }
 
-            string baseName = String.Empty;
-            string dirName = String.Empty;
+            var baseName = String.Empty;
+            var dirName = String.Empty;
             if (thisName.LastIndexOf("/") != -1)
             {
                 baseName = Path.GetFileName(thisName);
@@ -585,7 +585,7 @@ namespace NetSync
                 dirName = null;
             }
 
-            Int64 fileLength = f.ReadLongInt();
+            var fileLength = f.ReadLongInt();
 
             if ((flags & Options.XmitSameTime) == 0)
             {
@@ -598,21 +598,21 @@ namespace NetSync
 
             if (_options.PreserveUid && (flags & Options.XmitSameUid) == 0)
             {
-                int uid = f.ReadInt();
+                var uid = f.ReadInt();
             }
             if (_options.PreserveGid && (flags & Options.XmitSameGid) == 0)
             {
-                int gid = f.ReadInt();
+                var gid = f.ReadInt();
             }
 
-            byte[] sum = new byte[0];
+            var sum = new byte[0];
             if (_options.AlwaysChecksum && !Util.S_ISDIR(_mode))
             {
                 sum = new byte[CheckSum.Md4SumLength];
                 sum = f.ReadBuffer(_options.ProtocolVersion < 21 ? 2 : CheckSum.Md4SumLength);
             }
 
-            FileStruct fs = new FileStruct();
+            var fs = new FileStruct();
             fs.Length = (int)fileLength;
             fs.BaseName = baseName;
             fs.DirName = dirName;
@@ -625,7 +625,7 @@ namespace NetSync
 
         public void SendFileEntry(FileStruct file, IoStream ioStream, UInt32 baseflags)
         {
-            UInt32 flags = baseflags;
+            var flags = baseflags;
             int l1 = 0, l2 = 0;
 
             if (ioStream == null)
@@ -638,7 +638,7 @@ namespace NetSync
                 _lastName = String.Empty;
                 return;
             }
-            string fileName = file.GetFullName().Replace(":", String.Empty);
+            var fileName = file.GetFullName().Replace(":", String.Empty);
             for (l1 = 0;
                 _lastName.Length > l1 && (fileName[l1] == _lastName[l1]) && (l1 < 255);
                 l1++)
@@ -694,7 +694,7 @@ namespace NetSync
             }
 
 
-            byte[] b = System.Text.Encoding.ASCII.GetBytes(fileName);
+            var b = System.Text.Encoding.ASCII.GetBytes(fileName);
 
             ioStream.Write(b, l1, l2);
             ioStream.WriteLongInt(file.Length);
@@ -744,22 +744,22 @@ namespace NetSync
 
         public void SendDirectory(IoStream ioStream, List<FileStruct> fileList, string dir)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(dir);
+            var directoryInfo = new DirectoryInfo(dir);
             if (directoryInfo.Exists)
             {
                 if (_options.CvsExclude)
                 {
-                    Exclude excl = new Exclude(_options);
+                    var excl = new Exclude(_options);
                     excl.AddExcludeFile(ref _options.LocalExcludeList, dir, (int)(Options.XflgWordSplit & Options.XflgWordsOnly)); //@todo (int)(Options.XFLG_WORD_SPLIT & Options.XFLG_WORDS_ONLY) evaluates to 0 unconditionally. May be change & with | ?
                 }
-                FileInfo[] files = directoryInfo.GetFiles();
-                for (int i = 0; i < files.Length; i++)
+                var files = directoryInfo.GetFiles();
+                for (var i = 0; i < files.Length; i++)
                 {
                     // TODO: path length
                     SendFileName(ioStream, fileList, files[i].FullName.Replace(@"\", "/"), _options.Recurse, 0);
                 }
-                DirectoryInfo[] dirs = directoryInfo.GetDirectories();
-                for (int i = 0; i < dirs.Length; i++)
+                var dirs = directoryInfo.GetDirectories();
+                for (var i = 0; i < dirs.Length; i++)
                 {
                     // TODO: path length
                     SendFileName(ioStream, fileList, dirs[i].FullName.Replace(@"\", "/"), _options.Recurse, 0);
@@ -779,7 +779,7 @@ namespace NetSync
                 return;
             }
             fileList.Sort(new FileStructComparer());
-            for (int i = 0; i < fileList.Count; i++)
+            for (var i = 0; i < fileList.Count; i++)
             {
                 if (fileList[i] == null)
                 {
@@ -788,7 +788,7 @@ namespace NetSync
             }
             if (stripRoot)
             {
-                for (int i = 0; i < fileList.Count; i++)
+                for (var i = 0; i < fileList.Count; i++)
                 {
                     if ((fileList[i]).DirName != null && (fileList[i]).DirName[0] == '/')
                     {
@@ -860,9 +860,9 @@ namespace NetSync
         /// <param name="fileList"></param>
         private void LogFileList(List<FileStruct> fileList)
         {
-            for (int i = 0; i < fileList.Count; i++)
+            for (var i = 0; i < fileList.Count; i++)
             {
-                FileStruct file = fileList[i];
+                var file = fileList[i];
                 if (string.IsNullOrEmpty(file.BaseName))
                 {
                     continue;
@@ -894,7 +894,7 @@ namespace NetSync
                 /* Handle the -R version of the '.' dir. */
                 if (fileName[0] == '/')
                 {
-                    int len = fileName.Length;
+                    var len = fileName.Length;
                     if (fileName[len - 1] == '.' && fileName[len - 2] == '/')
                     {
                         return true;
@@ -905,7 +905,7 @@ namespace NetSync
             {
                 return false;
             }
-            Exclude excl = new Exclude(_options);
+            var excl = new Exclude(_options);
             if (_options.ExcludeList.Count > 0
                 && (rc = excl.CheckExclude(_options.ExcludeList, fileName, isDir)) != 0)
             {
