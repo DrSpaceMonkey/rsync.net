@@ -25,8 +25,8 @@ namespace NetSync
 
     public class Target
     {
-        public UInt32 t;
-        public int i;
+        public UInt32 T;
+        public int I;
     }
 
     public class TargetComparer : IComparer<Target>, IComparer
@@ -47,41 +47,41 @@ namespace NetSync
         /// <summary>
         /// 32 * 1024
         /// </summary>
-        public const int CHUNK_SIZE = (32 * 1024);
+        public const int ChunkSize = (32 * 1024);
         /// <summary>
         /// 1 &lt;&lt; 16
         /// </summary>
-        public const int TABLESIZE = (1 << 16);
+        public const int Tablesize = (1 << 16);
         /// <summary>
         /// -1
         /// </summary>
-        public const int NULL_TAG = -1;
+        public const int NullTag = -1;
         /// <summary>
         /// 1 &lt;&lt; 0
         /// </summary>
-        public const byte SUMFLG_SAME_OFFSET = (1 << 0);
-        private int falseAlarms;
-        private int tagHits;
-        private int matches;
-        private Int64 dataTransfer;
+        public const byte SumflgSameOffset = (1 << 0);
+        private int _falseAlarms;
+        private int _tagHits;
+        private int _matches;
+        private Int64 _dataTransfer;
 
-        private int totalFalseAlarms;
-        private int totalTagHits;
-        private int totalMatches;
-        private int lastMatch;
-        private List<Target> targets = new List<Target>();
-        private int[] tagTable = new int[TABLESIZE];
+        private int _totalFalseAlarms;
+        private int _totalTagHits;
+        private int _totalMatches;
+        private int _lastMatch;
+        private List<Target> _targets = new List<Target>();
+        private int[] _tagTable = new int[Tablesize];
 
-        private Options options;
+        private Options _options;
 
         public Match(Options opt)
         {
-            options = opt;
+            _options = opt;
         }
 
         public static int CompareTargets(Target t1, Target t2)
         {
-            return (int)t1.t - (int)t2.t;
+            return (int)t1.T - (int)t2.T;
         }
 
         public static UInt32 GetTag2(UInt32 s1, UInt32 s2)
@@ -96,212 +96,212 @@ namespace NetSync
 
         public void BuildHashTable(SumStruct s)
         {
-            for (int i = 0; i < s.count; i++)
+            for (int i = 0; i < s.Count; i++)
             {
-                targets.Add(new Target());
+                _targets.Add(new Target());
             }
 
-            for (int i = 0; i < s.count; i++)
+            for (int i = 0; i < s.Count; i++)
             {
-                targets[i].i = i;
-                targets[i].t = GetTag(s.sums[i].sum1);
+                _targets[i].I = i;
+                _targets[i].T = GetTag(s.Sums[i].Sum1);
             }
 
-            targets.Sort(0, s.count, new TargetComparer());
+            _targets.Sort(0, s.Count, new TargetComparer());
 
-            for (int i = 0; i < TABLESIZE; i++)
+            for (int i = 0; i < Tablesize; i++)
             {
-                tagTable[i] = NULL_TAG;
+                _tagTable[i] = NullTag;
             }
 
 
-            for (int i = s.count; i-- > 0; )
+            for (int i = s.Count; i-- > 0; )
             {
-                tagTable[((Target)targets[i]).t] = i;
+                _tagTable[((Target)_targets[i]).T] = i;
             }
         }
 
-        public void MatchSums(IOStream f, SumStruct s, MapFile buf, int len)
+        public void MatchSums(IoStream f, SumStruct s, MapFile buf, int len)
         {
-            byte[] fileSum = new byte[CheckSum.MD4_SUM_LENGTH];
+            byte[] fileSum = new byte[CheckSum.Md4SumLength];
 
-            lastMatch = 0;
-            falseAlarms = 0;
-            tagHits = 0;
-            matches = 0;
-            dataTransfer = 0;
+            _lastMatch = 0;
+            _falseAlarms = 0;
+            _tagHits = 0;
+            _matches = 0;
+            _dataTransfer = 0;
 
-            Sum sum = new Sum(options);
-            sum.Init(options.checksumSeed);
+            Sum sum = new Sum(_options);
+            sum.Init(_options.ChecksumSeed);
 
-            if (len > 0 && s.count > 0)
+            if (len > 0 && s.Count > 0)
             {
                 BuildHashTable(s);
 
-                if (options.verbose > 2)
+                if (_options.Verbose > 2)
                 {
                     Log.WriteLine("built hash table");
                 }
 
                 HashSearch(f, s, buf, len, sum);
 
-                if (options.verbose > 2)
+                if (_options.Verbose > 2)
                 {
                     Log.WriteLine("done hash search");
                 }
             }
             else
             {
-                for (int j = 0; j < len - CHUNK_SIZE; j += CHUNK_SIZE)
+                for (int j = 0; j < len - ChunkSize; j += ChunkSize)
                 {
-                    int n1 = Math.Min(CHUNK_SIZE, (len - CHUNK_SIZE) - j);
+                    int n1 = Math.Min(ChunkSize, (len - ChunkSize) - j);
                     Matched(f, s, buf, j + n1, -2, sum);
                 }
                 Matched(f, s, buf, len, -1, sum);
             }
 
             fileSum = sum.End();
-            if (buf != null && buf.status)
+            if (buf != null && buf.Status)
             {
                 fileSum[0]++;
             }
 
-            if (options.verbose > 2)
+            if (_options.Verbose > 2)
             {
                 Log.WriteLine("sending fileSum");
             }
-            f.Write(fileSum, 0, CheckSum.MD4_SUM_LENGTH);
+            f.Write(fileSum, 0, CheckSum.Md4SumLength);
 
-            targets.Clear();
+            _targets.Clear();
 
-            if (options.verbose > 2)
+            if (_options.Verbose > 2)
             {
-                Log.WriteLine("falseAlarms=" + falseAlarms + " tagHits=" + tagHits + " matches=" + matches);
+                Log.WriteLine("falseAlarms=" + _falseAlarms + " tagHits=" + _tagHits + " matches=" + _matches);
             }
 
-            totalTagHits += tagHits;
-            totalFalseAlarms += falseAlarms;
-            totalMatches += matches;
-            Options.stats.literalData += dataTransfer;
+            _totalTagHits += _tagHits;
+            _totalFalseAlarms += _falseAlarms;
+            _totalMatches += _matches;
+            Options.Stats.LiteralData += _dataTransfer;
         }
 
-        public void Matched(IOStream f, SumStruct s, MapFile buf, int offset, int i, Sum sum)
+        public void Matched(IoStream f, SumStruct s, MapFile buf, int offset, int i, Sum sum)
         {
-            int n = offset - lastMatch;
+            int n = offset - _lastMatch;
             int j;
 
-            if (options.verbose > 2 && i >= 0)
+            if (_options.Verbose > 2 && i >= 0)
             {
-                Log.WriteLine("match at " + offset + " last_match=" + lastMatch + " j=" + i + " len=" + s.sums[i].len + " n=" + n);
+                Log.WriteLine("match at " + offset + " last_match=" + _lastMatch + " j=" + i + " len=" + s.Sums[i].Len + " n=" + n);
             }
 
-            Token token = new Token(options);
-            token.SendToken(f, i, buf, lastMatch, n, (int)(i < 0 ? 0 : s.sums[i].len));
-            dataTransfer += n;
+            Token token = new Token(_options);
+            token.SendToken(f, i, buf, _lastMatch, n, (int)(i < 0 ? 0 : s.Sums[i].Len));
+            _dataTransfer += n;
 
             if (i >= 0)
             {
-                Options.stats.matchedData += s.sums[i].len;
-                n += (int)s.sums[i].len;
+                Options.Stats.MatchedData += s.Sums[i].Len;
+                n += (int)s.Sums[i].Len;
             }
 
-            for (j = 0; j < n; j += CHUNK_SIZE)
+            for (j = 0; j < n; j += ChunkSize)
             {
-                int n1 = Math.Min(CHUNK_SIZE, n - j);
-                int off = buf.MapPtr(lastMatch + j, n1);
-                sum.Update(buf.p, off, n1);
+                int n1 = Math.Min(ChunkSize, n - j);
+                int off = buf.MapPtr(_lastMatch + j, n1);
+                sum.Update(buf.P, off, n1);
             }
 
             if (i >= 0)
             {
-                lastMatch = (int)(offset + s.sums[i].len);
+                _lastMatch = (int)(offset + s.Sums[i].Len);
             }
             else
             {
-                lastMatch = offset;
+                _lastMatch = offset;
             }
 
-            if (buf != null && options.doProgress)
+            if (buf != null && _options.DoProgress)
             {
-                Progress.ShowProgress(lastMatch, buf.fileSize);
+                Progress.ShowProgress(_lastMatch, buf.FileSize);
                 if (i == -1)
                 {
-                    Progress.EndProgress(buf.fileSize);
+                    Progress.EndProgress(buf.FileSize);
                 }
             }
         }
 
-        public void HashSearch(IOStream f, SumStruct s, MapFile buf, int len, Sum _sum)
+        public void HashSearch(IoStream f, SumStruct s, MapFile buf, int len, Sum _sum)
         {
             int offset, end, backup;
             UInt32 k;
             int wantI;
-            byte[] sum2 = new byte[CheckSum.SUM_LENGTH];
+            byte[] sum2 = new byte[CheckSum.SumLength];
             UInt32 s1, s2, sum;
             int more;
             byte[] map;
 
             wantI = 0;
-            if (options.verbose > 2)
+            if (_options.Verbose > 2)
             {
-                Log.WriteLine("hash search ob=" + s.bLength + " len=" + len);
+                Log.WriteLine("hash search ob=" + s.BLength + " len=" + len);
             }
 
-            k = (UInt32)Math.Min(len, s.bLength);
+            k = (UInt32)Math.Min(len, s.BLength);
             int off = buf.MapPtr(0, (int)k);
-            map = buf.p;
+            map = buf.P;
 
-            UInt32 g = s.sums[0].sum1;
+            UInt32 g = s.Sums[0].Sum1;
             sum = CheckSum.GetChecksum1(map, off, (int)k);
             s1 = sum & 0xFFFF;
             s2 = sum >> 16;
-            if (options.verbose > 3)
+            if (_options.Verbose > 3)
             {
                 Log.WriteLine("sum=" + sum + " k=" + k);
             }
 
             offset = 0;
-            end = (int)(len + 1 - s.sums[s.count - 1].len);
-            if (options.verbose > 3)
+            end = (int)(len + 1 - s.Sums[s.Count - 1].Len);
+            if (_options.Verbose > 3)
             {
-                Log.WriteLine("hash search s.bLength=" + s.bLength + " len=" + len + " count=" + s.count);
+                Log.WriteLine("hash search s.bLength=" + s.BLength + " len=" + len + " count=" + s.Count);
             }
 
             do
             {
                 UInt32 t = GetTag2(s1, s2);
                 bool doneCsum2 = false;
-                int j = tagTable[t];
+                int j = _tagTable[t];
 
-                if (options.verbose > 4)
+                if (_options.Verbose > 4)
                 {
                     Log.WriteLine("offset=" + offset + " sum=" + sum);
                 }
 
-                if (j == NULL_TAG)
+                if (j == NullTag)
                 {
                     goto null_tag;
                 }
 
                 sum = (s1 & 0xffff) | (s2 << 16);
-                tagHits++;
+                _tagHits++;
                 do
                 {
                     UInt32 l;
-                    int i = ((Target)targets[j]).i;
+                    int i = ((Target)_targets[j]).I;
 
-                    if (sum != s.sums[i].sum1)
+                    if (sum != s.Sums[i].Sum1)
                     {
                         continue;
                     }
 
-                    l = (UInt32)Math.Min(s.bLength, len - offset);
-                    if (l != s.sums[i].len)
+                    l = (UInt32)Math.Min(s.BLength, len - offset);
+                    if (l != s.Sums[i].Len)
                     {
                         continue;
                     }
 
-                    if (options.verbose > 3)
+                    if (_options.Verbose > 3)
                     {
                         Log.WriteLine("potential match at " + offset + " target=" + j + " " + i + " sum=" + sum);
                     }
@@ -309,23 +309,23 @@ namespace NetSync
                     if (!doneCsum2)
                     {
                         off = buf.MapPtr(offset, (int)l);
-                        map = buf.p;
-                        CheckSum cs = new CheckSum(options);
+                        map = buf.P;
+                        CheckSum cs = new CheckSum(_options);
                         sum2 = cs.GetChecksum2(map, off, (int)l);
                         doneCsum2 = true;
                     }
 
-                    if (Util.MemoryCompare(sum2, 0, s.sums[i].sum2, 0, s.s2Length) != 0)
+                    if (Util.MemoryCompare(sum2, 0, s.Sums[i].Sum2, 0, s.S2Length) != 0)
                     {
-                        falseAlarms++;
+                        _falseAlarms++;
                         continue;
                     }
 
-                    if (i != wantI && wantI < s.count
-                        && (!options.inplace || options.makeBackups || s.sums[wantI].offset >= offset
-                        || (s.sums[wantI].flags & SUMFLG_SAME_OFFSET) != 0)
-                        && sum == s.sums[wantI].sum1
-                        && Util.MemoryCompare(sum2, 0, s.sums[wantI].sum2, 0, s.s2Length) == 0)
+                    if (i != wantI && wantI < s.Count
+                        && (!_options.Inplace || _options.MakeBackups || s.Sums[wantI].Offset >= offset
+                        || (s.Sums[wantI].Flags & SumflgSameOffset) != 0)
+                        && sum == s.Sums[wantI].Sum1
+                        && Util.MemoryCompare(sum2, 0, s.Sums[wantI].Sum2, 0, s.S2Length) == 0)
                     {
                         i = wantI;
                     }
@@ -333,17 +333,17 @@ namespace NetSync
                     wantI = i + 1;
 
                     Matched(f, s, buf, offset, i, _sum);
-                    offset += (int)(s.sums[i].len - 1);
-                    k = (UInt32)Math.Min(s.bLength, len - offset);
+                    offset += (int)(s.Sums[i].Len - 1);
+                    k = (UInt32)Math.Min(s.BLength, len - offset);
                     off = buf.MapPtr(offset, (int)k);
                     sum = CheckSum.GetChecksum1(map, off, (int)k);
                     s1 = sum & 0xFFFF;
                     s2 = sum >> 16;
-                    matches++;
+                    _matches++;
                     break;
-                } while (++j < s.count && ((Target)targets[j]).t == t);
+                } while (++j < s.Count && ((Target)_targets[j]).T == t);
             null_tag:
-                backup = offset - lastMatch;
+                backup = offset - _lastMatch;
                 if (backup < 0)
                 {
                     backup = 0;
@@ -351,12 +351,12 @@ namespace NetSync
 
                 more = (offset + k) < len ? 1 : 0;
                 off = buf.MapPtr(offset - backup, (int)(k + more + backup)) + backup;
-                s1 -= (UInt32)(CheckSum.ToInt(map[off]) + CheckSum.CHAR_OFFSET);
-                s2 -= (UInt32)(k * CheckSum.ToInt(map[off]) + CheckSum.CHAR_OFFSET);
+                s1 -= (UInt32)(CheckSum.ToInt(map[off]) + CheckSum.CharOffset);
+                s2 -= (UInt32)(k * CheckSum.ToInt(map[off]) + CheckSum.CharOffset);
                 off = (k + off >= map.Length) ? (int)(map.Length - k - 1) : off;
                 if (more != 0)
                 {
-                    s1 += (UInt32)(CheckSum.ToInt(map[k + off]) + CheckSum.CHAR_OFFSET);
+                    s1 += (UInt32)(CheckSum.ToInt(map[k + off]) + CheckSum.CharOffset);
                     s2 += s1;
                 }
                 else
@@ -364,9 +364,9 @@ namespace NetSync
                     --k;
                 }
 
-                if (backup >= CHUNK_SIZE + s.bLength && end - offset > CHUNK_SIZE)
+                if (backup >= ChunkSize + s.BLength && end - offset > ChunkSize)
                 {
-                    Matched(f, s, buf, (int)(offset - s.bLength), -2, _sum);
+                    Matched(f, s, buf, (int)(offset - s.BLength), -2, _sum);
                 }
             } while (++offset < end);
 
@@ -374,20 +374,20 @@ namespace NetSync
             buf.MapPtr(len - 1, 1);
         }
 
-        public void MatchReport(IOStream f)
+        public void MatchReport(IoStream f)
         {
-            if (options.verbose <= 1)
+            if (_options.Verbose <= 1)
             {
                 return;
             }
 
-            string report = "total: matches=" + totalMatches + "  tagHits=" + totalTagHits + "  falseAlarms=" +
-                totalFalseAlarms + " data=" + Options.stats.literalData;
+            string report = "total: matches=" + _totalMatches + "  tagHits=" + _totalTagHits + "  falseAlarms=" +
+                _totalFalseAlarms + " data=" + Options.Stats.LiteralData;
 
             Log.WriteLine(report);
-            if (options.amServer)
+            if (_options.AmServer)
             {
-                f.MultiplexWrite(MsgCode.MSG_INFO, ASCIIEncoding.ASCII.GetBytes(report), report.Length);
+                f.MultiplexWrite(MsgCode.MsgInfo, ASCIIEncoding.ASCII.GetBytes(report), report.Length);
             }
         }
     }

@@ -25,13 +25,13 @@ namespace NetSync
 {
     class Sender
     {
-        private Options options;
-        private CheckSum checkSum;
+        private Options _options;
+        private CheckSum _checkSum;
 
         public Sender(Options opt)
         {
-            options = opt;
-            checkSum = new CheckSum(options);
+            _options = opt;
+            _checkSum = new CheckSum(_options);
         }
 
         public void SendFiles(List<FileStruct> fileList, ClientInfo clientInfo)
@@ -39,33 +39,33 @@ namespace NetSync
             ShowMessage("Processing...");
             try
             {
-                IOStream ioStream = clientInfo.IoStream;
+                IoStream ioStream = clientInfo.IoStream;
                 string fileName = String.Empty, fileName2 = String.Empty;
                 SumStruct s = null;
                 int phase = 0;
-                bool saveMakeBackups = options.makeBackups;
-                Match match = new Match(options);
+                bool saveMakeBackups = _options.MakeBackups;
+                Match match = new Match(_options);
 
-                if (options.verbose > 2)
+                if (_options.Verbose > 2)
                 {
                     Log.WriteLine("SendFiles starting");
                 }
                 while (true)
                 {
                     fileName = String.Empty;
-                    int i = ioStream.readInt();
+                    int i = ioStream.ReadInt();
                     if (i == -1)
                     {
                         if (phase == 0)
                         {
                             phase++;
-                            checkSum.length = CheckSum.SUM_LENGTH;
-                            ioStream.writeInt(-1);
-                            if (options.verbose > 2)
+                            _checkSum.Length = CheckSum.SumLength;
+                            ioStream.WriteInt(-1);
+                            if (_options.Verbose > 2)
                             {
                                 Log.WriteLine("SendFiles phase=" + phase);
                             }
-                            options.makeBackups = false;
+                            _options.MakeBackups = false;
                             continue;
                         }
                         break;
@@ -73,18 +73,18 @@ namespace NetSync
 
                     if (i < 0 || i >= fileList.Count)
                     {
-                        MainClass.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", clientInfo);
+                        WinRsync.Exit("Invalid file index " + i + " (count=" + fileList.Count + ")", clientInfo);
                     }
 
                     FileStruct file = fileList[i];
 
-                    Options.stats.currentFileIndex = i;
-                    Options.stats.numTransferredFiles++;
-                    Options.stats.totalTransferredSize += file.length;
+                    Options.Stats.CurrentFileIndex = i;
+                    Options.Stats.NumTransferredFiles++;
+                    Options.Stats.TotalTransferredSize += file.Length;
 
-                    if (!string.IsNullOrEmpty(file.baseDir))
+                    if (!string.IsNullOrEmpty(file.BaseDir))
                     {
-                        fileName = file.baseDir;
+                        fileName = file.BaseDir;
                         if (!fileName.EndsWith("/"))
                         {
                             fileName += "/";
@@ -94,22 +94,22 @@ namespace NetSync
                     fileName += file.GetFullName();
                     ShowMessage("uploading " + fileName);
 
-                    if (options.verbose > 2)
+                    if (_options.Verbose > 2)
                     {
                         Log.WriteLine("sendFiles(" + i + ", " + fileName + ")");
                     }
 
-                    if (options.dryRun)
+                    if (_options.DryRun)
                     {
-                        if (!options.amServer && options.verbose != 0)
+                        if (!_options.AmServer && _options.Verbose != 0)
                         {
                             Log.WriteLine(fileName2);
                         }
-                        ioStream.writeInt(i);
+                        ioStream.WriteInt(i);
                         continue;
                     }
 
-                    Stats initialStats = Options.stats;
+                    Stats initialStats = Options.Stats;
                     s = ReceiveSums(clientInfo);
 
                     Stream fd;
@@ -119,13 +119,13 @@ namespace NetSync
                     }
                     catch (FileNotFoundException)
                     {
-                        Log.WriteLine("file has vanished: " + Util.fullFileName(fileName));
+                        Log.WriteLine("file has vanished: " + Util.FullFileName(fileName));
                         s = null;
                         continue;
                     }
                     catch (Exception)
                     {
-                        Log.WriteLine("SendFiles failed to open " + Util.fullFileName(fileName));
+                        Log.WriteLine("SendFiles failed to open " + Util.FullFileName(fileName));
                         s = null;
                         continue;
                     }
@@ -133,40 +133,40 @@ namespace NetSync
                     FStat st = new FStat();
                     FileInfo fi = new FileInfo(fileName);
                     // TODO: path length
-                    st.mTime = fi.LastWriteTime;
+                    st.MTime = fi.LastWriteTime;
                     // TODO: path length
-                    st.size = fi.Length;
+                    st.Size = fi.Length;
 
                     MapFile mbuf = null;
-                    if (st.size != 0)
+                    if (st.Size != 0)
                     {
-                        int mapSize = (int)Math.Max(s.bLength * 3, Options.MAX_MAP_SIZE);
-                        mbuf = new MapFile(fd, (int)st.size, mapSize, (int)s.bLength);
+                        int mapSize = (int)Math.Max(s.BLength * 3, Options.MaxMapSize);
+                        mbuf = new MapFile(fd, (int)st.Size, mapSize, (int)s.BLength);
                     }
 
-                    if (options.verbose > 2)
+                    if (_options.Verbose > 2)
                     {
-                        Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.size);
+                        Log.WriteLine("SendFiles mapped " + fileName + " of size " + st.Size);
                     }
 
-                    ioStream.writeInt(i);
-                    Generator gen = new Generator(options);
+                    ioStream.WriteInt(i);
+                    Generator gen = new Generator(_options);
                     gen.WriteSumHead(ioStream, s);
 
-                    if (options.verbose > 2)
+                    if (_options.Verbose > 2)
                     {
                         Log.WriteLine("calling MatchSums " + fileName);
                     }
 
-                    if (!options.amServer && options.verbose != 0)
+                    if (!_options.AmServer && _options.Verbose != 0)
                     {
                         Log.WriteLine(fileName2);
                     }
 
-                    Token token = new Token(options);
+                    Token token = new Token(_options);
                     token.SetCompression(fileName);
 
-                    match.MatchSums(ioStream, s, mbuf, (int)st.size);
+                    match.MatchSums(ioStream, s, mbuf, (int)st.Size);
                     Log.LogSend(file, initialStats);
 
                     if (mbuf != null)
@@ -174,27 +174,27 @@ namespace NetSync
                         bool j = mbuf.UnMapFile();
                         if (j)
                         {
-                            Log.WriteLine("read errors mapping " + Util.fullFileName(fileName));
+                            Log.WriteLine("read errors mapping " + Util.FullFileName(fileName));
                         }
                     }
                     fd.Close();
 
-                    s.sums = null;
+                    s.Sums = null;
 
-                    if (options.verbose > 2)
+                    if (_options.Verbose > 2)
                     {
                         Log.WriteLine("sender finished " + fileName);
                     }
                 }
-                options.makeBackups = saveMakeBackups;
+                _options.MakeBackups = saveMakeBackups;
 
-                if (options.verbose > 2)
+                if (_options.Verbose > 2)
                 {
                     Log.WriteLine("send files finished");
                 }
 
                 match.MatchReport(ioStream);
-                ioStream.writeInt(-1);
+                ioStream.WriteInt(-1);
             }
             finally
             {
@@ -204,74 +204,74 @@ namespace NetSync
 
         public SumStruct ReceiveSums(ClientInfo cInfo)
         {
-            IOStream f = cInfo.IoStream;
+            IoStream f = cInfo.IoStream;
             SumStruct s = new SumStruct();
             int i;
             int offset = 0;
             ReadSumHead(cInfo, ref s);
-            s.sums = null;
+            s.Sums = null;
 
-            if (options.verbose > 3)
+            if (_options.Verbose > 3)
             {
-                Log.WriteLine("count=" + s.count + " n=" + s.bLength + " rem=" + s.remainder);
+                Log.WriteLine("count=" + s.Count + " n=" + s.BLength + " rem=" + s.Remainder);
             }
 
-            if (s.count == 0)
+            if (s.Count == 0)
             {
                 return s;
             }
 
-            s.sums = new SumBuf[s.count];
+            s.Sums = new SumBuf[s.Count];
 
-            for (i = 0; i < s.count; i++)
+            for (i = 0; i < s.Count; i++)
             {
-                s.sums[i] = new SumBuf();
-                s.sums[i].sum1 = (UInt32)f.readInt();
-                s.sums[i].sum2 = f.ReadBuffer(s.s2Length);
-                s.sums[i].offset = offset;
-                s.sums[i].flags = 0;
+                s.Sums[i] = new SumBuf();
+                s.Sums[i].Sum1 = (UInt32)f.ReadInt();
+                s.Sums[i].Sum2 = f.ReadBuffer(s.S2Length);
+                s.Sums[i].Offset = offset;
+                s.Sums[i].Flags = 0;
 
-                if (i == s.count - 1 && s.remainder != 0)
+                if (i == s.Count - 1 && s.Remainder != 0)
                 {
-                    s.sums[i].len = s.remainder;
+                    s.Sums[i].Len = s.Remainder;
                 }
                 else
                 {
-                    s.sums[i].len = s.bLength;
+                    s.Sums[i].Len = s.BLength;
                 }
-                offset += (int)s.sums[i].len;
+                offset += (int)s.Sums[i].Len;
 
-                if (options.verbose > 3)
+                if (_options.Verbose > 3)
                 {
-                    Log.WriteLine("chunk[" + i + "] len=" + s.sums[i].len);
+                    Log.WriteLine("chunk[" + i + "] len=" + s.Sums[i].Len);
                 }
             }
 
-            s.fLength = offset;
+            s.FLength = offset;
             return s;
         }
 
         public void ReadSumHead(ClientInfo clientInfo, ref SumStruct sum)
         {
-            IOStream ioStream = clientInfo.IoStream;
-            sum.count = ioStream.readInt();
-            sum.bLength = (UInt32)ioStream.readInt();
-            if (options.protocolVersion < 27)
+            IoStream ioStream = clientInfo.IoStream;
+            sum.Count = ioStream.ReadInt();
+            sum.BLength = (UInt32)ioStream.ReadInt();
+            if (_options.ProtocolVersion < 27)
             {
-                sum.s2Length = checkSum.length;
+                sum.S2Length = _checkSum.Length;
             }
             else
             {
-                sum.s2Length = ioStream.readInt();
-                if (sum.s2Length > CheckSum.MD4_SUM_LENGTH)
+                sum.S2Length = ioStream.ReadInt();
+                if (sum.S2Length > CheckSum.Md4SumLength)
                 {
-                    MainClass.Exit("Invalid checksum length " + sum.s2Length, clientInfo);
+                    WinRsync.Exit("Invalid checksum length " + sum.S2Length, clientInfo);
                 }
             }
-            sum.remainder = (UInt32)ioStream.readInt();
+            sum.Remainder = (UInt32)ioStream.ReadInt();
         }
 
-        NotifyIcon icon = new NotifyIcon();
+        NotifyIcon _icon = new NotifyIcon();
         public void ShowMessage(string msg)
         {
             // TODO: path length
@@ -285,14 +285,14 @@ namespace NetSync
                 msg = msg.Substring(0, 60) + "...";
             }
 
-            icon.Icon = new Icon("logo.ico");
-            icon.Text = msg;
-            icon.Visible = true;
+            _icon.Icon = new Icon("logo.ico");
+            _icon.Text = msg;
+            _icon.Visible = true;
         }
 
         public void HideMessage()
         {
-            icon.Visible = false;
+            _icon.Visible = false;
         }
     }
 }

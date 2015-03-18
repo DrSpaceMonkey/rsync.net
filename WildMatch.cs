@@ -22,9 +22,9 @@ namespace NetSync
     public class WildMatch
     {
 
-        private const int ABORT_ALL = -1; //@fixed to const
-        private const int ABORT_TO_STARSTAR = -2; //@fixed to const
-        private const Char NEGATE_CLASS = '!'; //@fixed to const?
+        private const int AbortAll = -1; //@fixed to const
+        private const int AbortToStarstar = -2; //@fixed to const
+        private const Char NegateClass = '!'; //@fixed to const?
 
         /// <summary>
         /// Find the pattern (pattern) in the text string (text).
@@ -119,22 +119,22 @@ namespace NetSync
                         {
                             if ((matched = DoMatch(r, text)) != 0)
                             {
-                                if (special == 0 || matched != ABORT_TO_STARSTAR)
+                                if (special == 0 || matched != AbortToStarstar)
                                 {
                                     return 1;
                                 }
                             }
                             else if (special == 0 && text[0] == '/')
                             {
-                                return ABORT_TO_STARSTAR;
+                                return AbortToStarstar;
                             }
                             text = text.Substring(1);
                         }
-                        return ABORT_ALL;
+                        return AbortAll;
                     case '[':
                         k++;
                         /* Assign literal true/false because of "matched" comparison. */
-                        special = ch == NEGATE_CLASS ? 1 : 0;
+                        special = ch == NegateClass ? 1 : 0;
                         if (special == 1)
                         {
                             /* Inverted character class. */
@@ -146,14 +146,14 @@ namespace NetSync
                         {
                             if (k >= pattern.Length)
                             {
-                                return ABORT_ALL;
+                                return AbortAll;
                             }
                             if (ch == '\\')
                             {
                                 ch = pattern[++k];
                                 if (k > pattern.Length)
                                 {
-                                    return ABORT_ALL;
+                                    return AbortAll;
                                 }
                                 if (text[0] == ch)
                                 {
@@ -168,7 +168,7 @@ namespace NetSync
                                     ch = pattern[++k];
                                     if (k >= pattern.Length)
                                     {
-                                        return ABORT_ALL;
+                                        return AbortAll;
                                     }
                                 }
                                 if (text[0].CompareTo(ch) <= 0 && text[0].CompareTo(prev) >= 0)
@@ -188,7 +188,7 @@ namespace NetSync
                                 }
                                 if (k + 1 >= pattern.Length)
                                 {
-                                    return ABORT_ALL;
+                                    return AbortAll;
                                 }
                                 if (j == 0 || pattern[k + j] != ':')
                                 {
@@ -270,7 +270,7 @@ namespace NetSync
                                 }
                                 else
                                 {
-                                    return ABORT_ALL;
+                                    return AbortAll;
                                 }
                                 ch = Char.MinValue;
                             }

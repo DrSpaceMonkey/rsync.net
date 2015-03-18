@@ -20,20 +20,20 @@ using System.IO;
 namespace NetSync
 {
 
-    public class FileIO
+    public class FileIo
     {
-        static byte lastByte;
-        static int lastSparse;
+        static byte _lastByte;
+        static int _lastSparse;
 
         public static int SparseEnd(Stream f)
         {
-            if (lastSparse != 0)
+            if (_lastSparse != 0)
             {
                 f.Seek(-1, SeekOrigin.Current);
-                f.WriteByte(lastByte);
+                f.WriteByte(_lastByte);
                 return 0;
             }
-            lastSparse = 0;
+            _lastSparse = 0;
             return 0;
         }
 
@@ -46,11 +46,11 @@ namespace NetSync
             for (l1 = 0; l1 < len && buf[l1] == 0; l1++) { }
             for (l2 = 0; l2 < len - l1 && buf[len - (l2 + 1)] == 0; l2++) { }
 
-            lastByte = buf[len - 1];
+            _lastByte = buf[len - 1];
 
             if (l1 == len || l2 > 0)
             {
-                lastSparse = 1;
+                _lastSparse = 1;
             }
 
             if (l1 > 0)
@@ -95,39 +95,39 @@ namespace NetSync
         /// <summary>
         /// Window pointer
         /// </summary>
-        public byte[] p = null;
+        public byte[] P = null;
         /// <summary>
         /// File Descriptor
         /// </summary>
-        Stream fileDescriptor;
+        Stream _fileDescriptor;
         /// <summary>
         /// Largest window size we allocated
         /// </summary>
-        int pSize;
+        int _pSize;
         /// <summary>
         /// Latest (rounded) window size
         /// </summary>
-        int pLength;
+        int _pLength;
         /// <summary>
         /// Default window size
         /// </summary>
-        int defaultWindowSize;
+        int _defaultWindowSize;
         /// <summary>
         /// First errno from read errors (Seems to be false all the time)
         /// </summary>
-        public bool status = false;
+        public bool Status = false;
         /// <summary>
         /// File size (from stat)
         /// </summary>
-        public int fileSize;
+        public int FileSize;
         /// <summary>
         /// Window start
         /// </summary>
-        int pOffset;
+        int _pOffset;
         /// <summary>
         /// Offset of cursor in file descriptor ala lseek
         /// </summary>
-        int pFileDescriptorOffset;
+        int _pFileDescriptorOffset;
 
         /// <summary>
         /// Initialyze new instance
@@ -142,9 +142,9 @@ namespace NetSync
             {
                 mapSize += blockSize - (mapSize % blockSize);
             }
-            this.fileDescriptor = fileDescriptor;
-            this.fileSize = length;
-            this.defaultWindowSize = mapSize;
+            this._fileDescriptor = fileDescriptor;
+            this.FileSize = length;
+            this._defaultWindowSize = mapSize;
 
         }
 
@@ -165,41 +165,41 @@ namespace NetSync
                 return -1;
             }
 
-            if (length > (this.fileSize - offset))
+            if (length > (this.FileSize - offset))
             {
-                length = this.fileSize - offset;
+                length = this.FileSize - offset;
             }
 
-            if (offset >= this.pOffset && offset + length <= this.pOffset + this.pLength)
+            if (offset >= this._pOffset && offset + length <= this._pOffset + this._pLength)
             {
-                return offset - this.pOffset;
+                return offset - this._pOffset;
             }
 
             windowStart = offset;
-            windowSize = this.defaultWindowSize;
-            if (windowStart + windowSize > this.fileSize)
+            windowSize = this._defaultWindowSize;
+            if (windowStart + windowSize > this.FileSize)
             {
-                windowSize = this.fileSize - windowStart;
+                windowSize = this.FileSize - windowStart;
             }
             if (offset + length > windowStart + windowSize)
             {
                 windowSize = (offset + length) - windowStart;
             }
 
-            if (windowSize > this.pSize)
+            if (windowSize > this._pSize)
             {
-                ExtendArray(ref p, windowSize);
-                this.pSize = windowSize;
+                ExtendArray(ref P, windowSize);
+                this._pSize = windowSize;
             }
 
-            if (windowStart >= this.pOffset &&
-                windowStart < this.pOffset + this.pLength &&
-                windowStart + windowSize >= this.pOffset + this.pLength)
+            if (windowStart >= this._pOffset &&
+                windowStart < this._pOffset + this._pLength &&
+                windowStart + windowSize >= this._pOffset + this._pLength)
             {
-                readStart = this.pOffset + this.pLength;
+                readStart = this._pOffset + this._pLength;
                 readOffset = readStart - windowStart;
                 readSize = windowSize - readOffset;
-                MemoryMove(ref this.p, this.p, (this.pLength - readOffset), readOffset);
+                MemoryMove(ref this.P, this.P, (this._pLength - readOffset), readOffset);
             }
             else
             {
@@ -213,30 +213,30 @@ namespace NetSync
             }
             else
             {
-                if (this.pFileDescriptorOffset != readStart)
+                if (this._pFileDescriptorOffset != readStart)
                 {
-                    if (this.fileDescriptor.Seek(readStart, SeekOrigin.Begin) != readStart)
+                    if (this._fileDescriptor.Seek(readStart, SeekOrigin.Begin) != readStart)
                     {
-                        MainClass.Exit("Seek failed in MapPtr", null);
+                        WinRsync.Exit("Seek failed in MapPtr", null);
                     }
-                    this.pFileDescriptorOffset = readStart;
+                    this._pFileDescriptorOffset = readStart;
                 }
 
-                if ((numberOfReadBytes = fileDescriptor.Read(this.p, readOffset, readSize)) != readSize)
+                if ((numberOfReadBytes = _fileDescriptor.Read(this.P, readOffset, readSize)) != readSize)
                 {
                     //if (numberOfReadBytes < 0) //@fixed Read never returns <0 so status is false all the time
                     //{
                     //    numberOfReadBytes = 0;
                     //    status = true;
                     //}
-                    FillMemory(ref this.p, readOffset + numberOfReadBytes, 0, readSize - numberOfReadBytes);
+                    FillMemory(ref this.P, readOffset + numberOfReadBytes, 0, readSize - numberOfReadBytes);
                 }
-                this.pFileDescriptorOffset += numberOfReadBytes;
+                this._pFileDescriptorOffset += numberOfReadBytes;
             }
 
-            this.pOffset = windowStart;
-            this.pLength = windowSize;
-            return offset - this.pOffset;
+            this._pOffset = windowStart;
+            this._pLength = windowSize;
+            return offset - this._pOffset;
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace NetSync
         /// <returns></returns>
         public bool UnMapFile()
         {
-            return this.status;
+            return this.Status;
         }
 
         /// <summary>

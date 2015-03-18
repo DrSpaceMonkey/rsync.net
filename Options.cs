@@ -35,275 +35,274 @@ namespace NetSync
                     switch (args[i])
                     {
                         case "--version":
-                            MainClass.PrintRsyncVersion();
-                            MainClass.Exit(String.Empty, null);
+                            WinRsync.PrintRsyncVersion();
+                            WinRsync.Exit(String.Empty, null);
                             break;
                         case "--suffix":
-                            options.backupSuffix = args[++i];
+                            options.BackupSuffix = args[++i];
                             break;
                         case "--rsync-path":
-                            options.rsyncPath = args[++i];
+                            options.RsyncPath = args[++i];
                             break;
                         case "--password-file":
-                            options.passwordFile = args[++i];
+                            options.PasswordFile = args[++i];
                             break;
                         case "--ignore-times":
                         case "-I":
-                            options.ignoreTimes = true;
+                            options.IgnoreTimes = true;
                             break;
                         case "--size-only":
-                            options.sizeOnly = true;
+                            options.SizeOnly = true;
                             break;
                         case "--modify-window":
-                            options.usingModifyWindow = true;
-                            options.modifyWindow = Convert.ToInt32(args[++i]);
+                            options.UsingModifyWindow = true;
+                            options.ModifyWindow = Convert.ToInt32(args[++i]);
                             break;
                         case "--one-file-system":
                         case "-x":
-                            options.oneFileSystem = true;
+                            options.OneFileSystem = true;
                             break;
                         case "--delete":
-                            options.deleteMode = true;
+                            options.DeleteMode = true;
                             break;
                         case "--existing":
-                            options.onlyExisting = true;
+                            options.OnlyExisting = true;
                             break;
                         case "--ignore-existing":
-                            options.optIgnoreExisting = true;
+                            options.OptIgnoreExisting = true;
                             break;
                         case "--delete-after":
-                            options.deleteMode = true;
-                            options.deleteAfter = true;
+                            options.DeleteMode = true;
+                            options.DeleteAfter = true;
                             break;
                         case "--delete-excluded":
-                            options.deleteMode = true;
-                            options.deleteExcluded = true;
+                            options.DeleteMode = true;
+                            options.DeleteExcluded = true;
                             break;
                         case "--force":
-                            options.forceDelete = true;
+                            options.ForceDelete = true;
                             break;
                         case "--numeric-ids":
-                            options.numericIds = true;
+                            options.NumericIds = true;
                             break;
                         case "--exclude":
-                            excl.AddExclude(ref options.excludeList, args[++i], 0);
+                            excl.AddExclude(ref options.ExcludeList, args[++i], 0);
                             break;
                         case "--include":
-                            excl.AddExclude(ref options.excludeList, args[++i], (int)Options.XFLG_DEF_INCLUDE);
-                            options.forceDelete = true;
+                            excl.AddExclude(ref options.ExcludeList, args[++i], (int)Options.XflgDefInclude);
+                            options.ForceDelete = true;
                             break;
                         case "--exclude-from":
                         case "--include-from":
                             string arg = args[i];
-                            excl.AddExcludeFile(ref options.excludeList, args[++i],
-                                    (arg.CompareTo("--exclude-from") == 0) ? 0 : (int)Options.XFLG_DEF_INCLUDE);
+                            excl.AddExcludeFile(ref options.ExcludeList, args[++i],
+                                    (arg.CompareTo("--exclude-from") == 0) ? 0 : (int)Options.XflgDefInclude);
                             break;
                         case "--safe-links":
-                            options.safeSymlinks = true;
+                            options.SafeSymlinks = true;
                             break;
                         case "--help":
                         case "-h":
-                            MainClass.Usage();
-                            MainClass.Exit(String.Empty, null);
+                            WinRsync.Exit(String.Empty, null);
                             break;
                         case "--backup":
                         case "-b":
-                            options.makeBackups = true;
+                            options.MakeBackups = true;
                             break;
                         case "--dry-run":
                         case "-n":
-                            options.dryRun = true;
+                            options.DryRun = true;
                             break;
                         case "--sparse":
                         case "-S":
-                            options.sparseFiles = true;
+                            options.SparseFiles = true;
                             break;
                         case "--cvs-exclude":
                         case "-C":
-                            options.cvsExclude = true;
+                            options.CvsExclude = true;
                             break;
                         case "--update":
                         case "-u":
-                            options.updateOnly = true;
+                            options.UpdateOnly = true;
                             break;
                         case "--inplace":
-                            options.inplace = true;
+                            options.Inplace = true;
                             break;
                         case "--keep-dirlinks":
                         case "-K":
-                            options.keepDirLinks = true;
+                            options.KeepDirLinks = true;
                             break;
                         case "--links":
                         case "-l":
-                            options.preserveLinks = true;
+                            options.PreserveLinks = true;
                             break;
                         case "--copy-links":
                         case "-L":
-                            options.copyLinks = true;
+                            options.CopyLinks = true;
                             break;
                         case "--whole-file":
                         case "-W":
-                            options.wholeFile = 1;
+                            options.WholeFile = 1;
                             break;
                         case "--no-whole-file":
-                            options.wholeFile = 0;
+                            options.WholeFile = 0;
                             break;
                         case "--copy-unsafe-links":
-                            options.copyUnsafeLinks = true;
+                            options.CopyUnsafeLinks = true;
                             break;
                         case "--perms":
                         case "-p":
-                            options.preservePerms = true;
+                            options.PreservePerms = true;
                             break;
                         case "--owner":
                         case "-o":
-                            options.preserveUID = true;
+                            options.PreserveUid = true;
                             break;
                         case "--group":
                         case "-g":
-                            options.preserveGID = true;
+                            options.PreserveGid = true;
                             break;
                         case "--devices":
                         case "-D":
-                            options.preserveDevices = true;
+                            options.PreserveDevices = true;
                             break;
                         case "--times":
                         case "-t":
-                            options.preserveTimes = true;
+                            options.PreserveTimes = true;
                             break;
                         case "--checksum":
                         case "-c":
-                            options.alwaysChecksum = true;
+                            options.AlwaysChecksum = true;
                             break;
                         case "--verbose":
                         case "-v":
-                            options.verbose++;
+                            options.Verbose++;
                             break;
                         case "--quiet":
                         case "-q":
-                            options.quiet++;
+                            options.Quiet++;
                             break;
                         case "--archive":
                         case "-a":
-                            options.archiveMode = true;
+                            options.ArchiveMode = true;
                             break;
                         case "--server":
-                            options.amServer = true;
+                            options.AmServer = true;
                             break;
                         case "--sender":
-                            options.amSender = true;
+                            options.AmSender = true;
                             break;
                         case "--recursive":
                         case "-r":
-                            options.recurse = true;
+                            options.Recurse = true;
                             break;
                         case "--relative":
                         case "-R":
-                            options.relativePaths = true;
+                            options.RelativePaths = true;
                             break;
                         case "--no-relative":
-                            options.relativePaths = false;
+                            options.RelativePaths = false;
                             break;
                         case "--rsh":
                         case "-e":
-                            options.shellCmd = args[++i];
+                            options.ShellCmd = args[++i];
                             break;
                         case "--block-size":
                         case "-B":
-                            options.blockSize = Convert.ToInt32(args[++i]);
+                            options.BlockSize = Convert.ToInt32(args[++i]);
                             break;
                         case "--max-delete":
-                            options.maxDelete = Convert.ToInt32(args[++i]);
+                            options.MaxDelete = Convert.ToInt32(args[++i]);
                             break;
                         case "--timeout":
-                            options.ioTimeout = Convert.ToInt32(args[++i]);
+                            options.IoTimeout = Convert.ToInt32(args[++i]);
                             break;
                         case "--temp-dir":
                         case "-T":
-                            options.tmpDir = args[++i];
+                            options.TmpDir = args[++i];
                             break;
                         case "--compare-dest":
-                            options.compareDest = args[++i];
+                            options.CompareDest = args[++i];
                             break;
                         case "--link-dest":
-                            options.compareDest = args[++i];
+                            options.CompareDest = args[++i];
                             break;
                         case "--compress":
                         case "-z":
-                            options.doCompression = true;
+                            options.DoCompression = true;
                             break;
                         case "--stats":
-                            options.doStats = true;
+                            options.DoStats = true;
                             break;
                         case "--progress":
-                            options.doProgress = true;
+                            options.DoProgress = true;
                             break;
                         case "--partial":
-                            options.keepPartial = true;
+                            options.KeepPartial = true;
                             break;
                         case "--partial-dir":
-                            options.partialDir = args[++i];
+                            options.PartialDir = args[++i];
                             break;
                         case "--ignore-errors":
-                            options.ignoreErrors = true;
+                            options.IgnoreErrors = true;
                             break;
                         case "--blocking-io":
-                            options.blockingIO = 1;
+                            options.BlockingIo = 1;
                             break;
                         case "--no-blocking-io":
-                            options.blockingIO = 0;
+                            options.BlockingIo = 0;
                             break;
                         case "-P":
-                            options.doProgress = true;
-                            options.keepPartial = true;
+                            options.DoProgress = true;
+                            options.KeepPartial = true;
                             break;
                         case "--log-format":
-                            options.logFormat = args[++i];
+                            options.LogFormat = args[++i];
                             break;
                         case "--bwlimit":
-                            options.bwLimit = Convert.ToInt32(args[++i]);
+                            options.BwLimit = Convert.ToInt32(args[++i]);
                             break;
                         case "--backup-dir":
-                            options.backupDir = args[++i];
+                            options.BackupDir = args[++i];
                             break;
                         case "--hard-links":
                         case "-H":
-                            options.preserveHardLinks = true;
+                            options.PreserveHardLinks = true;
                             break;
                         case "--read-batch":
-                            options.batchName = args[++i];
-                            options.readBatch = true;
+                            options.BatchName = args[++i];
+                            options.ReadBatch = true;
                             break;
                         case "--write-batch":
-                            options.batchName = args[++i];
-                            options.writeBatch = true;
+                            options.BatchName = args[++i];
+                            options.WriteBatch = true;
                             break;
                         case "--files-from":
-                            options.filesFrom = args[++i];
+                            options.FilesFrom = args[++i];
                             break;
                         case "--from0":
-                            options.eolNulls = true;
+                            options.EolNulls = true;
                             break;
                         case "--no-implied-dirs":
-                            options.impliedDirs = true;
+                            options.ImpliedDirs = true;
                             break;
                         case "--protocol":
-                            options.protocolVersion = Convert.ToInt32(args[++i]);
+                            options.ProtocolVersion = Convert.ToInt32(args[++i]);
                             break;
                         case "--checksum-seed":
-                            options.checksumSeed = Convert.ToInt32(args[++i]);
+                            options.ChecksumSeed = Convert.ToInt32(args[++i]);
                             break;
                         case "--daemon":
-                            options.amDaemon = true;
+                            options.AmDaemon = true;
                             break;
                         case "--address":
-                            options.bindAddress = args[++i];
+                            options.BindAddress = args[++i];
                             break;
                         case "--port":
                             options.rsyncPort = Convert.ToInt32(args[++i]);
                             break;
                         case "--config":
-                            options.configFile = args[++i].Trim();
+                            options.ConfigFile = args[++i].Trim();
                             break;
                         default:
                             {
@@ -315,27 +314,26 @@ namespace NetSync
                 }
                 catch { return -1; }
             }
-            if (options.amSender && !options.amServer)
+            if (options.AmSender && !options.AmServer)
             {
-                MainClass.Usage();
-                MainClass.Exit(String.Empty, null);
+                WinRsync.Exit(String.Empty, null);
             }
-            if (options.ioTimeout > 0 && options.ioTimeout < options.selectTimeout)
+            if (options.IoTimeout > 0 && options.IoTimeout < options.SelectTimeout)
             {
-                options.selectTimeout = options.ioTimeout;
+                options.SelectTimeout = options.IoTimeout;
             }
             return argsNotUsed;
         }
 
-        private static int ParseMergeArgs(string MergeArgs, Options options)
+        private static int ParseMergeArgs(string mergeArgs, Options options)
         {
-            if (MergeArgs != null && MergeArgs.StartsWith("-") && MergeArgs.Substring(1).IndexOf('-') == -1)
+            if (mergeArgs != null && mergeArgs.StartsWith("-") && mergeArgs.Substring(1).IndexOf('-') == -1)
             {
-                MergeArgs = MergeArgs.Substring(1);
-                string[] args = new string[MergeArgs.Length];
-                for (int i = 0; i < MergeArgs.Length; i++)
+                mergeArgs = mergeArgs.Substring(1);
+                string[] args = new string[mergeArgs.Length];
+                for (int i = 0; i < mergeArgs.Length; i++)
                 {
-                    args[i] = "-" + MergeArgs[i];
+                    args[i] = "-" + mergeArgs[i];
                 }
                 return ParseArguments(args, options);
 
@@ -348,346 +346,348 @@ namespace NetSync
 
     public class Stats
     {
-        public Int64 totalSize = 0;
-        public Int64 totalTransferredSize = 0;
-        public Int64 totalWritten = 0;
-        public Int64 totalRead = 0;
-        public Int64 literalData = 0;
-        public Int64 matchedData = 0;
-        public int fileListSize = 0;
-        public int numFiles = 0;
-        public int numTransferredFiles = 0;
-        public int currentFileIndex = 0;
+        public Int64 TotalSize = 0;
+        public Int64 TotalTransferredSize = 0;
+        public Int64 TotalWritten = 0;
+        public Int64 TotalRead = 0;
+        public Int64 LiteralData = 0;
+        public Int64 MatchedData = 0;
+        public int FileListSize = 0;
+        public int NumFiles = 0;
+        public int NumTransferredFiles = 0;
+        public int CurrentFileIndex = 0;
     }
 
     public class Options
     {
-        public void Init()
+        public Options()
         {
-            excludeList.Add(new ExcludeStruct(String.Empty, 0, 0));
-            localExcludeList.Add(new ExcludeStruct("per-dir .cvsignore ", 0, 0));
-            serverExcludeList.Add(new ExcludeStruct("server ", 0, 0));
+            ExcludeList.Add(new ExcludeStruct(String.Empty, 0, 0));
+            LocalExcludeList.Add(new ExcludeStruct("per-dir .cvsignore ", 0, 0));
+            ServerExcludeList.Add(new ExcludeStruct("server ", 0, 0));
         }
-        public static System.DateTime lastIO = System.DateTime.MinValue;
+
+        public DateTime LastIo { get; } = System.DateTime.MinValue;
         //public static System.IO.StreamReader filesFromFD = null;
         /// <summary>
         /// Seems to be null all the time
         /// </summary>
-        public static System.IO.Stream filesFromFD = null;
-        public static Stats stats = new Stats();
+        public static System.IO.Stream FilesFromFd = null;
+        public static Stats Stats = new Stats();
         /// <summary>
         /// "rsync://"
         /// </summary>
-        public const string URL_PREFIX = "rsync://";
+        public const string UrlPrefix = "rsync://";
+
         /// <summary>
         /// 873
         /// </summary>
-        public const int RSYNC_PORT = 873;
-        public int rsyncPort = RSYNC_PORT;
+        public int rsyncPort { get; set; } = 873;
+
         /// <summary>
         /// 1024
         /// </summary>
-        public const int MAXPATHLEN = 1024;
+        public const int Maxpathlen = 1024;
         /// <summary>
         /// 700
         /// </summary>
-        public const int BLOCK_SIZE = 700;
+        public const int MaxBlockSize = 700;
         /// <summary>
         /// 1000
         /// </summary>
-        public const int MAX_ARGS = 1000;
+        public const int MaxArgs = 1000;
         /// <summary>
         /// 20
         /// </summary>
-        public const int MIN_PROTOCOL_VERSION = 20;
+        public const int MinProtocolVersion = 20;
         /// <summary>
         /// 25
         /// </summary>
-        public const int OLD_PROTOCOL_VERSION = 25;
+        public const int OldProtocolVersion = 25;
         /// <summary>
         /// 40
         /// </summary>
-        public const int MAX_PROTOCOL_VERSION = 40;
+        public const int MaxProtocolVersion = 40;
         /// <summary>
         /// (256 * 1024)
         /// </summary>
-        public const int MAX_MAP_SIZE = (256 * 1024);
+        public const int MaxMapSize = (256 * 1024);
         /// <summary>
         /// (1 &lt;&lt; 0)
         /// </summary>
-        public const int FLAG_TOP_DIR = (1 << 0);
+        public const int FlagTopDir = (1 << 0);
         /// <summary>
         /// (1 &lt;&lt; 1)
         /// </summary>
-        public const int FLAG_HLINK_EOL = (1 << 1);	/* generator only */
+        public const int FlagHlinkEol = (1 << 1);	/* generator only */
         /// <summary>
         /// (1 &lt;&lt; 2)
         /// </summary>
-        public const int FLAG_MOUNT_POINT = (1 << 2);	/* sender only */
+        public const int FlagMountPoint = (1 << 2);	/* sender only */
         /// <summary>
         /// 0
         /// </summary>
-        public const int NO_EXCLUDES = 0;
+        public const int NoExcludes = 0;
         /// <summary>
         /// 1
         /// </summary>
-        public const int SERVER_EXCLUDES = 1;
+        public const int ServerExcludes = 1;
         /// <summary>
         /// 2
         /// </summary>
-        public const int ALL_EXCLUDES = 2;
+        public const int AllExcludes = 2;
         /// <summary>
         /// 0
         /// </summary>
-        public const int GID_NONE = 0;
+        public const int GidNone = 0;
         /// <summary>
         /// (1 &lt;&lt; 0)
         /// </summary>
-        public const UInt32 XFLG_FATAL_ERRORS = (1 << 0);
+        public const UInt32 XflgFatalErrors = (1 << 0);
         /// <summary>
         /// (1 &lt;&lt; 1)
         /// </summary>
-        public const UInt32 XFLG_DEF_INCLUDE = (1 << 1);
+        public const UInt32 XflgDefInclude = (1 << 1);
         /// <summary>
         /// (1 &lt;&lt; 2)
         /// </summary>
-        public const UInt32 XFLG_WORDS_ONLY = (1 << 2);
+        public const UInt32 XflgWordsOnly = (1 << 2);
         /// <summary>
         /// (1 &lt;&lt; 3)
         /// </summary>
-        public const UInt32 XFLG_WORD_SPLIT = (1 << 3);
+        public const UInt32 XflgWordSplit = (1 << 3);
         /// <summary>
         /// (1 &lt;&lt; 4)
         /// </summary>
-        public const UInt32 XFLG_DIRECTORY = (1 << 4);
+        public const UInt32 XflgDirectory = (1 << 4);
         /// <summary>
         /// (1 &lt;&lt; 0)
         /// </summary>
-        public const UInt32 MATCHFLG_WILD = (1 << 0); /* pattern has '*', '[', and/or '?' */
+        public const UInt32 MatchflgWild = (1 << 0); /* pattern has '*', '[', and/or '?' */
         /// <summary>
         /// 
         /// </summary>
-        public const UInt32 MATCHFLG_WILD2 = (1 << 1); /* pattern has '**' */
+        public const UInt32 MatchflgWild2 = (1 << 1); /* pattern has '**' */
         /// <summary>
         /// (1 &lt;&lt; 2)
         /// </summary>
-        public const UInt32 MATCHFLG_WILD2_PREFIX = (1 << 2); /* pattern starts with '**' */
+        public const UInt32 MatchflgWild2Prefix = (1 << 2); /* pattern starts with '**' */
         /// <summary>
         /// (1 &lt;&lt; 3)
         /// </summary>
-        public const UInt32 MATCHFLG_ABS_PATH = (1 << 3); /* path-match on absolute path */
+        public const UInt32 MatchflgAbsPath = (1 << 3); /* path-match on absolute path */
         /// <summary>
         /// (1 &lt;&lt; 4)
         /// </summary>
-        public const UInt32 MATCHFLG_INCLUDE = (1 << 4); /* this is an include, not an exclude */
+        public const UInt32 MatchflgInclude = (1 << 4); /* this is an include, not an exclude */
         /// <summary>
         /// (1 &lt;&lt; 5)
         /// </summary>
-        public const UInt32 MATCHFLG_DIRECTORY = (1 << 5); /* this matches only directories */
+        public const UInt32 MatchflgDirectory = (1 << 5); /* this matches only directories */
         /// <summary>
         /// (1 &lt;&lt; 6)
         /// </summary>
-        public const UInt32 MATCHFLG_CLEAR_LIST = (1 << 6); /* this item is the "!" token */
+        public const UInt32 MatchflgClearList = (1 << 6); /* this item is the "!" token */
         /// <summary>
         /// (1 &lt;&lt; 0)
         /// </summary>
-        public const UInt32 XMIT_TOP_DIR = (1 << 0);
+        public const UInt32 XmitTopDir = (1 << 0);
         /// <summary>
         /// (1 &lt;&lt; 1)
         /// </summary>
-        public const UInt32 XMIT_SAME_MODE = (1 << 1);
+        public const UInt32 XmitSameMode = (1 << 1);
         /// <summary>
         /// (1 &lt;&lt; 2)
         /// </summary>
-        public const UInt32 XMIT_EXTENDED_FLAGS = (1 << 2);
+        public const UInt32 XmitExtendedFlags = (1 << 2);
         /// <summary>
         /// XMIT_EXTENDED_FLAGS = (1 &lt;&lt; 2)
         /// </summary>
-        public const UInt32 XMIT_SAME_RDEV_pre28 = XMIT_EXTENDED_FLAGS; /* Only in protocols < 28 */
+        public const UInt32 XmitSameRdevPre28 = XmitExtendedFlags; /* Only in protocols < 28 */
         /// <summary>
         /// (1 &lt;&lt; 3)
         /// </summary>
-        public const UInt32 XMIT_SAME_UID = (1 << 3);
+        public const UInt32 XmitSameUid = (1 << 3);
         /// <summary>
         /// (1 &lt;&lt; 4)
         /// </summary>
-        public const UInt32 XMIT_SAME_GID = (1 << 4);
+        public const UInt32 XmitSameGid = (1 << 4);
         /// <summary>
         /// (1 &lt;&lt; 5)
         /// </summary>
-        public const UInt32 XMIT_SAME_NAME = (1 << 5);
+        public const UInt32 XmitSameName = (1 << 5);
         /// <summary>
         /// (1 &lt;&lt; 6)
         /// </summary>
-        public const UInt32 XMIT_LONG_NAME = (1 << 6);
+        public const UInt32 XmitLongName = (1 << 6);
         /// <summary>
         /// (1 &lt;&lt; 7)
         /// </summary>
-        public const UInt32 XMIT_SAME_TIME = (1 << 7);
+        public const UInt32 XmitSameTime = (1 << 7);
         /// <summary>
         /// (1 &lt;&lt; 8)
         /// </summary>
-        public const UInt32 XMIT_SAME_RDEV_MAJOR = (1 << 8);
+        public const UInt32 XmitSameRdevMajor = (1 << 8);
         /// <summary>
         /// (1 &lt;&lt; 9)
         /// </summary>
-        public const UInt32 XMIT_HAS_IDEV_DATA = (1 << 9);
+        public const UInt32 XmitHasIdevData = (1 << 9);
         /// <summary>
         /// (1 &lt;&lt; 10)
         /// </summary>
-        public const UInt32 XMIT_SAME_DEV = (1 << 10);
+        public const UInt32 XmitSameDev = (1 << 10);
         /// <summary>
         /// (1 &lt;&lt; 11)
         /// </summary>
-        public const UInt32 XMIT_RDEV_MINOR_IS_SMALL = (1 << 11);
+        public const UInt32 XmitRdevMinorIsSmall = (1 << 11);
         //
-        public List<ExcludeStruct> excludeList = new List<ExcludeStruct>();
-        public List<ExcludeStruct> localExcludeList = new List<ExcludeStruct>();
-        public List<ExcludeStruct> serverExcludeList = new List<ExcludeStruct>();
-        public string excludePathPrefix = null;
+        public List<ExcludeStruct> ExcludeList = new List<ExcludeStruct>();
+        public List<ExcludeStruct> LocalExcludeList = new List<ExcludeStruct>();
+        public List<ExcludeStruct> ServerExcludeList = new List<ExcludeStruct>();
+        public string ExcludePathPrefix = null;
 
-        public DateTime startTime = System.DateTime.Now;
-        public string backupSuffix = null;
-        public string rsyncPath = null;
-        public string passwordFile = null;
-        public bool ignoreTimes = false;
-        public bool sizeOnly = false;
+        public DateTime StartTime = System.DateTime.Now;
+        public string BackupSuffix = null;
+        public string RsyncPath = null;
+        public string PasswordFile = null;
+        public bool IgnoreTimes = false;
+        public bool SizeOnly = false;
         /// <summary>
         /// Allowed difference between two files modification time
         /// </summary>
-        public int modifyWindow = 0;
-        public bool usingModifyWindow = false;
-        public bool oneFileSystem = false;
-        public bool deleteMode = false;
-        public bool onlyExisting = false;
-        public bool optIgnoreExisting = false;
-        public bool deleteAfter = false;
-        public bool deleteExcluded = false;
-        public bool forceDelete = false;
-        public bool numericIds = false;
-        public bool safeSymlinks = false;
-        public bool makeBackups = false;
-        public bool dryRun = false;
-        public bool sparseFiles = false;
-        public bool cvsExclude = false;
-        public bool updateOnly = false;
-        public bool inplace = false;
-        public bool keepDirLinks = false;
-        public bool preserveLinks = false;
-        public bool copyLinks = false;
-        public int wholeFile = -1;
-        public bool copyUnsafeLinks = false;
-        public bool preservePerms = false;
-        public bool preserveUID = false;
-        public bool preserveGID = false;
-        public bool preserveDevices = false;
-        public bool preserveTimes = false;
-        public bool alwaysChecksum = false;
-        public bool archiveMode = false;
-        public bool amServer = false;
-        public bool recurse = false;
-        public int verbose = 0;
-        public int quiet = 0;
-        public bool amSender = false;
-        public bool relativePaths = true; //changed to bool and set true as init value
-        public string shellCmd = null;
-        public int blockSize = 0;
-        public int maxDelete = 0;
-        public int ioTimeout = 0;
-        public string tmpDir = null;
-        public string compareDest = null;
-        public int selectTimeout = 0;
-        public bool doCompression = false;
-        public bool doStats = false;
-        public bool doProgress = false;
-        public bool keepPartial = false;
-        public string partialDir = null;
-        public bool ignoreErrors = false;
-        public int blockingIO = -1;
-        public string logFormat = null;
-        public int bwLimit = 0;
-        public string backupDir = null;
-        public bool preserveHardLinks = false;
-        public string batchName = null;
-        public string filesFrom = null;
-        public bool eolNulls = false;
-        public bool impliedDirs = false;
-        public int protocolVersion = 28;
-        public int checksumSeed = 0;
-        public bool readBatch = false;
-        public bool writeBatch = false;
-        public bool listOnly = false;
-        public bool delayUpdates = false;
+        public int ModifyWindow = 0;
+        public bool UsingModifyWindow = false;
+        public bool OneFileSystem = false;
+        public bool DeleteMode = false;
+        public bool OnlyExisting = false;
+        public bool OptIgnoreExisting = false;
+        public bool DeleteAfter = false;
+        public bool DeleteExcluded = false;
+        public bool ForceDelete = false;
+        public bool NumericIds = false;
+        public bool SafeSymlinks = false;
+        public bool MakeBackups = false;
+        public bool DryRun = false;
+        public bool SparseFiles = false;
+        public bool CvsExclude = false;
+        public bool UpdateOnly = false;
+        public bool Inplace = false;
+        public bool KeepDirLinks = false;
+        public bool PreserveLinks = false;
+        public bool CopyLinks = false;
+        public int WholeFile = -1;
+        public bool CopyUnsafeLinks = false;
+        public bool PreservePerms = false;
+        public bool PreserveUid = false;
+        public bool PreserveGid = false;
+        public bool PreserveDevices = false;
+        public bool PreserveTimes = false;
+        public bool AlwaysChecksum = false;
+        public bool ArchiveMode = false;
+        public bool AmServer = false;
+        public bool Recurse = false;
+        public int Verbose = 0;
+        public int Quiet = 0;
+        public bool AmSender = false;
+        public bool RelativePaths = true; //changed to bool and set true as init value
+        public string ShellCmd = null;
+        public int BlockSize = 0;
+        public int MaxDelete = 0;
+        public int IoTimeout = 0;
+        public string TmpDir = null;
+        public string CompareDest = null;
+        public int SelectTimeout = 0;
+        public bool DoCompression = false;
+        public bool DoStats = false;
+        public bool DoProgress = false;
+        public bool KeepPartial = false;
+        public string PartialDir = null;
+        public bool IgnoreErrors = false;
+        public int BlockingIo = -1;
+        public string LogFormat = null;
+        public int BwLimit = 0;
+        public string BackupDir = null;
+        public bool PreserveHardLinks = false;
+        public string BatchName = null;
+        public string FilesFrom = null;
+        public bool EolNulls = false;
+        public bool ImpliedDirs = false;
+        public int ProtocolVersion = 28;
+        public int ChecksumSeed = 0;
+        public bool ReadBatch = false;
+        public bool WriteBatch = false;
+        public bool ListOnly = false;
+        public bool DelayUpdates = false;
 
-        public string bindAddress = "127.0.0.1";
-        public string configFile = "rsyncd.conf";
-        public bool daemonOpt = false;
-        public bool noDetach = false;
+        public string BindAddress = "127.0.0.1";
+        public string ConfigFile = "rsyncd.conf";
+        public bool DaemonOpt = false;
+        public bool NoDetach = false;
         //public int defaultafHint = AIF_INET;
-        public bool amDaemon = false;
-        public bool amRoot = true;
-        public bool amGenerator = false;
-        public string remoteFilesFromFile = null;
+        public bool AmDaemon = false;
+        public bool AmRoot = true;
+        public bool AmGenerator = false;
+        public string RemoteFilesFromFile = null;
 
-        public bool readOnly = false;
-        public bool sanitizePath = false;
-        public Stream sockFIn = null;
-        public Stream sockFOut = null;
-        public int remoteProtocol = 0;
-        public string dir = String.Empty;
-        public FileStream logFile = null;
+        public bool ReadOnly = false;
+        public bool SanitizePath = false;
+        public Stream SockFIn = null;
+        public Stream SockFOut = null;
+        public int RemoteProtocol = 0;
+        public string Dir = String.Empty;
+        public FileStream LogFile = null;
         public int ModuleId = -1;
-        public string remoteAddr = null;
-        public string remoteHost = null;
+        public string RemoteAddr = null;
+        public string RemoteHost = null;
 
         public string WhoAmI()
         {
-            return amSender ? "sender" : amGenerator ? "generator" : "receiver";
+            return AmSender ? "sender" : AmGenerator ? "generator" : "receiver";
         }
 
         public int ServerOptions(string[] args)
         {
             int argc = 0;
             args[argc++] = "--server";
-            for (int i = 0; i < verbose; i++)
+            for (int i = 0; i < Verbose; i++)
             {
                 args[argc++] = "-v";
             }
 
 
             args[argc++] = "-R";
-            if (alwaysChecksum)
+            if (AlwaysChecksum)
             {
                 args[argc++] = "-c";
             }
-            if (recurse)
+            if (Recurse)
             {
                 args[argc++] = "-r";
             }
 
-            if (amSender)
+            if (AmSender)
             {
-                if (deleteExcluded)
+                if (DeleteExcluded)
                 {
                     args[argc++] = "--delete-excluded";
                 }
-                else if (deleteMode)
+                else if (DeleteMode)
                 {
                     args[argc++] = "--delete";
                 }
 
-                if (deleteAfter)
+                if (DeleteAfter)
                 {
                     args[argc++] = "--delete-after";
                 }
 
-                if (forceDelete)
+                if (ForceDelete)
                 {
                     args[argc++] = "--force";
                 }
             }
 
-            if (!amSender)
+            if (!AmSender)
             {
                 args[argc++] = "--sender";
             }

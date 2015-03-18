@@ -27,65 +27,65 @@ namespace NetSync
     public class ClientInfo
     {
         public Options Options = null;
-        public IOStream IoStream = null;
+        public IoStream IoStream = null;
         public Thread ClientThread = null;
     }
 
-    public class TCPSocketListener
+    public class TcpSocketListener
     {
-        private Socket Client;
-        private Thread ClientThread;
-        private ClientInfo ClientInfo;
-        private List<TCPSocketListener> ClientSockets;
+        private Socket _client;
+        private Thread _clientThread;
+        private ClientInfo _clientInfo;
+        private List<TcpSocketListener> _clientSockets;
 
-        public TCPSocketListener(Socket client, ref List<TCPSocketListener> clientSockets)
+        public TcpSocketListener(Socket client, ref List<TcpSocketListener> clientSockets)
         {
-            Client = client;
-            ClientSockets = clientSockets;
-            ClientInfo = new ClientInfo();
-            ClientInfo.Options = new Options();
+            _client = client;
+            _clientSockets = clientSockets;
+            _clientInfo = new ClientInfo();
+            _clientInfo.Options = new Options();
         }
         public void StartSocketListener()
         {
-            if (Client != null)
+            if (_client != null)
             {
-                ClientThread = new Thread(new ThreadStart(StartDaemon));
-                ClientInfo.IoStream = new IOStream(new NetworkStream(Client));
-                ClientInfo.IoStream.ClientThread = ClientThread;
-                ClientThread.Start();
+                _clientThread = new Thread(new ThreadStart(StartDaemon));
+                _clientInfo.IoStream = new IoStream(new NetworkStream(_client));
+                _clientInfo.IoStream.ClientThread = _clientThread;
+                _clientThread.Start();
             }
         }
 
         public void StartDaemon()
         {
-            string remoteAddr = Client.RemoteEndPoint.ToString();
+            string remoteAddr = _client.RemoteEndPoint.ToString();
             remoteAddr = remoteAddr.Substring(0, remoteAddr.IndexOf(':'));
             //string remoteHost = Dns.GetHostByAddress(IPAddress.Parse(remoteAddr)).HostName;
             string remoteHost = Dns.GetHostEntry(IPAddress.Parse(remoteAddr)).HostName;
-            ClientInfo.Options.remoteAddr = remoteAddr;
-            ClientInfo.Options.remoteHost = remoteHost;
+            _clientInfo.Options.RemoteAddr = remoteAddr;
+            _clientInfo.Options.RemoteHost = remoteHost;
 
-            Daemon.StartDaemon(ClientInfo);
-            Client.Close();
-            ClientSockets.Remove(this);
+            Daemon.StartDaemon(_clientInfo);
+            _client.Close();
+            _clientSockets.Remove(this);
         }
     }
 
 
     public class Daemon
     {
-        private static TcpListener Server = null;
-        private static List<TCPSocketListener> ClientSockets = null;
-        private static bool StopServer = true;
+        private static TcpListener _server = null;
+        private static List<TcpSocketListener> _clientSockets = null;
+        private static bool _stopServer = true;
         public static Options ServerOptions = null;
 
-        public static Configuration config;
+        public static Configuration Config;
 
         public static int DaemonMain(Options options)
         {
             ServerOptions = options;
-            config = new Configuration(ServerOptions.configFile);
-            if (config.LoadParm(options))
+            Config = new Configuration(ServerOptions.ConfigFile);
+            if (Config.LoadParm(options))
             {
                 StartAcceptLoop(options.rsyncPort);
             }
@@ -94,84 +94,84 @@ namespace NetSync
 
         public static void StartAcceptLoop(int port)
         {
-            IPAddress localAddr = IPAddress.Parse(ServerOptions.bindAddress);
-            Server = new TcpListener(localAddr, port); //Switched to this one because TcpListener(port) is obsolete
+            IPAddress localAddr = IPAddress.Parse(ServerOptions.BindAddress);
+            _server = new TcpListener(localAddr, port); //Switched to this one because TcpListener(port) is obsolete
             //Server = new TcpListener(port);
             
             try
             {
-                Server.Start();
+                _server.Start();
             }
             catch (Exception)
             {
-                MainClass.Exit("Can't listening address " + ServerOptions.bindAddress + " on port " + port, null);
+                WinRsync.Exit("Can't listening address " + ServerOptions.BindAddress + " on port " + port, null);
                 System.Environment.Exit(0);
             }
             Log.WriteLine("WinRSyncd starting, listening on port " + port);
-            StopServer = false;
-            ClientSockets = new List<TCPSocketListener>();
-            while (!StopServer)
+            _stopServer = false;
+            _clientSockets = new List<TcpSocketListener>();
+            while (!_stopServer)
             {
                 try
                 {
-                    Socket soc = Server.AcceptSocket();
-                    if (!config.LoadParm(ServerOptions))
+                    Socket soc = _server.AcceptSocket();
+                    if (!Config.LoadParm(ServerOptions))
                     {
                         continue;
                     }
-                    TCPSocketListener socketListener = new TCPSocketListener(soc, ref ClientSockets);
-                    lock (ClientSockets)
+                    TcpSocketListener socketListener = new TcpSocketListener(soc, ref _clientSockets);
+                    lock (_clientSockets)
                     {
-                        ClientSockets.Add(socketListener);
+                        _clientSockets.Add(socketListener);
                     }
                     socketListener.StartSocketListener();
-                    for (int i = 0; i < ClientSockets.Count; i++)
+                    for (int i = 0; i < _clientSockets.Count; i++)
                     {
-                        if (ClientSockets[i] == null)
+                        if (_clientSockets[i] == null)
                         {
-                            ClientSockets.RemoveAt(i);
+                            _clientSockets.RemoveAt(i);
                         }
                     }
                 }
                 catch (SocketException)
                 {
-                    StopServer = true;
+                    _stopServer = true;
                 }
             }
-            if (ServerOptions.logFile != null)
+            if (ServerOptions.LogFile != null)
             {
-                ServerOptions.logFile.Close();
+                ServerOptions.LogFile.Close();
             }
         }
 
         public static int StartDaemon(ClientInfo clientInfo)
         {
-            IOStream stream = clientInfo.IoStream;
+            IoStream stream = clientInfo.IoStream;
             Options options = clientInfo.Options;
-            options.amDaemon = true;
+            options.AmDaemon = true;
 
-            stream.IOPrintf("@RSYNCD: " + options.protocolVersion + "\n");
+            stream.IoPrintf("@RSYNCD: " + options.ProtocolVersion + "\n");
             string line = stream.ReadLine();
             try
             {
-                options.remoteProtocol = Int32.Parse(line.Substring(9, 2));
+                options.RemoteProtocol = Int32.Parse(line.Substring(9, 2));
             }
             catch
             {
-                options.remoteProtocol = 0;
+                options.RemoteProtocol = 0;
             }
-            bool isValidstring = line.StartsWith("@RSYNCD: ") && line.EndsWith("\n") && options.remoteProtocol > 0;
+            bool isValidstring = line.StartsWith("@RSYNCD: ") && line.EndsWith("\n") && options.RemoteProtocol > 0;
             if (!isValidstring)
             {
-                stream.IOPrintf("@ERROR: protocol startup error\n");
+                stream.IoPrintf("@ERROR: protocol startup error\n");
                 return -1;
             }
-            if (options.protocolVersion > options.remoteProtocol)
+            if (options.ProtocolVersion > options.RemoteProtocol)
             {
-                options.protocolVersion = options.remoteProtocol;
+                options.ProtocolVersion = options.RemoteProtocol;
             }
             line = stream.ReadLine();
-            if (line.CompareTo("#list\n") == 0)
+            if (String.Compare(line, "#list\n", StringComparison.Ordinal) == 0)
             {
                 ClientServer.SendListing(stream);
                 return -1;
@@ -179,17 +179,17 @@ namespace NetSync
 
             if (line[0] == '#')
             {
-                stream.IOPrintf("@ERROR: Unknown command '" + line.Replace("\n", String.Empty) + "'\n");
+                stream.IoPrintf("@ERROR: Unknown command '" + line.Replace("\n", String.Empty) + "'\n");
                 return -1;
             }
 
-            int i = config.GetNumberModule(line.Replace("\n", String.Empty));
+            int i = Config.GetNumberModule(line.Replace("\n", String.Empty));
             if (i < 0)
             {
-                stream.IOPrintf("@ERROR: Unknown module " + line);
-                MainClass.Exit("@ERROR: Unknown module " + line, clientInfo);
+                stream.IoPrintf("@ERROR: Unknown module " + line);
+                WinRsync.Exit("@ERROR: Unknown module " + line, clientInfo);
             }
-            options.doStats = true;
+            options.DoStats = true;
             options.ModuleId = i;
             ClientServer.RsyncModule(clientInfo, i);
             clientInfo.IoStream.Close();
@@ -198,16 +198,16 @@ namespace NetSync
 
         public static void StartServer(ClientInfo cInfo, string[] args)
         {
-            IOStream f = cInfo.IoStream;
+            IoStream f = cInfo.IoStream;
             Options options = cInfo.Options;
 
-            if (options.protocolVersion >= 23)
+            if (options.ProtocolVersion >= 23)
             {
-                f.IOStartMultiplexOut();
+                f.IoStartMultiplexOut();
             }
-            if (options.amSender)
+            if (options.AmSender)
             {
-                options.keepDirLinks = false; /* Must be disabled on the sender. */
+                options.KeepDirLinks = false; /* Must be disabled on the sender. */
                 Exclude excl = new Exclude(options);
                 excl.ReceiveExcludeList(f);
                 DoServerSender(cInfo, args);
@@ -221,46 +221,46 @@ namespace NetSync
         static void DoServerSender(ClientInfo clientInfo, string[] args)
         {
             string dir = args[0];
-            IOStream ioStream = clientInfo.IoStream;
+            IoStream ioStream = clientInfo.IoStream;
             Options options = clientInfo.Options;
 
-            if (options.verbose > 2)
+            if (options.Verbose > 2)
             {
                 Log.Write("Server sender starting");
             }
-            if (options.amDaemon && config.ModuleIsWriteOnly(options.ModuleId))
+            if (options.AmDaemon && Config.ModuleIsWriteOnly(options.ModuleId))
             {
-                MainClass.Exit("ERROR: module " + config.GetModuleName(options.ModuleId) + " is write only", clientInfo);
+                WinRsync.Exit("ERROR: module " + Config.GetModuleName(options.ModuleId) + " is write only", clientInfo);
                 return;
             }
 
-            if (!options.relativePaths && !Util.pushDir(dir))
+            if (!options.RelativePaths && !Util.PushDir(dir))
             {
-                MainClass.Exit("Push_dir#3 " + dir + "failed", clientInfo);
+                WinRsync.Exit("Push_dir#3 " + dir + "failed", clientInfo);
                 return;
             }
 
             FileList fList = new FileList(options);
-            List<FileStruct> fileList = fList.sendFileList(clientInfo, args);
-            if (options.verbose > 3)
+            List<FileStruct> fileList = fList.SendFileList(clientInfo, args);
+            if (options.Verbose > 3)
             {
                 Log.WriteLine("File list sent");
             }
             if (fileList.Count == 0)
             {
-                MainClass.Exit("File list is empty", clientInfo);
+                WinRsync.Exit("File list is empty", clientInfo);
                 return;
             }
-            ioStream.IOStartBufferingIn();
-            ioStream.IOStartBufferingOut();
+            ioStream.IoStartBufferingIn();
+            ioStream.IoStartBufferingOut();
 
             Sender sender = new Sender(options);
             sender.SendFiles(fileList, clientInfo);
             ioStream.Flush();
-            MainClass.Report(clientInfo);
-            if (options.protocolVersion >= 24)
+            WinRsync.Report(clientInfo);
+            if (options.ProtocolVersion >= 24)
             {
-                ioStream.readInt();
+                ioStream.ReadInt();
             }
             ioStream.Flush();
         }
@@ -268,45 +268,45 @@ namespace NetSync
         public static void DoServerReceive(ClientInfo cInfo, string[] args)
         {
             Options options = cInfo.Options;
-            IOStream f = cInfo.IoStream;
-            if (options.verbose > 2)
+            IoStream f = cInfo.IoStream;
+            if (options.Verbose > 2)
             {
                 Log.Write("Server receive starting");
             }
-            if (options.amDaemon && config.ModuleIsReadOnly(options.ModuleId))
+            if (options.AmDaemon && Config.ModuleIsReadOnly(options.ModuleId))
             {
-                MainClass.Exit("ERROR: module " + config.GetModuleName(options.ModuleId) + " is read only", cInfo);
+                WinRsync.Exit("ERROR: module " + Config.GetModuleName(options.ModuleId) + " is read only", cInfo);
                 return;
             }
 
-            f.IOStartBufferingIn();
-            if (options.deleteMode && !options.deleteExcluded)
+            f.IoStartBufferingIn();
+            if (options.DeleteMode && !options.DeleteExcluded)
             {
                 Exclude excl = new Exclude(options);
                 excl.ReceiveExcludeList(f);
             }
 
             FileList fList = new FileList(cInfo.Options);
-            List<FileStruct> fileList = fList.receiveFileList(cInfo);
+            List<FileStruct> fileList = fList.ReceiveFileList(cInfo);
             DoReceive(cInfo, fileList, null);
         }
 
         public static int DoReceive(ClientInfo cInfo, List<FileStruct> fileList, string localName)
         {
-            IOStream f = cInfo.IoStream;
+            IoStream f = cInfo.IoStream;
             Options options = cInfo.Options;
             Receiver receiver = new Receiver(options);
 
-            options.copyLinks = false;
+            options.CopyLinks = false;
             f.Flush();
-            if (!options.deleteAfter)
+            if (!options.DeleteAfter)
             {
-                if (options.recurse && options.deleteMode && localName == null && fileList.Count > 0)
+                if (options.Recurse && options.DeleteMode && localName == null && fileList.Count > 0)
                 {
                     receiver.DeleteFiles(fileList);
                 }
             }
-            f.IOStartBufferingOut();
+            f.IoStartBufferingOut();
             Generator gen = new Generator(options);
             gen.GenerateFiles(f, fileList, localName);
             f.Flush();
@@ -314,11 +314,11 @@ namespace NetSync
             {
                 receiver.ReceiveFiles(cInfo, fileList, localName);
             }
-            MainClass.Report(cInfo);
-            if (options.protocolVersion >= 24)
+            WinRsync.Report(cInfo);
+            if (options.ProtocolVersion >= 24)
             {
                 /* send a final goodbye message */
-                f.writeInt(-1);
+                f.WriteInt(-1);
             }
             f.Flush();
             return 0;

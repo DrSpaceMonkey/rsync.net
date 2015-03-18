@@ -26,9 +26,9 @@ namespace NetSync
     /// </summary>
     public class Access
     {
-        private const int NS_INT16SZ = 2; //changed to a const
-        private const int NS_INADDRSZ = 4; //changed to a const
-        private const int NS_IN6ADDRSZ = 16; //changet to a const
+        private const int NsInt16Sz = 2; //changed to a const
+        private const int NsInaddrsz = 4; //changed to a const
+        private const int NsIn6Addrsz = 16; //changet to a const
 
         /// <summary>
         /// Just creates new instance of Access class
@@ -308,9 +308,9 @@ namespace NetSync
             char ch;
             byte[] res = new byte[16];
             int pos = 0, octets = 0;
-            bool saw_digit;
+            bool sawDigit;
 
-            saw_digit = false;
+            sawDigit = false;
             octets = 0;
             int i = 0;
             while (i < src.Length)
@@ -326,23 +326,23 @@ namespace NetSync
                     //    return null;
                     //}
                     res[pos] = dig;
-                    if (!saw_digit)
+                    if (!sawDigit)
                     {
                         if (++octets > 4)
                         {
                             return null;
                         }
-                        saw_digit = true;
+                        sawDigit = true;
                     }
                 }
-                else if (ch == '.' && saw_digit)
+                else if (ch == '.' && sawDigit)
                 {
                     if (octets == 4)
                     {
                         return null;
                     }
                     pos++;
-                    saw_digit = false;
+                    sawDigit = false;
                 }
                 else
                 {
@@ -364,9 +364,9 @@ namespace NetSync
         protected byte[] InetPton6(string src)
         {
             string xdigits = "0123456789abcdef";
-            byte[] res = new byte[NS_IN6ADDRSZ];
+            byte[] res = new byte[NsIn6Addrsz];
             string curtok;
-            bool saw_xdigit;
+            bool sawXdigit;
             int pos = 0, colonp = -1, respos = 0;
             char ch;
             int val;
@@ -381,7 +381,7 @@ namespace NetSync
                 }
             }
             curtok = src;
-            saw_xdigit = false;
+            sawXdigit = false;
             val = 0;
             while (pos < src.Length - 1)
             {
@@ -396,13 +396,13 @@ namespace NetSync
                     {
                         return null;
                     }
-                    saw_xdigit = true;
+                    sawXdigit = true;
                     continue;
                 }
                 if (ch == ':')
                 {
                     curtok = src;
-                    if (!saw_xdigit)
+                    if (!sawXdigit)
                     {
                         if (colonp > 0)
                         {
@@ -411,31 +411,31 @@ namespace NetSync
                         colonp = respos;
                         continue;
                     }
-                    if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                    if (respos + NsInt16Sz > NsIn6Addrsz)
                     {
                         return null;
                     }
                     res[respos++] = (byte)((val >> 8) & 0xff);
                     res[respos++] = (byte)(val & 0xff);
-                    saw_xdigit = false;
+                    sawXdigit = false;
                     val = 0;
                     continue;
                 }
-                if (ch == '.' && ((respos + NS_INADDRSZ) <= NS_IN6ADDRSZ))
+                if (ch == '.' && ((respos + NsInaddrsz) <= NsIn6Addrsz))
                 {
                     byte[] tp = InetPton4(curtok);
                     if (tp != null)
                     {
-                        respos += NS_INADDRSZ;
-                        saw_xdigit = false;
+                        respos += NsInaddrsz;
+                        sawXdigit = false;
                         break;	/* '\0' was seen by inet_pton4(). */
                     }
                 }
                 return null;
             }
-            if (saw_xdigit)
+            if (sawXdigit)
             {
-                if (respos + NS_INT16SZ > NS_IN6ADDRSZ)
+                if (respos + NsInt16Sz > NsIn6Addrsz)
                 {
                     return null;
                 }
@@ -456,7 +456,7 @@ namespace NetSync
                     res[res.Length - i] = res[colonp + n - i];
                     res[colonp + n - i] = 0;
                 }
-                respos = NS_IN6ADDRSZ;
+                respos = NsIn6Addrsz;
             }
             //			if (respos != NS_IN6ADDRSZ)
             //				return null;

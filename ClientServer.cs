@@ -25,7 +25,7 @@ namespace NetSync
         /// Do nothing
         /// </summary>
         /// <param name="f"></param>
-        public static void SendListing(IOStream f) //@todo_long empty method
+        public static void SendListing(IoStream f) //@todo_long empty method
         {
 
         }
@@ -38,12 +38,12 @@ namespace NetSync
         /// <returns></returns>
         public static void RsyncModule(ClientInfo clientInfo, int moduleNumber) //@fixed Why return something if result not used?
         {
-            string path = Daemon.config.GetModule(moduleNumber).Path;
-            string name = Daemon.config.GetModuleName(moduleNumber);
-            IOStream ioStream = clientInfo.IoStream;
+            string path = Daemon.Config.GetModule(moduleNumber).Path;
+            string name = Daemon.Config.GetModuleName(moduleNumber);
+            IoStream ioStream = clientInfo.IoStream;
             Options options = clientInfo.Options;
-            string[] args = new string[Options.MAX_ARGS];
-            int argc = 0, maxArgs = Options.MAX_ARGS;
+            string[] args = new string[Options.MaxArgs];
+            int argc = 0, maxArgs = Options.MaxArgs;
             string line = String.Empty;
 
             if (path[0] == '/')
@@ -53,23 +53,23 @@ namespace NetSync
             path = path.Replace("\n", String.Empty);
 
             Access ac = new Access();
-            if (!ac.AllowAccess(options.remoteAddr, options.remoteHost, Daemon.config.GetHostsAllow(moduleNumber), Daemon.config.GetHostsDeny(moduleNumber)))
+            if (!ac.AllowAccess(options.RemoteAddr, options.RemoteHost, Daemon.Config.GetHostsAllow(moduleNumber), Daemon.Config.GetHostsDeny(moduleNumber)))
             {
-                Log.Write("rsync denied on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")");
-                ioStream.IOPrintf("@ERROR: access denied to " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
+                Log.Write("rsync denied on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")");
+                ioStream.IoPrintf("@ERROR: access denied to " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")\n");
                 return;
             }
 
-            if (!Authentication.AuthorizeServer(clientInfo, moduleNumber, options.remoteAddr, "@RSYNCD: AUTHREQD "))
+            if (!Authentication.AuthorizeServer(clientInfo, moduleNumber, options.RemoteAddr, "@RSYNCD: AUTHREQD "))
             {
-                Log.Write("auth failed on module " + name + " from " + options.remoteHost + " (" + options.remoteAddr + ")\n");
-                ioStream.IOPrintf("@ERROR: auth failed on module " + name + "\n");
+                Log.Write("auth failed on module " + name + " from " + options.RemoteHost + " (" + options.RemoteAddr + ")\n");
+                ioStream.IoPrintf("@ERROR: auth failed on module " + name + "\n");
                 return;
             }
             // TODO: path length
             if (Directory.Exists(path))
             {
-                ioStream.IOPrintf("@RSYNCD: OK\n");
+                ioStream.IoPrintf("@RSYNCD: OK\n");
             }
             else
             {
@@ -77,16 +77,16 @@ namespace NetSync
                 {
                     // TODO: path length
                     Directory.CreateDirectory(path);
-                    ioStream.IOPrintf("@RSYNCD: OK\n");
+                    ioStream.IoPrintf("@RSYNCD: OK\n");
                 }
                 catch (Exception)
                 {
-                    ioStream.IOPrintf("@ERROR: Path not found\n");
-                    MainClass.Exit("@ERROR: Path not found: " + path, clientInfo);
+                    ioStream.IoPrintf("@ERROR: Path not found\n");
+                    WinRsync.Exit("@ERROR: Path not found: " + path, clientInfo);
                 }
             }
-            options.amServer = true;	//to fix error in SetupProtocol
-            options.dir = path;
+            options.AmServer = true;	//to fix error in SetupProtocol
+            options.Dir = path;
 
             while (true)
             {
@@ -98,18 +98,19 @@ namespace NetSync
                 }
                 if (argc == maxArgs)
                 {
-                    maxArgs += Options.MAX_ARGS;
+                    maxArgs += Options.MaxArgs;
                     MapFile.ExtendArray(ref args, maxArgs);
                 }
                 args[argc++] = line;
             }
             args[argc++] = path;
 
-            options.verbose = 0;
+            options.Verbose = 0;
+
             int argsNotUsed = CommandLineParser.ParseArguments(args, options);
             if (argsNotUsed == -1)
             {
-                MainClass.Exit("Error parsing options", clientInfo);
+                WinRsync.Exit("Error parsing options", clientInfo);
             }
             string[] args2 = new string[argsNotUsed];
             for (int i = 0; i < argsNotUsed; i++)
@@ -117,8 +118,9 @@ namespace NetSync
                 args2[i] = args[args.Length - argsNotUsed + i];
             }
 
-            MainClass.SetupProtocol(clientInfo);
-            ioStream.IOStartMultiplexOut();
+
+            WinRsync.SetupProtocol(clientInfo);
+            ioStream.IoStartMultiplexOut();
             Daemon.StartServer(clientInfo, args2);
         }
     }

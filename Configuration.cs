@@ -26,12 +26,12 @@ namespace NetSync
     /// </summary>
     public class Configuration
     {
-        private string confFile;
+        private string _confFile;
 
         public List<Module> Modules = null;
-        public string logFile;
-        public string port;
-        public string address;
+        public string LogFile;
+        public string Port;
+        public string Address;
 
         /// <summary>
         /// Creates new instance and sets confFile to system.directory + cFile
@@ -39,7 +39,7 @@ namespace NetSync
         /// <param name="cFile"></param>
         public Configuration(string cFile)
         {
-            confFile = Path.Combine(Environment.SystemDirectory, Path.GetFileName(cFile));
+            _confFile = Path.Combine(Environment.SystemDirectory, Path.GetFileName(cFile));
         }
 
         /// <summary>
@@ -180,14 +180,14 @@ namespace NetSync
             lock (this)
             {
                 // TODO: path length
-                if (confFile == null || confFile.CompareTo(String.Empty) == 0 || !File.Exists(confFile))
+                if (_confFile == null || _confFile.CompareTo(String.Empty) == 0 || !File.Exists(_confFile))
                 {
-                    MainClass.Exit("Can't find .conf file: " + confFile, null);
+                    WinRsync.Exit("Can't find .conf file: " + _confFile, null);
                     return false;
                 }
                 try
                 {
-                    using (var cf = new System.IO.StreamReader(confFile))
+                    using (var cf = new System.IO.StreamReader(_confFile))
                     {
                         Module mod = null;
 
@@ -278,7 +278,7 @@ namespace NetSync
                                                     string logFile = parm[1];
                                                     try
                                                     {
-                                                        options.logFile = new FileStream(logFile, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);
+                                                        options.LogFile = new FileStream(logFile, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write);
                                                     }
                                                     catch (Exception e)
                                                     {
@@ -286,11 +286,11 @@ namespace NetSync
                                                     }
                                                     break;
                                                 case "port":
-                                                    port = parm[1];
-                                                    options.rsyncPort = Convert.ToInt32(port);
+                                                    Port = parm[1];
+                                                    options.rsyncPort = Convert.ToInt32(Port);
                                                     break;
                                                 case "address":
-                                                    options.bindAddress = address = parm[1];
+                                                    options.BindAddress = Address = parm[1];
                                                     break;
                                                 default:
                                                     continue;
@@ -305,7 +305,7 @@ namespace NetSync
                 }
                 catch
                 {
-                    MainClass.Exit("failed to open: " + confFile, null);
+                    WinRsync.Exit("failed to open: " + _confFile, null);
                     return false;
                 }
             }

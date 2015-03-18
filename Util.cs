@@ -22,8 +22,8 @@ namespace NetSync
 {
     public class Util
     {
-        static bool pushDirInitialized = false;
-        public static string currDir = null;
+        static bool _pushDirInitialized = false;
+        public static string CurrDir = null;
 
         /// <summary>
         /// Checks the file 'mode' to see whether the file is a directory. If so it returns True
@@ -42,7 +42,7 @@ namespace NetSync
         /// <param name="rootDir"></param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public static string sanitizePath(string p, string rootDir, int depth) //@todo_long remove it if possible
+        public static string SanitizePath(string p, string rootDir, int depth) //@todo_long remove it if possible
         {
             return p;
         }
@@ -51,13 +51,13 @@ namespace NetSync
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static bool pushDir(string dir)
+        public static bool PushDir(string dir)
         {
-            if (!pushDirInitialized)
+            if (!_pushDirInitialized)
             {
-                pushDirInitialized = true;
+                _pushDirInitialized = true;
                 // TODO: path length
-                currDir = Directory.GetCurrentDirectory();
+                CurrDir = Directory.GetCurrentDirectory();
             }
 
             //if (string.IsNullOrEmpty(dir)) // We can skip this check because try will catch this situation
@@ -76,7 +76,7 @@ namespace NetSync
             }
 
             // TODO: path length
-            currDir = Directory.GetCurrentDirectory();
+            CurrDir = Directory.GetCurrentDirectory();
             return true;
         }
 
@@ -85,7 +85,7 @@ namespace NetSync
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static bool popDir(string dir)
+        public static bool PopDir(string dir)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace NetSync
             {
                 return false;
             }
-            currDir = dir;
+            CurrDir = dir;
             return true;
         }
 
@@ -105,7 +105,7 @@ namespace NetSync
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public static string fullFileName(string fileName)
+        public static string FullFileName(string fileName)
         {
             //...Safe FileName
             if (fileName.IndexOf(':') != -1 || fileName.StartsWith(@"\\"))
@@ -114,7 +114,7 @@ namespace NetSync
             }
             else
             {
-                return currDir + @"\" + fileName;	//relative
+                return CurrDir + @"\" + fileName;	//relative
             }
             //...modules
         }
@@ -126,7 +126,7 @@ namespace NetSync
         /// <param name="fileName"></param>
         /// <param name="collapseDotDot"></param>
         /// <returns></returns>
-        public static string cleanFileName(string fileName, bool collapseDotDot)
+        public static string CleanFileName(string fileName, bool collapseDotDot)
         {
             string cleanedName = fileName.Replace(@"\\", @"\");
             //if (cleanedName.EndsWith(@"\")) //@fixed possibly replace by TrimEnd?
@@ -146,7 +146,7 @@ namespace NetSync
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static string NS(string s)
+        public static string Ns(string s)
         {
             return s == null ? "<NULL>" : s;
         }
@@ -250,13 +250,13 @@ namespace NetSync
         {
             if (file2ModificationTime > file1ModificationTime)
             {
-                if (file2ModificationTime - file1ModificationTime <= options.modifyWindow)
+                if (file2ModificationTime - file1ModificationTime <= options.ModifyWindow)
                 {
                     return 0;
                 }
                 return -1;
             }
-            if (file1ModificationTime - file2ModificationTime <= options.modifyWindow)
+            if (file1ModificationTime - file2ModificationTime <= options.ModifyWindow)
             {
                 return 0;
             }

@@ -25,11 +25,11 @@ namespace NetSync
     /// </summary>
     class CheckSum
     {
-        private Options options;
+        private Options _options;
 
         public CheckSum(Options opt)
         {
-            options = opt;
+            _options = opt;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace NetSync
         /// <param name="buf"></param>
         /// <param name="offset"></param>
         /// <param name="x"></param>
-        public static void SIVAL(ref byte[] buf, int offset, UInt32 x)
+        public static void Sival(ref byte[] buf, int offset, UInt32 x)
         {
             buf[offset + 0] = (byte)(x & 0xFF);
             buf[offset + 1] = (byte)((x >> 8) & 0xFF);
@@ -58,23 +58,23 @@ namespace NetSync
         /// <summary>
         /// Current length of checksum
         /// </summary>
-        public int length = 2;
+        public int Length = 2;
         /// <summary>
         /// 16
         /// </summary>
-        public const int SUM_LENGTH = 16;
+        public const int SumLength = 16;
         /// <summary>
         /// 0
         /// </summary>
-        public const int CHAR_OFFSET = 0;
+        public const int CharOffset = 0;
         /// <summary>
         /// 64
         /// </summary>
-        public const int CSUM_CHUNK = 64;
+        public const int CsumChunk = 64;
         /// <summary>
         /// 16
         /// </summary>
-        public const int MD4_SUM_LENGTH = 16;
+        public const int Md4SumLength = 16;
 
         /// <summary>
         /// 
@@ -98,12 +98,12 @@ namespace NetSync
                 b3 = ToInt(buf[i + 2 + pos]);
                 b4 = ToInt(buf[i + 3 + pos]);
 
-                s2 += (UInt32)(4 * (s1 + b1) + 3 * b2 + 2 * b3 + b4 + 10 * CHAR_OFFSET);
-                s1 += (UInt32)(b1 + b2 + b3 + b4 + 4 * CHAR_OFFSET);
+                s2 += (UInt32)(4 * (s1 + b1) + 3 * b2 + 2 * b3 + b4 + 10 * CharOffset);
+                s1 += (UInt32)(b1 + b2 + b3 + b4 + 4 * CharOffset);
             }
             for (; i < len; i++)
             {
-                s1 += (UInt32)(ToInt(buf[i + pos]) + CHAR_OFFSET);
+                s1 += (UInt32)(ToInt(buf[i + pos]) + CharOffset);
                 s2 += s1;
             }
             UInt32 sum = ((s1 & 0xffff) + (s2 << 16));
@@ -124,19 +124,19 @@ namespace NetSync
             {
                 buf1[j] = buf[pos + j];
             }
-            MDFour mdFour = new MDFour(options);
+            MdFour mdFour = new MdFour(_options);
             mdFour.Begin();
-            if (options.checksumSeed != 0)
+            if (_options.ChecksumSeed != 0)
             {
-                SIVAL(ref buf1, len, (UInt32)options.checksumSeed);
+                Sival(ref buf1, len, (UInt32)_options.ChecksumSeed);
                 len += 4;
             }
             int i;
-            for (i = 0; i + CSUM_CHUNK <= len; i += CSUM_CHUNK)
+            for (i = 0; i + CsumChunk <= len; i += CsumChunk)
             {
-                mdFour.Update(buf1, i, CSUM_CHUNK);
+                mdFour.Update(buf1, i, CsumChunk);
             }
-            if (len - i > 0 || options.protocolVersion >= 27)
+            if (len - i > 0 || _options.ProtocolVersion >= 27)
             {
                 mdFour.Update(buf1, i, (UInt32)(len - i));
             }
@@ -153,26 +153,26 @@ namespace NetSync
         public bool FileCheckSum(string fileName, ref byte[] sum, int size)
         {
             int i;
-            MDFour mdFour = new MDFour(options);
-            sum = new byte[MD4_SUM_LENGTH];
+            MdFour mdFour = new MdFour(_options);
+            sum = new byte[Md4SumLength];
             try
             {
                 using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
 
-                    MapFile buf = new MapFile(fileStream, size, Options.MAX_MAP_SIZE, CSUM_CHUNK);
+                    MapFile buf = new MapFile(fileStream, size, Options.MaxMapSize, CsumChunk);
                     mdFour.Begin();
 
-                    for (i = 0; i + CSUM_CHUNK <= size; i += CSUM_CHUNK)
+                    for (i = 0; i + CsumChunk <= size; i += CsumChunk)
                     {
-                        int offset = buf.MapPtr(i, CSUM_CHUNK);
-                        mdFour.Update(buf.p, offset, CSUM_CHUNK);
+                        int offset = buf.MapPtr(i, CsumChunk);
+                        mdFour.Update(buf.P, offset, CsumChunk);
                     }
 
-                    if (size - i > 0 || options.protocolVersion >= 27)
+                    if (size - i > 0 || _options.ProtocolVersion >= 27)
                     {
                         int offset = buf.MapPtr(i, size - i);
-                        mdFour.Update(buf.p, offset, (UInt32)(size - i));
+                        mdFour.Update(buf.P, offset, (UInt32)(size - i));
                     }
 
                     sum = mdFour.Result();
@@ -193,117 +193,117 @@ namespace NetSync
     /// <summary>
     /// Calculates MD4
     /// </summary>
-    public class MDFour
+    public class MdFour
     {
-        public const UInt32 MASK32 = 0xFFFFFFFF;
+        public const UInt32 Mask32 = 0xFFFFFFFF;
 
         public UInt32 A, B, C, D;
-        public UInt32 totalN;
-        public UInt32 totalN2;
-        private Options options;
+        public UInt32 TotalN;
+        public UInt32 TotalN2;
+        private Options _options;
 
-        public MDFour(Options opt)
+        public MdFour(Options opt)
         {
-            options = opt;
+            _options = opt;
         }
 
 
-        public UInt32 F(UInt32 X, UInt32 Y, UInt32 Z)
+        public UInt32 F(UInt32 x, UInt32 y, UInt32 z)
         {
-            return ((((X) & (Y)) | ((~(X)) & (Z))));
+            return ((((x) & (y)) | ((~(x)) & (z))));
         }
 
-        public UInt32 G(UInt32 X, UInt32 Y, UInt32 Z)
+        public UInt32 G(UInt32 x, UInt32 y, UInt32 z)
         {
-            return ((((X) & (Y)) | ((X) & (Z)) | ((Y) & (Z))));
+            return ((((x) & (y)) | ((x) & (z)) | ((y) & (z))));
         }
 
-        public UInt32 H(UInt32 X, UInt32 Y, UInt32 Z)
+        public UInt32 H(UInt32 x, UInt32 y, UInt32 z)
         {
-            return (((X) ^ (Y) ^ (Z)));
+            return (((x) ^ (y) ^ (z)));
         }
 
-        public UInt32 lshift(UInt32 x, int s)
+        public UInt32 Lshift(UInt32 x, int s)
         {
-            return (((((x) << (s)) & MASK32) | (((x) >> (32 - (s))) & MASK32)));
+            return (((((x) << (s)) & Mask32) | (((x) >> (32 - (s))) & Mask32)));
         }
 
-        public UInt32 ROUND1(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] M, int k, int s)
+        public UInt32 Round1(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] m, int k, int s)
         {
-            return lshift((a + F(b, c, d) + M[k]) & MASK32, s);
+            return Lshift((a + F(b, c, d) + m[k]) & Mask32, s);
         }
 
-        public UInt32 ROUND2(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] M, int k, int s)
+        public UInt32 Round2(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] m, int k, int s)
         {
-            return lshift((a + G(b, c, d) + M[k] + 0x5A827999) & MASK32, s);
+            return Lshift((a + G(b, c, d) + m[k] + 0x5A827999) & Mask32, s);
         }
 
-        public UInt32 ROUND3(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] M, int k, int s)
+        public UInt32 Round3(UInt32 a, UInt32 b, UInt32 c, UInt32 d, UInt32[] m, int k, int s)
         {
-            return lshift((a + H(b, c, d) + M[k] + 0x6ED9EBA1) & MASK32, s);
+            return Lshift((a + H(b, c, d) + m[k] + 0x6ED9EBA1) & Mask32, s);
         }
 
-        public void MDFour64(UInt32[] M)
+        public void MdFour64(UInt32[] m)
         {
-            UInt32 AA, BB, CC, DD;
-            AA = this.A; BB = this.B; CC = this.C; DD = this.D;
+            UInt32 aa, bb, cc, dd;
+            aa = this.A; bb = this.B; cc = this.C; dd = this.D;
 
-            A = ROUND1(A, B, C, D, M, 0, 3);
-            D = ROUND1(D, A, B, C, M, 1, 7);
-            C = ROUND1(C, D, A, B, M, 2, 11);
-            B = ROUND1(B, C, D, A, M, 3, 19);
-            A = ROUND1(A, B, C, D, M, 4, 3);
-            D = ROUND1(D, A, B, C, M, 5, 7);
-            C = ROUND1(C, D, A, B, M, 6, 11);
-            B = ROUND1(B, C, D, A, M, 7, 19);
-            A = ROUND1(A, B, C, D, M, 8, 3);
-            D = ROUND1(D, A, B, C, M, 9, 7);
-            C = ROUND1(C, D, A, B, M, 10, 11);
-            B = ROUND1(B, C, D, A, M, 11, 19);
-            A = ROUND1(A, B, C, D, M, 12, 3);
-            D = ROUND1(D, A, B, C, M, 13, 7);
-            C = ROUND1(C, D, A, B, M, 14, 11);
-            B = ROUND1(B, C, D, A, M, 15, 19);
+            A = Round1(A, B, C, D, m, 0, 3);
+            D = Round1(D, A, B, C, m, 1, 7);
+            C = Round1(C, D, A, B, m, 2, 11);
+            B = Round1(B, C, D, A, m, 3, 19);
+            A = Round1(A, B, C, D, m, 4, 3);
+            D = Round1(D, A, B, C, m, 5, 7);
+            C = Round1(C, D, A, B, m, 6, 11);
+            B = Round1(B, C, D, A, m, 7, 19);
+            A = Round1(A, B, C, D, m, 8, 3);
+            D = Round1(D, A, B, C, m, 9, 7);
+            C = Round1(C, D, A, B, m, 10, 11);
+            B = Round1(B, C, D, A, m, 11, 19);
+            A = Round1(A, B, C, D, m, 12, 3);
+            D = Round1(D, A, B, C, m, 13, 7);
+            C = Round1(C, D, A, B, m, 14, 11);
+            B = Round1(B, C, D, A, m, 15, 19);
 
-            A = ROUND2(A, B, C, D, M, 0, 3);
-            D = ROUND2(D, A, B, C, M, 4, 5);
-            C = ROUND2(C, D, A, B, M, 8, 9);
-            B = ROUND2(B, C, D, A, M, 12, 13);
-            A = ROUND2(A, B, C, D, M, 1, 3);
-            D = ROUND2(D, A, B, C, M, 5, 5);
-            C = ROUND2(C, D, A, B, M, 9, 9);
-            B = ROUND2(B, C, D, A, M, 13, 13);
-            A = ROUND2(A, B, C, D, M, 2, 3);
-            D = ROUND2(D, A, B, C, M, 6, 5);
-            C = ROUND2(C, D, A, B, M, 10, 9);
-            B = ROUND2(B, C, D, A, M, 14, 13);
-            A = ROUND2(A, B, C, D, M, 3, 3);
-            D = ROUND2(D, A, B, C, M, 7, 5);
-            C = ROUND2(C, D, A, B, M, 11, 9);
-            B = ROUND2(B, C, D, A, M, 15, 13);
+            A = Round2(A, B, C, D, m, 0, 3);
+            D = Round2(D, A, B, C, m, 4, 5);
+            C = Round2(C, D, A, B, m, 8, 9);
+            B = Round2(B, C, D, A, m, 12, 13);
+            A = Round2(A, B, C, D, m, 1, 3);
+            D = Round2(D, A, B, C, m, 5, 5);
+            C = Round2(C, D, A, B, m, 9, 9);
+            B = Round2(B, C, D, A, m, 13, 13);
+            A = Round2(A, B, C, D, m, 2, 3);
+            D = Round2(D, A, B, C, m, 6, 5);
+            C = Round2(C, D, A, B, m, 10, 9);
+            B = Round2(B, C, D, A, m, 14, 13);
+            A = Round2(A, B, C, D, m, 3, 3);
+            D = Round2(D, A, B, C, m, 7, 5);
+            C = Round2(C, D, A, B, m, 11, 9);
+            B = Round2(B, C, D, A, m, 15, 13);
 
-            A = ROUND3(A, B, C, D, M, 0, 3);
-            D = ROUND3(D, A, B, C, M, 8, 9);
-            C = ROUND3(C, D, A, B, M, 4, 11);
-            B = ROUND3(B, C, D, A, M, 12, 15);
-            A = ROUND3(A, B, C, D, M, 2, 3);
-            D = ROUND3(D, A, B, C, M, 10, 9);
-            C = ROUND3(C, D, A, B, M, 6, 11);
-            B = ROUND3(B, C, D, A, M, 14, 15);
-            A = ROUND3(A, B, C, D, M, 1, 3);
-            D = ROUND3(D, A, B, C, M, 9, 9);
-            C = ROUND3(C, D, A, B, M, 5, 11);
-            B = ROUND3(B, C, D, A, M, 13, 15);
-            A = ROUND3(A, B, C, D, M, 3, 3);
-            D = ROUND3(D, A, B, C, M, 11, 9);
-            C = ROUND3(C, D, A, B, M, 7, 11);
-            B = ROUND3(B, C, D, A, M, 15, 15);
+            A = Round3(A, B, C, D, m, 0, 3);
+            D = Round3(D, A, B, C, m, 8, 9);
+            C = Round3(C, D, A, B, m, 4, 11);
+            B = Round3(B, C, D, A, m, 12, 15);
+            A = Round3(A, B, C, D, m, 2, 3);
+            D = Round3(D, A, B, C, m, 10, 9);
+            C = Round3(C, D, A, B, m, 6, 11);
+            B = Round3(B, C, D, A, m, 14, 15);
+            A = Round3(A, B, C, D, m, 1, 3);
+            D = Round3(D, A, B, C, m, 9, 9);
+            C = Round3(C, D, A, B, m, 5, 11);
+            B = Round3(B, C, D, A, m, 13, 15);
+            A = Round3(A, B, C, D, m, 3, 3);
+            D = Round3(D, A, B, C, m, 11, 9);
+            C = Round3(C, D, A, B, m, 7, 11);
+            B = Round3(B, C, D, A, m, 15, 15);
 
-            A += AA; B += BB;
-            C += CC; D += DD;
+            A += aa; B += bb;
+            C += cc; D += dd;
 
-            A &= MASK32; B &= MASK32;
-            C &= MASK32; D &= MASK32;
+            A &= Mask32; B &= Mask32;
+            C &= Mask32; D &= Mask32;
 
             //this.A = A; this.B = B; this.C = C; this.D = D;
         }
@@ -314,21 +314,21 @@ namespace NetSync
             this.B = 0xefcdab89;
             this.C = 0x98badcfe;
             this.D = 0x10325476;
-            this.totalN = 0;
-            this.totalN2 = 0;
+            this.TotalN = 0;
+            this.TotalN2 = 0;
         }
 
         public byte[] Result()
         {
             byte[] ret = new byte[16];
-            copy4(ref ret, 0, A);
-            copy4(ref ret, 4, B);
-            copy4(ref ret, 8, C);
-            copy4(ref ret, 12, D);
+            Copy4(ref ret, 0, A);
+            Copy4(ref ret, 4, B);
+            Copy4(ref ret, 8, C);
+            Copy4(ref ret, 12, D);
             return ret;
         }
 
-        private void copy4(ref byte[] outData, int ind, UInt32 x)
+        private void Copy4(ref byte[] outData, int ind, UInt32 x)
         {
             outData[ind] = (byte)x;
             outData[ind + 1] = (byte)(x >> 8);
@@ -336,23 +336,23 @@ namespace NetSync
             outData[ind + 3] = (byte)(x >> 24);
         }
 
-        private void copy64(ref UInt32[] M, int ind, byte[] inData, int ind2)
+        private void Copy64(ref UInt32[] m, int ind, byte[] inData, int ind2)
         {
             for (int i = 0; i < 16; i++)
             {
-                M[i + ind] = (UInt32)((inData[i * 4 + 3 + ind2] << 24) | (inData[i * 4 + 2 + ind2] << 16) | (inData[i * 4 + 1 + ind2] << 8) | (inData[i * 4 + 0 + ind2] << 0));
+                m[i + ind] = (UInt32)((inData[i * 4 + 3 + ind2] << 24) | (inData[i * 4 + 2 + ind2] << 16) | (inData[i * 4 + 1 + ind2] << 8) | (inData[i * 4 + 0 + ind2] << 0));
             }
         }
 
         public void Tail(byte[] inData, int ind, UInt32 n)
         {
-            UInt32[] M = new UInt32[16];
-            this.totalN += n << 3;
-            if (this.totalN < (n << 3))
+            UInt32[] m = new UInt32[16];
+            this.TotalN += n << 3;
+            if (this.TotalN < (n << 3))
             {
-                this.totalN2++;
+                this.TotalN2++;
             }
-            this.totalN2 += n >> 29;
+            this.TotalN2 += n >> 29;
             byte[] buf = new byte[128];
             for (int i = 0; i < n; i++)
             {
@@ -361,31 +361,31 @@ namespace NetSync
             buf[n] = 0x80;
             if (n <= 55)
             {
-                copy4(ref buf, 56, this.totalN);
-                if (options.protocolVersion >= 27)
+                Copy4(ref buf, 56, this.TotalN);
+                if (_options.ProtocolVersion >= 27)
                 {
-                    copy4(ref buf, 60, this.totalN2);
+                    Copy4(ref buf, 60, this.TotalN2);
                 }
-                copy64(ref M, 0, buf, 0);
-                MDFour64(M);
+                Copy64(ref m, 0, buf, 0);
+                MdFour64(m);
             }
             else
             {
-                copy4(ref buf, 120, this.totalN);
-                if (options.protocolVersion >= 27)
+                Copy4(ref buf, 120, this.TotalN);
+                if (_options.ProtocolVersion >= 27)
                 {
-                    copy4(ref buf, 124, this.totalN2);
+                    Copy4(ref buf, 124, this.TotalN2);
                 }
-                copy64(ref M, 0, buf, 0);
-                MDFour64(M);
-                copy64(ref M, 0, buf, 64);
-                MDFour64(M);
+                Copy64(ref m, 0, buf, 0);
+                MdFour64(m);
+                Copy64(ref m, 0, buf, 64);
+                MdFour64(m);
             }
         }
 
         public void Update(byte[] inData, int ind, UInt32 n)
         {
-            UInt32[] M = new UInt32[16];
+            UInt32[] m = new UInt32[16];
 
             if (n == 0)
             {
@@ -395,14 +395,14 @@ namespace NetSync
             int i = 0;
             while (n >= 64)
             {
-                copy64(ref M, 0, inData, ind + i);
-                MDFour64(M);
+                Copy64(ref m, 0, inData, ind + i);
+                MdFour64(m);
                 i += 64;
                 n -= 64;
-                totalN += 64 << 3;
-                if (totalN < 64 << 3)
+                TotalN += 64 << 3;
+                if (TotalN < 64 << 3)
                 {
-                    totalN2++;
+                    TotalN2++;
                 }
             }
 
@@ -418,82 +418,82 @@ namespace NetSync
     /// </summary>
     public class Sum
     {
-        public int sumResidue;
-        public byte[] sumrbuf = new byte[CheckSum.CSUM_CHUNK];
-        public MDFour md;
-        private Options options;
+        public int SumResidue;
+        public byte[] Sumrbuf = new byte[CheckSum.CsumChunk];
+        public MdFour Md;
+        private Options _options;
 
         public Sum(Options opt)
         {
-            options = opt;
-            md = new MDFour(opt);
+            _options = opt;
+            Md = new MdFour(opt);
         }
 
         public void Init(int seed)
         {
             byte[] s = new byte[4];
-            md.Begin();
-            this.sumResidue = 0;
-            CheckSum.SIVAL(ref s, 0, (UInt32)seed);
+            Md.Begin();
+            this.SumResidue = 0;
+            CheckSum.Sival(ref s, 0, (UInt32)seed);
             Update(s, 0, 4);
         }
 
         public void Update(byte[] p, int ind, int len)
         {
             int pPos = 0;
-            if (len + sumResidue < CheckSum.CSUM_CHUNK)
+            if (len + SumResidue < CheckSum.CsumChunk)
             {
                 for (int j = 0; j < len; j++)
                 {
-                    sumrbuf[sumResidue + j] = p[j + ind];
+                    Sumrbuf[SumResidue + j] = p[j + ind];
                 }
-                sumResidue += len;
+                SumResidue += len;
                 return;
             }
 
-            if (sumResidue != 0)
+            if (SumResidue != 0)
             {
-                int min = Math.Min(CheckSum.CSUM_CHUNK - sumResidue, len);
+                int min = Math.Min(CheckSum.CsumChunk - SumResidue, len);
                 for (int j = 0; j < min; j++)
                 {
-                    sumrbuf[sumResidue + j] = p[j + ind];
+                    Sumrbuf[SumResidue + j] = p[j + ind];
                 }
-                md.Update(sumrbuf, 0, (UInt32)(min + sumResidue));
+                Md.Update(Sumrbuf, 0, (UInt32)(min + SumResidue));
                 len -= min;
                 pPos += min;
             }
 
             int i;
-            for (i = 0; i + CheckSum.CSUM_CHUNK <= len; i += CheckSum.CSUM_CHUNK)
+            for (i = 0; i + CheckSum.CsumChunk <= len; i += CheckSum.CsumChunk)
             {
-                for (int j = 0; j < CheckSum.CSUM_CHUNK; j++)
+                for (int j = 0; j < CheckSum.CsumChunk; j++)
                 {
-                    sumrbuf[j] = p[pPos + i + j + ind];
+                    Sumrbuf[j] = p[pPos + i + j + ind];
                 }
-                md.Update(sumrbuf, 0, CheckSum.CSUM_CHUNK);
+                Md.Update(Sumrbuf, 0, CheckSum.CsumChunk);
             }
 
             if (len - i > 0)
             {
-                sumResidue = len - i;
-                for (int j = 0; j < sumResidue; j++)
+                SumResidue = len - i;
+                for (int j = 0; j < SumResidue; j++)
                 {
-                    sumrbuf[j] = p[pPos + i + j + ind];
+                    Sumrbuf[j] = p[pPos + i + j + ind];
                 }
             }
             else
             {
-                sumResidue = 0;
+                SumResidue = 0;
             }
         }
 
         public byte[] End()
         {
-            if (sumResidue != 0 || options.protocolVersion >= 27)
+            if (SumResidue != 0 || _options.ProtocolVersion >= 27)
             {
-                md.Update(sumrbuf, 0, (UInt32)sumResidue);
+                Md.Update(Sumrbuf, 0, (UInt32)SumResidue);
             }
-            return md.Result();
+            return Md.Result();
         }
 
     }

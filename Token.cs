@@ -21,24 +21,24 @@ namespace NetSync
 {
     public class Token
     {
-        public static int residue;
-        private Options options;
+        public static int Residue;
+        private Options _options;
 
         public Token(Options opt)
         {
-            options = opt;
+            _options = opt;
         }
         public void SetCompression(string fname)
         {
-            if (!options.doCompression)
+            if (!_options.DoCompression)
             {
                 return;
             }
         }
 
-        public void SendToken(IOStream f, int token, MapFile buf, int offset, int n, int toklen)
+        public void SendToken(IoStream f, int token, MapFile buf, int offset, int n, int toklen)
         {
-            if (!options.doCompression)
+            if (!_options.DoCompression)
             {
                 SimpleSendToken(f, token, buf, offset, n);
             }
@@ -48,10 +48,10 @@ namespace NetSync
             }
         }
 
-        public int ReceiveToken(IOStream ioStream, ref byte[] data, int offset)
+        public int ReceiveToken(IoStream ioStream, ref byte[] data, int offset)
         {
             int token;
-            if (!options.doCompression)
+            if (!_options.DoCompression)
             {
                 token = SimpleReceiveToken(ioStream, ref data, offset);
             }
@@ -62,37 +62,37 @@ namespace NetSync
             return token;
         }
 
-        public int SimpleReceiveToken(IOStream ioStream, ref byte[] data, int offset)
+        public int SimpleReceiveToken(IoStream ioStream, ref byte[] data, int offset)
         {
             int n;
-            if (residue == 0)
+            if (Residue == 0)
             {
-                int i = ioStream.readInt();
+                int i = ioStream.ReadInt();
                 if (i <= 0)
                 {
                     return i;
                 }
-                residue = i;
+                Residue = i;
             }
 
-            n = Math.Min(Match.CHUNK_SIZE, residue);
-            residue -= n;
+            n = Math.Min(Match.ChunkSize, Residue);
+            Residue -= n;
             data = ioStream.ReadBuffer(n);
             return n;
         }
 
-        public int ReceiveDeflatedToken(IOStream f, byte[] data, int offset)
+        public int ReceiveDeflatedToken(IoStream f, byte[] data, int offset)
         {
             return 0;
         }
 
-        public void SendDeflatedToken(IOStream f, int token, MapFile buf, int offset, int nb, int toklen)
+        public void SendDeflatedToken(IoStream f, int token, MapFile buf, int offset, int nb, int toklen)
         {
         }
 
         public void SeeToken(byte[] data, int offset, int tokLen)
         {
-            if (options.doCompression)
+            if (_options.DoCompression)
             {
                 SeeDeflateToken(data, offset, tokLen);
             }
@@ -102,23 +102,23 @@ namespace NetSync
         {
         }
 
-        public void SimpleSendToken(IOStream f, int token, MapFile buf, int offset, int n)
+        public void SimpleSendToken(IoStream f, int token, MapFile buf, int offset, int n)
         {
             if (n > 0)
             {
                 int l = 0;
                 while (l < n)
                 {
-                    int n1 = Math.Min(Match.CHUNK_SIZE, n - l);
-                    f.writeInt(n1);
+                    int n1 = Math.Min(Match.ChunkSize, n - l);
+                    f.WriteInt(n1);
                     int off = buf.MapPtr(offset + l, n1);
-                    f.Write(buf.p, off, n1);
+                    f.Write(buf.P, off, n1);
                     l += n1;
                 }
             }
             if (token != -2)
             {
-                f.writeInt(-(token + 1));
+                f.WriteInt(-(token + 1));
             }
         }
     }

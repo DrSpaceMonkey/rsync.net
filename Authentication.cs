@@ -23,7 +23,7 @@ namespace NetSync
 {
     class Authentication
     {
-        public static string password_file = String.Empty;
+        public static string PasswordFile = String.Empty;
 
         /// <summary>
         /// Encodes message, treated as ASCII, into base64 string
@@ -55,9 +55,9 @@ namespace NetSync
                 input[i] = Convert.ToByte(addr[i]);
             }
 
-            CheckSum.SIVAL(ref input, 16, (UInt32)timeVector.Second);
-            CheckSum.SIVAL(ref input, 20, (UInt32)timeVector.Hour);
-            CheckSum.SIVAL(ref input, 24, (UInt32)timeVector.Day);
+            CheckSum.Sival(ref input, 16, (UInt32)timeVector.Second);
+            CheckSum.Sival(ref input, 20, (UInt32)timeVector.Hour);
+            CheckSum.Sival(ref input, 24, (UInt32)timeVector.Day);
 
             Sum sum = new Sum(opt);
             sum.Init(0);
@@ -101,7 +101,7 @@ namespace NetSync
             }
             if (string.IsNullOrEmpty(pass))
             {
-                pass = GetEmptyPassword(password_file);
+                pass = GetEmptyPassword(PasswordFile);
             }
             if (pass.Equals(String.Empty))
             {
@@ -147,10 +147,10 @@ namespace NetSync
         /// <returns></returns>
         public static bool AuthorizeServer(ClientInfo clientInfo, int moduleNumber, string addr, string leader)
         {
-            string users = Daemon.config.GetAuthUsers(moduleNumber).Trim();
+            string users = Daemon.Config.GetAuthUsers(moduleNumber).Trim();
             //string challenge;
             string b64Challenge;
-            IOStream ioStream = clientInfo.IoStream;
+            IoStream ioStream = clientInfo.IoStream;
             string line;
 
             string user = String.Empty;
@@ -167,7 +167,7 @@ namespace NetSync
             }
 
             b64Challenge = Base64Encode(GenerateChallenge(addr, clientInfo.Options));
-            ioStream.IOPrintf(leader + b64Challenge + "\n");
+            ioStream.IoPrintf(leader + b64Challenge + "\n");
 
             line = ioStream.ReadLine();
 
@@ -225,7 +225,7 @@ namespace NetSync
             //}
             try
             {
-                string fileName = Path.Combine(Environment.SystemDirectory, Daemon.config.GetSecretsFile(moduleNumber));
+                string fileName = Path.Combine(Environment.SystemDirectory, Daemon.Config.GetSecretsFile(moduleNumber));
                 string secret = null;
                 using (var streamReader = new System.IO.StreamReader(fileName))
                 {

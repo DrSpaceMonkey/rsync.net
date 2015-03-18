@@ -24,33 +24,33 @@ namespace NetSync
         public int ClientRun(ClientInfo clientInfo, int pid, string[] args)
         {
             Options options = clientInfo.Options;
-            IOStream ioStream = clientInfo.IoStream;
+            IoStream ioStream = clientInfo.IoStream;
             FileList fList;
             List<FileStruct> fileList;
 
-            MainClass.SetupProtocol(clientInfo);
-            if (options.protocolVersion >= 23 && !options.readBatch)
+            WinRsync.SetupProtocol(clientInfo);
+            if (options.ProtocolVersion >= 23 && !options.ReadBatch)
             {
-                ioStream.IOStartMultiplexIn();
+                ioStream.IoStartMultiplexIn();
             }
-            if (options.amSender)
+            if (options.AmSender)
             {
-                ioStream.IOStartBufferingOut();
+                ioStream.IoStartBufferingOut();
 
-                if (options.deleteMode && !options.deleteExcluded)
+                if (options.DeleteMode && !options.DeleteExcluded)
                 {
                     Exclude excl = new Exclude(options);
                     excl.SendExcludeList(ioStream);
                 }
 
-                if (options.verbose > 3)
+                if (options.Verbose > 3)
                 {
                     Log.Write("File list sent\n");
                 }
                 ioStream.Flush();
                 fList = new FileList(options);
-                fileList = fList.sendFileList(clientInfo, args);
-                if (options.verbose > 3)
+                fileList = fList.SendFileList(clientInfo, args);
+                if (options.Verbose > 3)
                 {
                     Log.WriteLine("file list sent");
                 }
@@ -58,28 +58,28 @@ namespace NetSync
                 Sender sender = new Sender(options);
                 sender.SendFiles(fileList, clientInfo);
                 ioStream.Flush();
-                ioStream.writeInt(-1);
+                ioStream.WriteInt(-1);
                 return -1;
             }
-            options.dir = args[0];
-            if (options.dir.CompareTo(String.Empty) != 0 && options.dir.IndexOf(':') == -1)
+            options.Dir = args[0];
+            if (options.Dir.CompareTo(String.Empty) != 0 && options.Dir.IndexOf(':') == -1)
             {
-                if (options.dir[0] == '/')
+                if (options.Dir[0] == '/')
                 {
-                    options.dir = "c:" + options.dir;
+                    options.Dir = "c:" + options.Dir;
                 }
-                else if (options.dir.IndexOf('/') != -1)
+                else if (options.Dir.IndexOf('/') != -1)
                 {
-                    options.dir = options.dir.Insert(options.dir.IndexOf('/') - 1, ":");
+                    options.Dir = options.Dir.Insert(options.Dir.IndexOf('/') - 1, ":");
                 }
             }
-            if (!options.readBatch)
+            if (!options.ReadBatch)
             {
                 Exclude excl = new Exclude(options);
                 excl.SendExcludeList(ioStream);
             }
             fList = new FileList(options);
-            fileList = fList.receiveFileList(clientInfo);
+            fileList = fList.ReceiveFileList(clientInfo);
             return Daemon.DoReceive(clientInfo, fileList, null);
         }
     }

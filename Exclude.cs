@@ -23,15 +23,15 @@ namespace NetSync
 {
     public class ExcludeStruct
     {
-        public string pattern;
-        public UInt32 matchFlags;
-        public int slashCnt;
+        public string Pattern;
+        public UInt32 MatchFlags;
+        public int SlashCnt;
 
         public ExcludeStruct(string pattern, UInt32 matchFlags, int slashCnt)
         {
-            this.pattern = pattern;
-            this.matchFlags = matchFlags;
-            this.slashCnt = slashCnt;
+            this.Pattern = pattern;
+            this.MatchFlags = matchFlags;
+            this.SlashCnt = slashCnt;
         }
 
         public ExcludeStruct() { }
@@ -39,17 +39,17 @@ namespace NetSync
 
     public class Exclude
     {
-        private Options options;
+        private Options _options;
 
         public Exclude(Options opt)
         {
-            options = opt;
+            _options = opt;
         }
 
         public static void AddCvsExcludes() { }
         public void AddExcludeFile(ref List<ExcludeStruct> exclList, string fileName, int xFlags)
         {
-            bool wordSplit = (xFlags & Options.XFLG_WORD_SPLIT) != 0;
+            bool wordSplit = (xFlags & Options.XflgWordSplit) != 0;
             TextReader f;
             // TODO: path length
             if (fileName == null || fileName.CompareTo(String.Empty) == 0 || !File.Exists(fileName))
@@ -68,9 +68,9 @@ namespace NetSync
                 }
                 catch
                 {
-                    if ((xFlags & Options.XFLG_FATAL_ERRORS) != 0)
+                    if ((xFlags & Options.XflgFatalErrors) != 0)
                     {
-                        Log.Write("failed to open " + (((xFlags & Options.XFLG_DEF_INCLUDE) != 0) ? "include" : "exclude") + " file " + fileName);
+                        Log.Write("failed to open " + (((xFlags & Options.XflgDefInclude) != 0) ? "include" : "exclude") + " file " + fileName);
                     }
                     return;
                 }
@@ -110,20 +110,20 @@ namespace NetSync
                 {
                     break;
                 }
-                if ((mFlags & Options.MATCHFLG_CLEAR_LIST) != 0)
+                if ((mFlags & Options.MatchflgClearList) != 0)
                 {
-                    if (options.verbose > 2)
+                    if (_options.Verbose > 2)
                     {
-                        Log.WriteLine("[" + options.WhoAmI() + "] clearing exclude list");
+                        Log.WriteLine("[" + _options.WhoAmI() + "] clearing exclude list");
                     }
                     exclList.Clear();
                     continue;
                 }
 
                 MakeExlude(ref exclList, cp, mFlags);
-                if (options.verbose > 2)
+                if (_options.Verbose > 2)
                 {
-                    Log.WriteLine("[" + options.WhoAmI() + "] AddExclude(" + cp + ")");
+                    Log.WriteLine("[" + _options.WhoAmI() + "] AddExclude(" + cp + ")");
                 }
             }
         }
@@ -133,53 +133,53 @@ namespace NetSync
             int exLen = 0;
             int patLen = pat.Length;
             ExcludeStruct ret = new ExcludeStruct();
-            if (options.excludePathPrefix != null)
+            if (_options.ExcludePathPrefix != null)
             {
-                mFlags |= Options.MATCHFLG_ABS_PATH;
+                mFlags |= Options.MatchflgAbsPath;
             }
-            if (options.excludePathPrefix != null && pat[0] == '/')
+            if (_options.ExcludePathPrefix != null && pat[0] == '/')
             {
-                exLen = options.excludePathPrefix.Length;
+                exLen = _options.ExcludePathPrefix.Length;
             }
             else
             {
                 exLen = 0;
             }
-            ret.pattern = String.Empty;
+            ret.Pattern = String.Empty;
             if (exLen != 0)
             {
-                ret.pattern += options.excludePathPrefix;
+                ret.Pattern += _options.ExcludePathPrefix;
             }
-            ret.pattern += pat.Replace('\\', '/');
+            ret.Pattern += pat.Replace('\\', '/');
             patLen += exLen;
 
-            if (ret.pattern.IndexOfAny(new char[] { '*', '[', '?' }) != -1)
+            if (ret.Pattern.IndexOfAny(new char[] { '*', '[', '?' }) != -1)
             {
-                mFlags |= Options.MATCHFLG_WILD;
-                if (ret.pattern.IndexOf("**") != -1)
+                mFlags |= Options.MatchflgWild;
+                if (ret.Pattern.IndexOf("**") != -1)
                 {
-                    mFlags |= Options.MATCHFLG_WILD2;
-                    if (ret.pattern.IndexOf("**") == 0)
+                    mFlags |= Options.MatchflgWild2;
+                    if (ret.Pattern.IndexOf("**") == 0)
                     {
-                        mFlags |= Options.MATCHFLG_WILD2_PREFIX;
+                        mFlags |= Options.MatchflgWild2Prefix;
                     }
                 }
             }
 
-            if (patLen > 1 && ret.pattern[ret.pattern.Length - 1] == '/')
+            if (patLen > 1 && ret.Pattern[ret.Pattern.Length - 1] == '/')
             {
-                ret.pattern = ret.pattern.Remove(ret.pattern.Length - 1, 1);
-                mFlags |= Options.MATCHFLG_DIRECTORY;
+                ret.Pattern = ret.Pattern.Remove(ret.Pattern.Length - 1, 1);
+                mFlags |= Options.MatchflgDirectory;
             }
 
-            for (int i = 0; i < ret.pattern.Length; i++)
+            for (int i = 0; i < ret.Pattern.Length; i++)
             {
-                if (ret.pattern[i] == '/')
+                if (ret.Pattern[i] == '/')
                 {
-                    ret.slashCnt++;
+                    ret.SlashCnt++;
                 }
             }
-            ret.matchFlags = mFlags;
+            ret.MatchFlags = mFlags;
             exclList.Add(ret);
         }
 
@@ -193,27 +193,27 @@ namespace NetSync
                 return String.Empty;
             }
 
-            if ((xFlags & Options.XFLG_WORD_SPLIT) != 0)
+            if ((xFlags & Options.XflgWordSplit) != 0)
             {
                 p = s = p.Trim(' ');
             }
-            if ((xFlags & Options.XFLG_WORDS_ONLY) == 0 && (s[0] == '-' || s[0] == '+') && s[1] == ' ')
+            if ((xFlags & Options.XflgWordsOnly) == 0 && (s[0] == '-' || s[0] == '+') && s[1] == ' ')
             {
                 if (s[0] == '+')
                 {
-                    mFlags |= Options.MATCHFLG_INCLUDE;
+                    mFlags |= Options.MatchflgInclude;
                 }
                 s = s.Substring(2);
             }
-            else if ((xFlags & Options.XFLG_DEF_INCLUDE) != 0)
+            else if ((xFlags & Options.XflgDefInclude) != 0)
             {
-                mFlags |= Options.MATCHFLG_INCLUDE;
+                mFlags |= Options.MatchflgInclude;
             }
-            if ((xFlags & Options.XFLG_DIRECTORY) != 0)
+            if ((xFlags & Options.XflgDirectory) != 0)
             {
-                mFlags |= Options.MATCHFLG_DIRECTORY;
+                mFlags |= Options.MatchflgDirectory;
             }
-            if ((xFlags & Options.XFLG_WORD_SPLIT) != 0)
+            if ((xFlags & Options.XflgWordSplit) != 0)
             {
                 int i = 0;
                 while (i < s.Length && s[i] == ' ')
@@ -228,7 +228,7 @@ namespace NetSync
             }
             if (p[0] == '!' && len == 1)
             {
-                mFlags |= Options.MATCHFLG_CLEAR_LIST;
+                mFlags |= Options.MatchflgClearList;
             }
             return s;
         }
@@ -244,7 +244,7 @@ namespace NetSync
                 if (CheckOneExclude(name, ex, nameIsDir))
                 {
                     ReportExcludeResult(name, ex, nameIsDir);
-                    return (ex.matchFlags & Options.MATCHFLG_INCLUDE) != 0 ? 1 : -1;
+                    return (ex.MatchFlags & Options.MatchflgInclude) != 0 ? 1 : -1;
                 }
             }
             return 0;
@@ -252,8 +252,8 @@ namespace NetSync
 
         static bool CheckOneExclude(string name, ExcludeStruct ex, int nameIsDir)
         {
-            int match_start = 0;
-            string pattern = ex.pattern;
+            int matchStart = 0;
+            string pattern = ex.Pattern;
 
             if (name.CompareTo(String.Empty) == 0)
             {
@@ -264,14 +264,14 @@ namespace NetSync
                 return false;
             }
 
-            if (0 != (ex.matchFlags & Options.MATCHFLG_DIRECTORY) && nameIsDir == 0)
+            if (0 != (ex.MatchFlags & Options.MatchflgDirectory) && nameIsDir == 0)
             {
                 return false;
             }
 
             if (pattern[0] == '/')
             {
-                match_start = 1;
+                matchStart = 1;
                 pattern = pattern.TrimStart('/');
                 if (name[0] == '/')
                 {
@@ -279,11 +279,11 @@ namespace NetSync
                 }
             }
 
-            if ((ex.matchFlags & Options.MATCHFLG_WILD) != 0)
+            if ((ex.MatchFlags & Options.MatchflgWild) != 0)
             {
                 /* A non-anchored match with an infix slash and no "**"
                  * needs to match the last slash_cnt+1 name elements. */
-                if (match_start != 0 && ex.slashCnt != 0 && 0 == (ex.matchFlags & Options.MATCHFLG_WILD2))
+                if (matchStart != 0 && ex.SlashCnt != 0 && 0 == (ex.MatchFlags & Options.MatchflgWild2))
                 {
                     name = name.Substring(name.IndexOf('/') + 1);
                 }
@@ -291,7 +291,7 @@ namespace NetSync
                 {
                     return true;
                 }
-                if ((ex.matchFlags & Options.MATCHFLG_WILD2_PREFIX) != 0)
+                if ((ex.MatchFlags & Options.MatchflgWild2Prefix) != 0)
                 {
                     /* If the **-prefixed pattern has a '/' as the next
                     * character, then try to match the rest of the
@@ -301,7 +301,7 @@ namespace NetSync
                         return true;
                     }
                 }
-                else if (0 == match_start && (ex.matchFlags & Options.MATCHFLG_WILD2) != 0)
+                else if (0 == matchStart && (ex.MatchFlags & Options.MatchflgWild2) != 0)
                 {
                     /* A non-anchored match with an infix or trailing "**"
                     * (but not a prefixed "**") needs to try matching
@@ -317,7 +317,7 @@ namespace NetSync
                     }
                 }
             }
-            else if (match_start != 0)
+            else if (matchStart != 0)
             {
                 if (name.CompareTo(pattern) == 0)
                 {
@@ -345,76 +345,76 @@ namespace NetSync
             * then it is stripped out by make_exclude.  So as a special
             * case we add it back in here. */
 
-            if (options.verbose >= 2)
+            if (_options.Verbose >= 2)
             {
-                Log.Write(options.WhoAmI() + " " + ((ent.matchFlags & Options.MATCHFLG_INCLUDE) != 0 ? "in" : "ex") +
+                Log.Write(_options.WhoAmI() + " " + ((ent.MatchFlags & Options.MatchflgInclude) != 0 ? "in" : "ex") +
                     "cluding " + (nameIsDir != 0 ? "directory" : "file") + " " +
-                    name + " because of " + ent.pattern + " pattern " +
-                    ((ent.matchFlags & Options.MATCHFLG_DIRECTORY) != 0 ? "/" : String.Empty) + "\n");
+                    name + " because of " + ent.Pattern + " pattern " +
+                    ((ent.MatchFlags & Options.MatchflgDirectory) != 0 ? "/" : String.Empty) + "\n");
             }
         }
 
-        public void SendExcludeList(IOStream f)
+        public void SendExcludeList(IoStream f)
         {
-            if (options.listOnly && !options.recurse)
+            if (_options.ListOnly && !_options.Recurse)
             {
-                AddExclude(ref options.excludeList, "/*/*", 0);
+                AddExclude(ref _options.ExcludeList, "/*/*", 0);
             }
 
-            foreach (ExcludeStruct ent in options.excludeList)
+            foreach (ExcludeStruct ent in _options.ExcludeList)
             {
                 int l;
                 string p;
 
-                if (ent.pattern.Length == 0 || ent.pattern.Length > Options.MAXPATHLEN)
+                if (ent.Pattern.Length == 0 || ent.Pattern.Length > Options.Maxpathlen)
                 {
                     continue;
                 }
-                l = ent.pattern.Length;
-                p = ent.pattern;
-                if ((ent.matchFlags & Options.MATCHFLG_DIRECTORY) != 0)
+                l = ent.Pattern.Length;
+                p = ent.Pattern;
+                if ((ent.MatchFlags & Options.MatchflgDirectory) != 0)
                 {
                     p += "/\0";
                 }
 
-                if ((ent.matchFlags & Options.MATCHFLG_INCLUDE) != 0)
+                if ((ent.MatchFlags & Options.MatchflgInclude) != 0)
                 {
-                    f.writeInt(l + 2);
-                    f.IOPrintf("+ ");
+                    f.WriteInt(l + 2);
+                    f.IoPrintf("+ ");
                 }
                 else if ((p[0] == '-' || p[0] == '+') && p[1] == ' ')
                 {
-                    f.writeInt(l + 2);
-                    f.IOPrintf("- ");
+                    f.WriteInt(l + 2);
+                    f.IoPrintf("- ");
                 }
                 else
                 {
-                    f.writeInt(l);
+                    f.WriteInt(l);
                 }
-                f.IOPrintf(p);
+                f.IoPrintf(p);
 
             }
-            f.writeInt(0);
+            f.WriteInt(0);
         }
 
         /// <summary>
         /// Receives exclude list from stream
         /// </summary>
         /// <param name="ioStream"></param>
-        public void ReceiveExcludeList(IOStream ioStream)
+        public void ReceiveExcludeList(IoStream ioStream)
         {
             string line = String.Empty;
             int length;
-            while ((length = ioStream.readInt()) != 0)
+            while ((length = ioStream.ReadInt()) != 0)
             {
-                if (length >= Options.MAXPATHLEN + 3)
+                if (length >= Options.Maxpathlen + 3)
                 {
                     Log.Write("Overflow: recv_exclude_list");
                     continue;
                 }
 
                 line = ioStream.ReadStringFromBuffer(length);
-                AddExclude(ref options.excludeList, line, 0);
+                AddExclude(ref _options.ExcludeList, line, 0);
             }
         }
     }

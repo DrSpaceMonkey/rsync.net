@@ -26,7 +26,7 @@
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>NetSync</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
@@ -155,7 +155,7 @@
     <Compile Include="IO.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainClass.cs">
+    <Compile Include="WinRsync.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Match.cs">
