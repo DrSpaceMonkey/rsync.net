@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,7 @@ namespace NetSync
     {
         private string _confFile;
 
-        public List<Module> Modules = null;
+        public List<Module> Modules;
         public string LogFile;
         public string Port;
         public string Address;
@@ -75,7 +76,7 @@ namespace NetSync
                 {
                     return null;
                 }
-                return (Module)Modules[numberModule];
+                return Modules[numberModule];
             }
         }
 
@@ -180,7 +181,7 @@ namespace NetSync
             lock (this)
             {
                 // TODO: path length
-                if (_confFile == null || _confFile.CompareTo(String.Empty) == 0 || !File.Exists(_confFile))
+                if (!File.Exists(_confFile))
                 {
                     WinRsync.Exit("Can't find .conf file: " + _confFile, null);
                     return false;
@@ -206,9 +207,9 @@ namespace NetSync
                                     break;
                                 }
                                 line = line.Trim();
-                                if (line.CompareTo(String.Empty) != 0 && line[0] != ';' && line[0] != '#')
+                                if (!line.IsBlank() && !line.StartsWith(";") && !line.StartsWith("#"))
                                 {
-                                    if (line[0] == '[' && line[line.Length - 1] == ']')
+                                    if (line.StartsWith("[") && line.StartsWith("]"))
                                     {
                                         line = line.TrimStart('[').TrimEnd(']');
                                         var numberModule = -1;
@@ -319,7 +320,7 @@ namespace NetSync
         public string Path = String.Empty;
         public string Comment = String.Empty;
         public bool ReadOnly = true;
-        public bool WriteOnly = false;
+        public bool WriteOnly;
         public string HostsAllow = String.Empty;
         public string HostsDeny = String.Empty;
         public string AuthUsers = String.Empty;

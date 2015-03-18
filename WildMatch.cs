@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 
 namespace NetSync
@@ -200,10 +201,7 @@ namespace NetSync
                                     }
                                     continue;
                                 }
-                                else
-                                {
-                                    k += j;
-                                }
+                                k += j;
                                 var s = pattern.Substring(k - j + 1, j - 1);
                                 if (s.Equals("alnum"))
                                 {
@@ -288,7 +286,7 @@ namespace NetSync
                 }
             }
             text = text.Substring(1);
-            return text.CompareTo(String.Empty) != 0 ? 0 : 1;
+            return Convert.ToInt32(!text.IsBlank());
         }
     }
 }

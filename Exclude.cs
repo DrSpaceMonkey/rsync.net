@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,45 +51,25 @@ namespace NetSync
         public void AddExcludeFile(ref List<ExcludeStruct> exclList, string fileName, int xFlags)
         {
             var wordSplit = (xFlags & Options.XflgWordSplit) != 0;
-            TextReader f;
             // TODO: path length
-            if (fileName == null || fileName.CompareTo(String.Empty) == 0 || !File.Exists(fileName))
+            if (File.Exists(fileName))
             {
-                return;
-            }
-            if (fileName.CompareTo("-") == 0)
-            {
-                f = Console.In;
-            }
-            else
-            {
-                try
-                {
-                    f = new StreamReader(fileName);
-                }
-                catch
-                {
-                    if ((xFlags & Options.XflgFatalErrors) != 0)
-                    {
-                        Log.Write("failed to open " + (((xFlags & Options.XflgDefInclude) != 0) ? "include" : "exclude") + " file " + fileName);
-                    }
-                    return;
-                }
-            }
-            while (true)
-            {
-                var line = f.ReadLine();
-                if (line == null)
-                {
-                    break;
-                }
-                if (line.CompareTo(String.Empty) != 0 && (wordSplit || (line[0] != ';' && line[0] != '#')))
-                {
-                    AddExclude(ref exclList, line, xFlags);
-                }
-            }
-            f.Close();
+                TextReader f = new StreamReader(fileName);
 
+                while (true)
+                {
+                    var line = f.ReadLine();
+                    if (line == null)
+                    {
+                        break;
+                    }
+                    if (!line.IsBlank() && (wordSplit || (line[0] != ';' && line[0] != '#')))
+                    {
+                        AddExclude(ref exclList, line, xFlags);
+                    }
+                }
+                f.Close();
+            }
         }
         public void AddExclude(ref List<ExcludeStruct> exclList, string pattern, int xFlags)
         {
@@ -153,7 +134,7 @@ namespace NetSync
             ret.Pattern += pat.Replace('\\', '/');
             patLen += exLen;
 
-            if (ret.Pattern.IndexOfAny(new char[] { '*', '[', '?' }) != -1)
+            if (ret.Pattern.IndexOfAny(new[] { '*', '[', '?' }) != -1)
             {
                 mFlags |= Options.MatchflgWild;
                 if (ret.Pattern.IndexOf("**") != -1)
@@ -188,7 +169,7 @@ namespace NetSync
             len = 0;
             var s = p;
             mFlags = 0;
-            if (p.CompareTo(String.Empty) == 0)
+            if (p.IsBlank())
             {
                 return String.Empty;
             }
@@ -255,11 +236,11 @@ namespace NetSync
             var matchStart = 0;
             var pattern = ex.Pattern;
 
-            if (name.CompareTo(String.Empty) == 0)
+            if (name.IsBlank())
             {
                 return false;
             }
-            if (pattern.CompareTo(String.Empty) == 0)
+            if (pattern.IsBlank())
             {
                 return false;
             }

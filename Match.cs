@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -117,7 +118,7 @@ namespace NetSync
 
             for (var i = s.Count; i-- > 0; )
             {
-                _tagTable[((Target)_targets[i]).T] = i;
+                _tagTable[_targets[i].T] = i;
             }
         }
 
@@ -288,7 +289,7 @@ namespace NetSync
                 do
                 {
                     UInt32 l;
-                    var i = ((Target)_targets[j]).I;
+                    var i = _targets[j].I;
 
                     if (sum != s.Sums[i].Sum1)
                     {
@@ -341,7 +342,7 @@ namespace NetSync
                     s2 = sum >> 16;
                     _matches++;
                     break;
-                } while (++j < s.Count && ((Target)_targets[j]).T == t);
+                } while (++j < s.Count && _targets[j].T == t);
             null_tag:
                 backup = offset - _lastMatch;
                 if (backup < 0)

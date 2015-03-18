@@ -17,9 +17,7 @@
  */
 
 using System;
-using System.IO;
 using System.Net.Sockets;
-using System.Text;
 
 namespace NetSync
 {
@@ -29,11 +27,6 @@ namespace NetSync
         private const string RsyncName = "rsync";
         private const string RsyncVersion = "1.0";
 
-        public WinRsync()
-        {
-
-        }
-
         public Options Opt { get; private set; }
 
         public void Run(string[] args)
@@ -42,12 +35,12 @@ namespace NetSync
 
             if (args.Length == 0)
             {
-                WinRsync.Exit(String.Empty, null);
+                Exit(String.Empty, null);
             }
             int argsNotUsed = CommandLineParser.ParseArguments(args, Opt);
             if (argsNotUsed == -1)
             {
-                WinRsync.Exit("Error parsing options", null);
+                Exit("Error parsing options", null);
             }
             string[] args2 = new string[argsNotUsed];
             for (int i = 0; i < argsNotUsed; i++)
@@ -60,8 +53,10 @@ namespace NetSync
                 Daemon.DaemonMain(Opt);
                 return;
             }
-            var cInfo = new ClientInfo();
-            cInfo.Options = Opt;
+            var cInfo = new ClientInfo
+            {
+                Options = Opt
+            };
             StartClient(args2, cInfo);
             Opt.DoStats = true;
             cInfo.IoStream = null;
@@ -211,7 +206,7 @@ namespace NetSync
         public static int StartSocketClient(string host, string path, string user, string[] args, ClientInfo cInfo)
         {
             var options = cInfo.Options;
-            if (path.CompareTo(String.Empty) != 0 && path[0] == '/')
+            if (!path.IsBlank() && path.StartsWith('/'.ToString()))
             {
                 Log.WriteLine("ERROR: The remote path must start with a module name not a /");
                 return -1;

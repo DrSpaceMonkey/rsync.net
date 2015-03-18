@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.IO;
 using System.Text;
@@ -39,8 +40,8 @@ namespace NetSync
         private Stream _socketOut;
         private Stream _socketIn;
 
-        private bool _ioMultiplexingIn = false;
-        private bool _ioMultiplexingOut = false;
+        private bool _ioMultiplexingIn;
+        private bool _ioMultiplexingOut;
         /// <summary>
         /// 7
         /// </summary>
@@ -49,12 +50,12 @@ namespace NetSync
         /// 4096
         /// </summary>
         private const int IoBufferSize = 4096;
-        private int _ioBufInSize = 0;
-        private int _remaining = 0;
-        private int _ioBufInIndex = 0;
-        private byte[] _ioBufIn = null;
-        private byte[] _ioBufOut = null;
-        private int _ioBufOutCount = 0;
+        private int _ioBufInSize;
+        private int _remaining;
+        private int _ioBufInIndex;
+        private byte[] _ioBufIn;
+        private byte[] _ioBufOut;
+        private int _ioBufOutCount;
         /// <summary>
         /// False
         /// </summary>
@@ -299,7 +300,6 @@ namespace NetSync
                 {
                     break;
                 }
-                continue;
             }
             return fileName;
         }

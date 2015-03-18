@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -23,20 +24,19 @@ using System.Threading;
 
 namespace NetSync
 {
-
     public class ClientInfo
     {
-        public Options Options = null;
-        public IoStream IoStream = null;
         public Thread ClientThread = null;
+        public IoStream IoStream;
+        public Options Options;
     }
 
     public class TcpSocketListener
     {
-        private Socket _client;
+        private readonly Socket _client;
+        private readonly ClientInfo _clientInfo;
+        private readonly List<TcpSocketListener> _clientSockets;
         private Thread _clientThread;
-        private ClientInfo _clientInfo;
-        private List<TcpSocketListener> _clientSockets;
 
         public TcpSocketListener(Socket client, ref List<TcpSocketListener> clientSockets)
         {
@@ -45,25 +45,26 @@ namespace NetSync
             _clientInfo = new ClientInfo();
             _clientInfo.Options = new Options();
         }
+
         public void StartSocketListener()
         {
             if (_client != null)
             {
-                _clientThread = new Thread(new ThreadStart(StartDaemon));
-                _clientInfo.IoStream = new IoStream(new NetworkStream(_client));
-                _clientInfo.IoStream.ClientThread = _clientThread;
+                _clientThread = new Thread(StartDaemon);
+                _clientInfo.IoStream = new IoStream(new NetworkStream(_client))
+                {
+                    ClientThread = _clientThread
+                };
                 _clientThread.Start();
             }
         }
 
         public void StartDaemon()
         {
-            var remoteAddr = _client.RemoteEndPoint.ToString();
-            remoteAddr = remoteAddr.Substring(0, remoteAddr.IndexOf(':'));
-            //string remoteHost = Dns.GetHostByAddress(IPAddress.Parse(remoteAddr)).HostName;
-            var remoteHost = Dns.GetHostEntry(IPAddress.Parse(remoteAddr)).HostName;
-            _clientInfo.Options.RemoteAddr = remoteAddr;
-            _clientInfo.Options.RemoteHost = remoteHost;
+            var remoteEndPoint = _client.RemoteEndPoint as IPEndPoint;
+
+            _clientInfo.Options.RemoteAddr = remoteEndPoint.Address.ToString();
+            _clientInfo.Options.RemoteHost = Dns.GetHostEntry(remoteEndPoint.Address).HostName;
 
             Daemon.StartDaemon(_clientInfo);
             _client.Close();
@@ -74,11 +75,10 @@ namespace NetSync
 
     public class Daemon
     {
-        private static TcpListener _server = null;
-        private static List<TcpSocketListener> _clientSockets = null;
+        private static TcpListener _server;
+        private static List<TcpSocketListener> _clientSockets;
         private static bool _stopServer = true;
-        public static Options ServerOptions = null;
-
+        public static Options ServerOptions;
         public static Configuration Config;
 
         public static int DaemonMain(Options options)
@@ -97,19 +97,16 @@ namespace NetSync
             var localAddr = IPAddress.Parse(ServerOptions.BindAddress);
             _server = new TcpListener(localAddr, port); //Switched to this one because TcpListener(port) is obsolete
             //Server = new TcpListener(port);
-            
-            try
-            {
-                _server.Start();
-            }
-            catch (Exception)
-            {
-                WinRsync.Exit("Can't listening address " + ServerOptions.BindAddress + " on port " + port, null);
-                Environment.Exit(0);
-            }
+
+
+            _server.Start();
+
             Log.WriteLine("WinRSyncd starting, listening on port " + port);
             _stopServer = false;
-            _clientSockets = new List<TcpSocketListener>();
+            lock (_clientSockets)
+            {
+                _clientSockets = new List<TcpSocketListener>();
+            }
             while (!_stopServer)
             {
                 try
@@ -218,7 +215,7 @@ namespace NetSync
             }
         }
 
-        static void DoServerSender(ClientInfo clientInfo, string[] args)
+        private static void DoServerSender(ClientInfo clientInfo, string[] args)
         {
             var dir = args[0];
             var ioStream = clientInfo.IoStream;

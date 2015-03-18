@@ -1,4 +1,5 @@
-using System;
+using System.Collections.Generic;
+using System.IO;
 /**
  *  Copyright (C) 2006 Alex Pedenko
  * 
@@ -16,7 +17,7 @@ using System;
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-using System.Collections.Generic;
+
 namespace NetSync
 {
     public class Client
@@ -62,17 +63,8 @@ namespace NetSync
                 return -1;
             }
             options.Dir = args[0];
-            if (options.Dir.CompareTo(String.Empty) != 0 && options.Dir.IndexOf(':') == -1)
-            {
-                if (options.Dir[0] == '/')
-                {
-                    options.Dir = "c:" + options.Dir;
-                }
-                else if (options.Dir.IndexOf('/') != -1)
-                {
-                    options.Dir = options.Dir.Insert(options.Dir.IndexOf('/') - 1, ":");
-                }
-            }
+            options.Dir = Path.GetFullPath(options.Dir ?? string.Empty);
+
             if (!options.ReadBatch)
             {
                 var excl = new Exclude(options);

@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -104,7 +105,7 @@ namespace NetSync
                 Options.Stats.NumTransferredFiles++;
                 Options.Stats.TotalTransferredSize += file.Length;
 
-                if (localName != null && localName.CompareTo(String.Empty) != 0)
+                if (!localName.IsBlank())
                 {
                     fileName = localName;
                 }

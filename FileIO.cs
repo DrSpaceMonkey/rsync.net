@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System.IO;
 
 namespace NetSync
@@ -70,7 +71,7 @@ namespace NetSync
             {
                 return ret;
             }
-            else if (ret != (len - (l1 + l2)))
+            if (ret != (len - (l1 + l2)))
             {
                 return (l1 + ret);
             }
@@ -95,7 +96,7 @@ namespace NetSync
         /// <summary>
         /// Window pointer
         /// </summary>
-        public byte[] P = null;
+        public byte[] P;
         /// <summary>
         /// File Descriptor
         /// </summary>

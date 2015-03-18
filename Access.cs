@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -29,13 +30,6 @@ namespace NetSync
         private const int NsInt16Sz = 2; //changed to a const
         private const int NsInaddrsz = 4; //changed to a const
         private const int NsIn6Addrsz = 16; //changet to a const
-
-        /// <summary>
-        /// Just creates new instance of Access class
-        /// </summary>
-        public Access()
-        {
-        }
 
         /// <summary>
         /// Checks whether 'addr' or 'host' is allowed
@@ -142,7 +136,7 @@ namespace NetSync
             var mask = new byte[16];
             var bits = 0; //changet to int?
 
-            if (addr == null || addr.CompareTo(String.Empty) == 0)
+            if (addr.IsBlank())
             {
                 return false;
             }
@@ -205,7 +199,7 @@ namespace NetSync
             
             if (bits >= 0)
             {
-                MakeMask(mask, (int)bits, addrlen);
+                MakeMask(mask, bits, addrlen);
             }
 
             return MatchBinary(ipaddr.ToString(), iptok.ToString(), mask, addrlen);
@@ -244,8 +238,6 @@ namespace NetSync
                     mask[w + 1 + i] = 0;
                 }
             }
-
-            return;
         }
 
         /// <summary>
@@ -283,10 +275,7 @@ namespace NetSync
             {
                 return InetPton4(src);
             }
-            else
-            {
-                return InetPton6(src);
-            }
+            return InetPton6(src);
         }
 
         /// <summary>

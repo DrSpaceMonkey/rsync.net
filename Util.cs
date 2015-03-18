@@ -276,5 +276,19 @@ namespace NetSync
         {
             return String.IsNullOrEmpty(value);
         }
+
+
+        /// <summary>
+        /// Makes a relative path from an absolute path
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="referencePath"></param>
+        /// <returns></returns>
+        public static string MakeRelative(string filePath, string referencePath)
+        {
+            var fileUri = new Uri(filePath);
+            var referenceUri = new Uri(referencePath);
+            return referenceUri.MakeRelativeUri(fileUri).ToString();
+        }
     }
 }

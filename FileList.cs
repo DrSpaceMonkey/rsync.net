@@ -15,10 +15,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace NetSync
 {
@@ -61,7 +63,7 @@ namespace NetSync
         private string _lastDir = String.Empty;
         private string _fileListDir = String.Empty;
         private string _lastName = String.Empty;
-        private UInt32 _mode = 0;
+        private UInt32 _mode;
         private DateTime _modTime = DateTime.Now;
         private Options _options;
         private CheckSum _checkSum;
@@ -336,13 +338,13 @@ namespace NetSync
 
             if (s1.Length == i)
             {
-                return -(int)s2[i];
+                return -s2[i];
             }
             if (s2.Length == i)
             {
-                return (int)s1[i];
+                return s1[i];
             }
-            return (int)s1[i] - (int)s2[i];
+            return s1[i] - s2[i];
         }
 
         public static int FileListFind(List<FileStruct> fileList, FileStruct file)
@@ -670,7 +672,7 @@ namespace NetSync
             }
 
 
-            var b = System.Text.Encoding.ASCII.GetBytes(fileName);
+            var b = Encoding.ASCII.GetBytes(fileName);
 
             ioStream.Write(b, l1, l2);
             ioStream.WriteLongInt(file.Length);
@@ -744,13 +746,12 @@ namespace NetSync
             else
             {
                 Log.WriteLine("Can't find directory '" + Util.FullFileName(dir) + "'");
-                return;
             }
         }
 
         public void CleanFileList(List<FileStruct> fileList, bool stripRoot, bool noDups)
         {
-            if (fileList == null || fileList.Count == 0)
+            if (fileList.Count == 0)
             {
                 return;
             }
@@ -764,20 +765,12 @@ namespace NetSync
             }
             if (stripRoot)
             {
-                for (var i = 0; i < fileList.Count; i++)
+                foreach (FileStruct t in fileList)
                 {
-                    if ((fileList[i]).DirName != null && (fileList[i]).DirName[0] == '/')
-                    {
-                        (fileList[i]).DirName = (fileList[i]).DirName.Substring(1);
-                    }
-                    if ((fileList[i]).DirName != null && (fileList[i]).DirName.CompareTo(String.Empty) == 0)
-                    {
-                        (fileList[i]).DirName = null;
-                    }
+                    (t).DirName = (t).DirName.IsBlank() ? null : (t).DirName.TrimStart(Path.PathSeparator);
                 }
 
             }
-            return;
         }
 
         private bool ShowFileListProgress()
@@ -798,7 +791,7 @@ namespace NetSync
         {
             if (_options.DoProgress)
             {
-                Log.WriteLine(fileList.Count.ToString() + " file" + (fileList.Count == 1 ? " " : "s ") + "to consider");
+                Log.WriteLine(fileList.Count + " file" + (fileList.Count == 1 ? " " : "s ") + "to consider");
             }
             else
             {
@@ -843,7 +836,7 @@ namespace NetSync
                 {
                     continue;
                 }
-                Log.WriteLine(" " + file.Length + " " + file.ModTime.ToString() + " " + file.GetFullName());
+                Log.WriteLine(" " + file.Length + " " + file.ModTime + " " + file.GetFullName());
             }            
         }
 
@@ -860,7 +853,7 @@ namespace NetSync
             {
                 return false;
             }
-            if (fileName.CompareTo(String.Empty) != 0)
+            if (!fileName.IsBlank())
             {
                 /* never exclude '.', even if somebody does --exclude '*' */
                 if (fileName[0] == '.' && fileName.Length == 1)
@@ -868,10 +861,10 @@ namespace NetSync
                     return false;
                 }
                 /* Handle the -R version of the '.' dir. */
-                if (fileName[0] == '/')
+                if (fileName.StartsWith(Path.PathSeparator.ToString()))
                 {
                     var len = fileName.Length;
-                    if (fileName[len - 1] == '.' && fileName[len - 2] == '/')
+                    if (fileName.EndsWith((string.Format(".{0}", Path.PathSeparator))))
                     {
                         return true;
                     }
