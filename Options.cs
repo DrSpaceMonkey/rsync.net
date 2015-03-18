@@ -24,329 +24,329 @@ namespace NetSync
 
     #region Deprecated command line paring
 
-    //
-
-    //internal class CommandLineParser
-    //{
-
-    //    public static int ParseArguments(string[] args, Options options)
-    //    {
-    //        var argsNotUsed = 0;
-    //        var i = 0;
-    //        var excl = new Exclude(options);
-    //        while (i < args.Length)
-    //        {
-    //            try
-    //            {
-    //                switch (args[i])
-    //                {
-    //                    case "--suffix":
-    //                        options.BackupSuffix = args[++i];
-    //                        break;
-    //                    case "--rsync-path":
-    //                        options.RsyncPath = args[++i];
-    //                        break;
-    //                    case "--password-file":
-    //                        options.PasswordFile = args[++i];
-    //                        break;
-    //                    case "--ignore-times":
-    //                    case "-I":
-    //                        options.IgnoreTimes = true;
-    //                        break;
-    //                    case "--size-only":
-    //                        options.SizeOnly = true;
-    //                        break;
-    //                    case "--modify-window":
-    //                        options.UsingModifyWindow = true;
-    //                        options.ModifyWindow = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--one-file-system":
-    //                    case "-x":
-    //                        options.OneFileSystem = true;
-    //                        break;
-    //                    case "--delete":
-    //                        options.DeleteMode = true;
-    //                        break;
-    //                    case "--existing":
-    //                        options.OnlyExisting = true;
-    //                        break;
-    //                    case "--ignore-existing":
-    //                        options.OptIgnoreExisting = true;
-    //                        break;
-    //                    case "--delete-after":
-    //                        options.DeleteMode = true;
-    //                        options.DeleteAfter = true;
-    //                        break;
-    //                    case "--delete-excluded":
-    //                        options.DeleteMode = true;
-    //                        options.DeleteExcluded = true;
-    //                        break;
-    //                    case "--force":
-    //                        options.ForceDelete = true;
-    //                        break;
-    //                    case "--numeric-ids":
-    //                        options.NumericIds = true;
-    //                        break;
-    //                    case "--exclude":
-    //                        excl.AddExclude(ref options.ExcludeList, args[++i], 0);
-    //                        break;
-    //                    case "--include":
-    //                        excl.AddExclude(ref options.ExcludeList, args[++i], (int)Options.XflgDefInclude);
-    //                        options.ForceDelete = true;
-    //                        break;
-    //                    case "--exclude-from":
-    //                    case "--include-from":
-    //                        var arg = args[i];
-    //                        excl.AddExcludeFile(ref options.ExcludeList, args[++i],
-    //                                (arg.CompareTo("--exclude-from") == 0) ? 0 : (int)Options.XflgDefInclude);
-    //                        break;
-    //                    case "--safe-links":
-    //                        options.SafeSymlinks = true;
-    //                        break;
-    //                    case "--help":
-    //                    case "-h":
-    //                        WinRsync.Exit(String.Empty, null);
-    //                        break;
-    //                    case "--backup":
-    //                    case "-b":
-    //                        options.MakeBackups = true;
-    //                        break;
-    //                    case "--dry-run":
-    //                    case "-n":
-    //                        options.DryRun = true;
-    //                        break;
-    //                    case "--sparse":
-    //                    case "-S":
-    //                        options.SparseFiles = true;
-    //                        break;
-    //                    case "--cvs-exclude":
-    //                    case "-C":
-    //                        options.CvsExclude = true;
-    //                        break;
-    //                    case "--update":
-    //                    case "-u":
-    //                        options.UpdateOnly = true;
-    //                        break;
-    //                    case "--inplace":
-    //                        options.Inplace = true;
-    //                        break;
-    //                    case "--keep-dirlinks":
-    //                    case "-K":
-    //                        options.KeepDirLinks = true;
-    //                        break;
-    //                    case "--links":
-    //                    case "-l":
-    //                        options.PreserveLinks = true;
-    //                        break;
-    //                    case "--copy-links":
-    //                    case "-L":
-    //                        options.CopyLinks = true;
-    //                        break;
-    //                    case "--whole-file":
-    //                    case "-W":
-    //                        options.WholeFile = 1;
-    //                        break;
-    //                    case "--no-whole-file":
-    //                        options.WholeFile = 0;
-    //                        break;
-    //                    case "--copy-unsafe-links":
-    //                        options.CopyUnsafeLinks = true;
-    //                        break;
-    //                    case "--perms":
-    //                    case "-p":
-    //                        options.PreservePerms = true;
-    //                        break;
-    //                    case "--owner":
-    //                    case "-o":
-    //                        options.PreserveUid = true;
-    //                        break;
-    //                    case "--group":
-    //                    case "-g":
-    //                        options.PreserveGid = true;
-    //                        break;
-    //                    case "--devices":
-    //                    case "-D":
-    //                        options.PreserveDevices = true;
-    //                        break;
-    //                    case "--times":
-    //                    case "-t":
-    //                        options.PreserveTimes = true;
-    //                        break;
-    //                    case "--checksum":
-    //                    case "-c":
-    //                        options.AlwaysChecksum = true;
-    //                        break;
-    //                    case "--verbose":
-    //                    case "-v":
-    //                        options.Verbose++;
-    //                        break;
-    //                    case "--quiet":
-    //                    case "-q":
-    //                        options.Quiet++;
-    //                        break;
-    //                    case "--archive":
-    //                    case "-a":
-    //                        options.ArchiveMode = true;
-    //                        break;
-    //                    case "--server":
-    //                        options.AmServer = true;
-    //                        break;
-    //                    case "--sender":
-    //                        options.AmSender = true;
-    //                        break;
-    //                    case "--recursive":
-    //                    case "-r":
-    //                        options.Recurse = true;
-    //                        break;
-    //                    case "--relative":
-    //                    case "-R":
-    //                        options.RelativePaths = true;
-    //                        break;
-    //                    case "--no-relative":
-    //                        options.RelativePaths = false;
-    //                        break;
-    //                    case "--rsh":
-    //                    case "-e":
-    //                        options.ShellCmd = args[++i];
-    //                        break;
-    //                    case "--block-size":
-    //                    case "-B":
-    //                        options.BlockSize = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--max-delete":
-    //                        options.MaxDelete = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--timeout":
-    //                        options.IoTimeout = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--temp-dir":
-    //                    case "-T":
-    //                        options.TmpDir = args[++i];
-    //                        break;
-    //                    case "--compare-dest":
-    //                        options.CompareDest = args[++i];
-    //                        break;
-    //                    case "--link-dest":
-    //                        options.CompareDest = args[++i];
-    //                        break;
-    //                    case "--compress":
-    //                    case "-z":
-    //                        options.DoCompression = true;
-    //                        break;
-    //                    case "--stats":
-    //                        options.DoStats = true;
-    //                        break;
-    //                    case "--progress":
-    //                        options.DoProgress = true;
-    //                        break;
-    //                    case "--partial":
-    //                        options.KeepPartial = true;
-    //                        break;
-    //                    case "--partial-dir":
-    //                        options.PartialDir = args[++i];
-    //                        break;
-    //                    case "--ignore-errors":
-    //                        options.IgnoreErrors = true;
-    //                        break;
-    //                    case "--blocking-io":
-    //                        options.BlockingIo = 1;
-    //                        break;
-    //                    case "--no-blocking-io":
-    //                        options.BlockingIo = 0;
-    //                        break;
-    //                    case "-P":
-    //                        options.DoProgress = true;
-    //                        options.KeepPartial = true;
-    //                        break;
-    //                    case "--log-format":
-    //                        options.LogFormat = args[++i];
-    //                        break;
-    //                    case "--bwlimit":
-    //                        options.BwLimit = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--backup-dir":
-    //                        options.BackupDir = args[++i];
-    //                        break;
-    //                    case "--hard-links":
-    //                    case "-H":
-    //                        options.PreserveHardLinks = true;
-    //                        break;
-    //                    case "--read-batch":
-    //                        options.BatchName = args[++i];
-    //                        options.ReadBatch = true;
-    //                        break;
-    //                    case "--write-batch":
-    //                        options.BatchName = args[++i];
-    //                        options.WriteBatch = true;
-    //                        break;
-    //                    case "--files-from":
-    //                        options.FilesFrom = args[++i];
-    //                        break;
-    //                    case "--from0":
-    //                        options.EolNulls = true;
-    //                        break;
-    //                    case "--no-implied-dirs":
-    //                        options.ImpliedDirs = true;
-    //                        break;
-    //                    case "--protocol":
-    //                        options.ProtocolVersion = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--checksum-seed":
-    //                        options.ChecksumSeed = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--daemon":
-    //                        options.AmDaemon = true;
-    //                        break;
-    //                    case "--address":
-    //                        options.BindAddress = args[++i];
-    //                        break;
-    //                    case "--port":
-    //                        options.RsyncPort = Convert.ToInt32(args[++i]);
-    //                        break;
-    //                    case "--config":
-    //                        options.ConfigFile = args[++i].Trim();
-    //                        break;
-    //                    default:
-    //                        {
-    //                            argsNotUsed += ParseMergeArgs(args[i], options);
-    //                            break;
-    //                        }
-    //                }
-    //                i++;
-    //            }
-    //            catch { return -1; }
-    //        }
-    //        if (options.AmSender && !options.AmServer)
-    //        {
-    //            WinRsync.Exit(String.Empty, null);
-    //        }
-    //        if (options.IoTimeout > 0 && options.IoTimeout < options.SelectTimeout)
-    //        {
-    //            options.SelectTimeout = options.IoTimeout;
-    //        }
-    //        return argsNotUsed;
-    //    }
 
 
+    internal class CommandLineParser
+    {
 
-    //    private static int ParseMergeArgs(string mergeArgs, Options options)
-    //    {
-    //        if (mergeArgs != null && mergeArgs.StartsWith("-") && mergeArgs.Substring(1).IndexOf('-') == -1)
-    //        {
-    //            mergeArgs = mergeArgs.Substring(1);
-    //            var args = new string[mergeArgs.Length];
-    //            for (var i = 0; i < mergeArgs.Length; i++)
-    //            {
-    //                args[i] = "-" + mergeArgs[i];
-    //            }
-    //            return ParseArguments(args, options);
+        public static int ParseArguments(string[] args, Options options)
+        {
+            var argsNotUsed = 0;
+            var i = 0;
+            var excl = new Exclude(options);
+            while (i < args.Length)
+            {
+                try
+                {
+                    switch (args[i])
+                    {
+                        case "--suffix":
+                            options.BackupSuffix = args[++i];
+                            break;
+                        case "--rsync-path":
+                            options.RsyncPath = args[++i];
+                            break;
+                        case "--password-file":
+                            options.PasswordFile = args[++i];
+                            break;
+                        case "--ignore-times":
+                        case "-I":
+                            options.IgnoreTimes = true;
+                            break;
+                        case "--size-only":
+                            options.SizeOnly = true;
+                            break;
+                        case "--modify-window":
+                            options.UsingModifyWindow = true;
+                            options.ModifyWindow = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--one-file-system":
+                        case "-x":
+                            options.OneFileSystem = true;
+                            break;
+                        case "--delete":
+                            options.DeleteMode = true;
+                            break;
+                        case "--existing":
+                            options.OnlyExisting = true;
+                            break;
+                        case "--ignore-existing":
+                            options.OptIgnoreExisting = true;
+                            break;
+                        case "--delete-after":
+                            options.DeleteMode = true;
+                            options.DeleteAfter = true;
+                            break;
+                        case "--delete-excluded":
+                            options.DeleteMode = true;
+                            options.DeleteExcluded = true;
+                            break;
+                        case "--force":
+                            options.ForceDelete = true;
+                            break;
+                        case "--numeric-ids":
+                            options.NumericIds = true;
+                            break;
+                        case "--exclude":
+                            excl.AddExclude(ref options.ExcludeList, args[++i], 0);
+                            break;
+                        case "--include":
+                            excl.AddExclude(ref options.ExcludeList, args[++i], (int)Options.XflgDefInclude);
+                            options.ForceDelete = true;
+                            break;
+                        case "--exclude-from":
+                        case "--include-from":
+                            var arg = args[i];
+                            excl.AddExcludeFile(ref options.ExcludeList, args[++i],
+                                    (arg.CompareTo("--exclude-from") == 0) ? 0 : (int)Options.XflgDefInclude);
+                            break;
+                        case "--safe-links":
+                            options.SafeSymlinks = true;
+                            break;
+                        case "--help":
+                        case "-h":
+                            WinRsync.Exit(String.Empty, null);
+                            break;
+                        case "--backup":
+                        case "-b":
+                            options.MakeBackups = true;
+                            break;
+                        case "--dry-run":
+                        case "-n":
+                            options.DryRun = true;
+                            break;
+                        case "--sparse":
+                        case "-S":
+                            options.SparseFiles = true;
+                            break;
+                        case "--cvs-exclude":
+                        case "-C":
+                            options.CvsExclude = true;
+                            break;
+                        case "--update":
+                        case "-u":
+                            options.UpdateOnly = true;
+                            break;
+                        case "--inplace":
+                            options.Inplace = true;
+                            break;
+                        case "--keep-dirlinks":
+                        case "-K":
+                            options.KeepDirLinks = true;
+                            break;
+                        case "--links":
+                        case "-l":
+                            options.PreserveLinks = true;
+                            break;
+                        case "--copy-links":
+                        case "-L":
+                            options.CopyLinks = true;
+                            break;
+                        case "--whole-file":
+                        case "-W":
+                            options.WholeFile = 1;
+                            break;
+                        case "--no-whole-file":
+                            options.WholeFile = 0;
+                            break;
+                        case "--copy-unsafe-links":
+                            options.CopyUnsafeLinks = true;
+                            break;
+                        case "--perms":
+                        case "-p":
+                            options.PreservePerms = true;
+                            break;
+                        case "--owner":
+                        case "-o":
+                            options.PreserveUid = true;
+                            break;
+                        case "--group":
+                        case "-g":
+                            options.PreserveGid = true;
+                            break;
+                        case "--devices":
+                        case "-D":
+                            options.PreserveDevices = true;
+                            break;
+                        case "--times":
+                        case "-t":
+                            options.PreserveTimes = true;
+                            break;
+                        case "--checksum":
+                        case "-c":
+                            options.AlwaysChecksum = true;
+                            break;
+                        case "--verbose":
+                        case "-v":
+                            options.Verbose++;
+                            break;
+                        case "--quiet":
+                        case "-q":
+                            options.Quiet++;
+                            break;
+                        case "--archive":
+                        case "-a":
+                            options.ArchiveMode = true;
+                            break;
+                        case "--server":
+                            options.AmServer = true;
+                            break;
+                        case "--sender":
+                            options.AmSender = true;
+                            break;
+                        case "--recursive":
+                        case "-r":
+                            options.Recurse = true;
+                            break;
+                        case "--relative":
+                        case "-R":
+                            options.RelativePaths = true;
+                            break;
+                        case "--no-relative":
+                            options.RelativePaths = false;
+                            break;
+                        case "--rsh":
+                        case "-e":
+                            options.ShellCmd = args[++i];
+                            break;
+                        case "--block-size":
+                        case "-B":
+                            options.BlockSize = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--max-delete":
+                            options.MaxDelete = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--timeout":
+                            options.IoTimeout = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--temp-dir":
+                        case "-T":
+                            options.TmpDir = args[++i];
+                            break;
+                        case "--compare-dest":
+                            options.CompareDest = args[++i];
+                            break;
+                        case "--link-dest":
+                            options.CompareDest = args[++i];
+                            break;
+                        case "--compress":
+                        case "-z":
+                            options.DoCompression = true;
+                            break;
+                        case "--stats":
+                            options.DoStats = true;
+                            break;
+                        case "--progress":
+                            options.DoProgress = true;
+                            break;
+                        case "--partial":
+                            options.KeepPartial = true;
+                            break;
+                        case "--partial-dir":
+                            options.PartialDir = args[++i];
+                            break;
+                        case "--ignore-errors":
+                            options.IgnoreErrors = true;
+                            break;
+                        case "--blocking-io":
+                            options.BlockingIo = 1;
+                            break;
+                        case "--no-blocking-io":
+                            options.BlockingIo = 0;
+                            break;
+                        case "-P":
+                            options.DoProgress = true;
+                            options.KeepPartial = true;
+                            break;
+                        case "--log-format":
+                            options.LogFormat = args[++i];
+                            break;
+                        case "--bwlimit":
+                            options.BwLimit = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--backup-dir":
+                            options.BackupDir = args[++i];
+                            break;
+                        case "--hard-links":
+                        case "-H":
+                            options.PreserveHardLinks = true;
+                            break;
+                        case "--read-batch":
+                            options.BatchName = args[++i];
+                            options.ReadBatch = true;
+                            break;
+                        case "--write-batch":
+                            options.BatchName = args[++i];
+                            options.WriteBatch = true;
+                            break;
+                        case "--files-from":
+                            options.FilesFrom = args[++i];
+                            break;
+                        case "--from0":
+                            options.EolNulls = true;
+                            break;
+                        case "--no-implied-dirs":
+                            options.ImpliedDirs = true;
+                            break;
+                        case "--protocol":
+                            options.ProtocolVersion = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--checksum-seed":
+                            options.ChecksumSeed = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--daemon":
+                            options.AmDaemon = true;
+                            break;
+                        case "--address":
+                            options.BindAddress = args[++i];
+                            break;
+                        case "--port":
+                            options.RsyncPort = Convert.ToInt32(args[++i]);
+                            break;
+                        case "--config":
+                            options.ConfigFile = args[++i].Trim();
+                            break;
+                        default:
+                            {
+                                argsNotUsed += ParseMergeArgs(args[i], options);
+                                break;
+                            }
+                    }
+                    i++;
+                }
+                catch { return -1; }
+            }
+            if (options.AmSender && !options.AmServer)
+            {
+                WinRsync.Exit(String.Empty, null);
+            }
+            if (options.IoTimeout > 0 && options.IoTimeout < options.SelectTimeout)
+            {
+                options.SelectTimeout = options.IoTimeout;
+            }
+            return argsNotUsed;
+        }
 
-    //        }
-    //        return 1;
-    //    }
-    //}
 
-    //
+
+        private static int ParseMergeArgs(string mergeArgs, Options options)
+        {
+            if (mergeArgs != null && mergeArgs.StartsWith("-") && mergeArgs.Substring(1).IndexOf('-') == -1)
+            {
+                mergeArgs = mergeArgs.Substring(1);
+                var args = new string[mergeArgs.Length];
+                for (var i = 0; i < mergeArgs.Length; i++)
+                {
+                    args[i] = "-" + mergeArgs[i];
+                }
+                return ParseArguments(args, options);
+
+            }
+            return 1;
+        }
+    }
+
+
 
     #endregion
 

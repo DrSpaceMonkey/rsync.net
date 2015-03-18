@@ -257,9 +257,24 @@ namespace NetSync
             return 1;
         }
 
+        /// <summary>
+        /// Syntactic sugar for String.Trim() for nullable strings
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string Coaleced(this string value)
         {
             return (value ?? string.Empty).Trim();
+        }
+
+        /// <summary>
+        /// Syntactic sugar for "String.IsNullOrEmpty(x)"
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool IsBlank(this string value)
+        {
+            return String.IsNullOrEmpty(value);
         }
     }
 }

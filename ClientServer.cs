@@ -110,7 +110,7 @@ namespace NetSync
 
             options.Verbose = 0;
 
-            /*
+            
 
             var argsNotUsed = CommandLineParser.ParseArguments(args, options);
             if (argsNotUsed == -1)
@@ -124,7 +124,7 @@ namespace NetSync
                 args2[i] = args[args.Length - argsNotUsed + i];
             }
             
-            */
+            
 
             WinRsync.SetupProtocol(clientInfo);
             ioStream.IoStartMultiplexOut();

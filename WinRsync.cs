@@ -31,7 +31,7 @@ namespace NetSync
 
         public WinRsync()
         {
-            ;
+
         }
 
         public Options Opt { get; private set; }
@@ -40,20 +40,20 @@ namespace NetSync
         {
             Opt = new Options();
 
-            //if (args.Length == 0)
-            //{
-            //    WinRsync.Exit(String.Empty, null);
-            //}
-            //int argsNotUsed = CommandLineParser.ParseArguments(args, Opt);
-            //if (argsNotUsed == -1)
-            //{
-            //    WinRsync.Exit("Error parsing options", null);
-            //}
-            //string[] args2 = new string[argsNotUsed];
-            //for (int i = 0; i < argsNotUsed; i++)
-            //{
-            //    args2[i] = args[args.Length - argsNotUsed + i];
-            //}
+            if (args.Length == 0)
+            {
+                WinRsync.Exit(String.Empty, null);
+            }
+            int argsNotUsed = CommandLineParser.ParseArguments(args, Opt);
+            if (argsNotUsed == -1)
+            {
+                WinRsync.Exit("Error parsing options", null);
+            }
+            string[] args2 = new string[argsNotUsed];
+            for (int i = 0; i < argsNotUsed; i++)
+            {
+                args2[i] = args[args.Length - argsNotUsed + i];
+            }
 
             if (Opt.AmDaemon && !Opt.AmSender)
             {
@@ -401,6 +401,10 @@ namespace NetSync
         {
             Log.Write(message);
 
+            /*
+
+            Not needed for a library
+
             if (!Opt.AmDaemon)
             {
                 Console.Read();
@@ -413,6 +417,7 @@ namespace NetSync
                     clientInfo.IoStream.ClientThread.Abort();
                 }
             }
+            */
         }
     }
 
@@ -451,32 +456,33 @@ namespace NetSync
         /// <param name="str"></param>
         private static void LogWrite(string str)
         {
-            if (Daemon.ServerOptions != null)
-            {
-                if (Daemon.ServerOptions.LogFile == null)
-                {
-                    try
-                    {
-                        Daemon.ServerOptions.LogFile =
-                            new FileStream(Path.Combine(Environment.SystemDirectory, "rsyncd.log"),
-                                FileMode.Append, FileAccess.Write); //FileMode.OpenOrCreate | FileMode.Append is redundant
-                    }
-                    catch (Exception)
-                    {
-                        return;
-                    }
-                }
-                str = "[ " + DateTime.Now + " ] " + str;
-                Daemon.ServerOptions.LogFile.Write(Encoding.ASCII.GetBytes(str), 0, str.Length); //@todo cyrillic
-                Daemon.ServerOptions.LogFile.Flush();
-            }
-            else
-            {
-                if (!WinRsync.Opt.AmDaemon)
-                {
-                    Console.Write(str);
-                }
-            }
+
+            //if (Daemon.ServerOptions != null)
+            //{
+            //    if (Daemon.ServerOptions.LogFile == null)
+            //    {
+            //        try
+            //        {
+            //            Daemon.ServerOptions.LogFile =
+            //                new FileStream(Path.Combine(Environment.SystemDirectory, "rsyncd.log"),
+            //                    FileMode.Append, FileAccess.Write); //FileMode.OpenOrCreate | FileMode.Append is redundant
+            //        }
+            //        catch (Exception)
+            //        {
+            //            return;
+            //        }
+            //    }
+            //    str = "[ " + DateTime.Now + " ] " + str;
+            //    Daemon.ServerOptions.LogFile.Write(Encoding.ASCII.GetBytes(str), 0, str.Length); //@todo cyrillic
+            //    Daemon.ServerOptions.LogFile.Flush();
+            //}
+            //else
+            //{
+            //    if (!WinRsync.Opt.AmDaemon)
+            //    {
+            //        Console.Write(str);
+            //    }
+            //}
         }
     }
 

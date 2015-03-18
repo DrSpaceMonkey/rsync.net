@@ -47,29 +47,21 @@ namespace NetSync
         /// <returns></returns>
         public bool AllowAccess(string addr, string host, string allowList, string denyList)
         {
-            if (allowList == null || allowList.CompareTo(String.Empty) == 0)
-            {
-                allowList = null;
-            }
-            if (denyList == null || denyList.CompareTo(String.Empty) == 0)
-            {
-                denyList = null;
-            }
             /* if theres no deny list and no allow list then allow access */
-            if (denyList == null && allowList == null)
+            if (denyList.IsBlank() && allowList.IsBlank())
             {
                 return true;
             }
             /* if there is an allow list but no deny list then allow only hosts
                on the allow list */
-            if (denyList == null)
+            if (denyList.IsBlank())
             {
                 return (AccessMatch(allowList, addr, host));
             }
 
             /* if theres a deny list but no allow list then allow
                all hosts not on the deny list */
-            if (allowList == null)
+            if (allowList.IsBlank())
             {
                 return (!AccessMatch(denyList, addr, host));
             }
