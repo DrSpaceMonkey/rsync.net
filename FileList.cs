@@ -28,7 +28,7 @@ namespace NetSync
         public string BaseName;
         public string DirName;
         public string BaseDir;
-        public System.DateTime ModTime;
+        public DateTime ModTime;
         public uint Mode;
         public int Uid;
         public int Gid;
@@ -694,7 +694,7 @@ namespace NetSync
             }
 
 
-            byte[] b = System.Text.ASCIIEncoding.ASCII.GetBytes(fileName);
+            byte[] b = System.Text.Encoding.ASCII.GetBytes(fileName);
 
             ioStream.Write(b, l1, l2);
             ioStream.WriteLongInt(file.Length);

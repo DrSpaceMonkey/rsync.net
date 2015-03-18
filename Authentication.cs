@@ -105,7 +105,7 @@ namespace NetSync
             }
             if (pass.Equals(String.Empty))
             {
-                pass = System.Environment.GetEnvironmentVariable("RSYNC_PASSWORD");
+                pass = Environment.GetEnvironmentVariable("RSYNC_PASSWORD");
             }
             if (string.IsNullOrEmpty(pass))
             {
@@ -227,7 +227,7 @@ namespace NetSync
             {
                 string fileName = Path.Combine(Environment.SystemDirectory, Daemon.Config.GetSecretsFile(moduleNumber));
                 string secret = null;
-                using (var streamReader = new System.IO.StreamReader(fileName))
+                using (var streamReader = new StreamReader(fileName))
                 {
                     while (true)
                     {

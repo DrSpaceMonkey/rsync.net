@@ -187,7 +187,7 @@ namespace NetSync
                 }
                 try
                 {
-                    using (var cf = new System.IO.StreamReader(_confFile))
+                    using (var cf = new StreamReader(_confFile))
                     {
                         Module mod = null;
 
@@ -287,7 +287,7 @@ namespace NetSync
                                                     break;
                                                 case "port":
                                                     Port = parm[1];
-                                                    options.rsyncPort = Convert.ToInt32(Port);
+                                                    options.RsyncPort = Convert.ToInt32(Port);
                                                     break;
                                                 case "address":
                                                     options.BindAddress = Address = parm[1];

@@ -29,9 +29,9 @@ namespace NetSync
 
         public ExcludeStruct(string pattern, UInt32 matchFlags, int slashCnt)
         {
-            this.Pattern = pattern;
-            this.MatchFlags = matchFlags;
-            this.SlashCnt = slashCnt;
+            Pattern = pattern;
+            MatchFlags = matchFlags;
+            SlashCnt = slashCnt;
         }
 
         public ExcludeStruct() { }
@@ -58,13 +58,13 @@ namespace NetSync
             }
             if (fileName.CompareTo("-") == 0)
             {
-                f = System.Console.In;
+                f = Console.In;
             }
             else
             {
                 try
                 {
-                    f = new System.IO.StreamReader(fileName);
+                    f = new StreamReader(fileName);
                 }
                 catch
                 {

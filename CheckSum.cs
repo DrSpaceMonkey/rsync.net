@@ -246,7 +246,7 @@ namespace NetSync
         public void MdFour64(UInt32[] m)
         {
             UInt32 aa, bb, cc, dd;
-            aa = this.A; bb = this.B; cc = this.C; dd = this.D;
+            aa = A; bb = B; cc = C; dd = D;
 
             A = Round1(A, B, C, D, m, 0, 3);
             D = Round1(D, A, B, C, m, 1, 7);
@@ -310,12 +310,12 @@ namespace NetSync
 
         public void Begin()
         {
-            this.A = 0x67452301;
-            this.B = 0xefcdab89;
-            this.C = 0x98badcfe;
-            this.D = 0x10325476;
-            this.TotalN = 0;
-            this.TotalN2 = 0;
+            A = 0x67452301;
+            B = 0xefcdab89;
+            C = 0x98badcfe;
+            D = 0x10325476;
+            TotalN = 0;
+            TotalN2 = 0;
         }
 
         public byte[] Result()
@@ -347,12 +347,12 @@ namespace NetSync
         public void Tail(byte[] inData, int ind, UInt32 n)
         {
             UInt32[] m = new UInt32[16];
-            this.TotalN += n << 3;
-            if (this.TotalN < (n << 3))
+            TotalN += n << 3;
+            if (TotalN < (n << 3))
             {
-                this.TotalN2++;
+                TotalN2++;
             }
-            this.TotalN2 += n >> 29;
+            TotalN2 += n >> 29;
             byte[] buf = new byte[128];
             for (int i = 0; i < n; i++)
             {
@@ -361,20 +361,20 @@ namespace NetSync
             buf[n] = 0x80;
             if (n <= 55)
             {
-                Copy4(ref buf, 56, this.TotalN);
+                Copy4(ref buf, 56, TotalN);
                 if (_options.ProtocolVersion >= 27)
                 {
-                    Copy4(ref buf, 60, this.TotalN2);
+                    Copy4(ref buf, 60, TotalN2);
                 }
                 Copy64(ref m, 0, buf, 0);
                 MdFour64(m);
             }
             else
             {
-                Copy4(ref buf, 120, this.TotalN);
+                Copy4(ref buf, 120, TotalN);
                 if (_options.ProtocolVersion >= 27)
                 {
-                    Copy4(ref buf, 124, this.TotalN2);
+                    Copy4(ref buf, 124, TotalN2);
                 }
                 Copy64(ref m, 0, buf, 0);
                 MdFour64(m);
@@ -433,7 +433,7 @@ namespace NetSync
         {
             byte[] s = new byte[4];
             Md.Begin();
-            this.SumResidue = 0;
+            SumResidue = 0;
             CheckSum.Sival(ref s, 0, (UInt32)seed);
             Update(s, 0, 4);
         }

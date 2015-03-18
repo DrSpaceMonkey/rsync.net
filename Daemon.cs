@@ -87,7 +87,7 @@ namespace NetSync
             Config = new Configuration(ServerOptions.ConfigFile);
             if (Config.LoadParm(options))
             {
-                StartAcceptLoop(options.rsyncPort);
+                StartAcceptLoop(options.RsyncPort);
             }
             return -1;
         }
@@ -105,7 +105,7 @@ namespace NetSync
             catch (Exception)
             {
                 WinRsync.Exit("Can't listening address " + ServerOptions.BindAddress + " on port " + port, null);
-                System.Environment.Exit(0);
+                Environment.Exit(0);
             }
             Log.WriteLine("WinRSyncd starting, listening on port " + port);
             _stopServer = false;

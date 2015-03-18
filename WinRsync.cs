@@ -143,7 +143,7 @@ namespace NetSync
                 }
                 if (host.IndexOf(':') != -1)
                 {
-                    options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
+                    options.RsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                     host = host.Substring(0, host.IndexOf(':'));
                 }
                 var newArgs = Util.DeleteFirstElement(args);
@@ -185,7 +185,7 @@ namespace NetSync
                     }
                     if (host.IndexOf(':') != -1)
                     {
-                        options.rsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
+                        options.RsyncPort = Convert.ToInt32(host.Substring(host.IndexOf(':')));
                         host = host.Substring(0, host.IndexOf(':'));
                     }
                     var newArgs = Util.DeleteLastElement(args);
@@ -216,7 +216,7 @@ namespace NetSync
                 Log.WriteLine("ERROR: The remote path must start with a module name not a /");
                 return -1;
             }
-            cInfo.IoStream = OpenSocketOutWrapped(host, options.rsyncPort, options.BindAddress);
+            cInfo.IoStream = OpenSocketOutWrapped(host, options.RsyncPort, options.BindAddress);
 
             if (cInfo.IoStream != null)
             {

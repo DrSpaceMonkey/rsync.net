@@ -387,7 +387,7 @@ namespace NetSync
             Log.WriteLine(report);
             if (_options.AmServer)
             {
-                f.MultiplexWrite(MsgCode.MsgInfo, ASCIIEncoding.ASCII.GetBytes(report), report.Length);
+                f.MultiplexWrite(MsgCode.MsgInfo, Encoding.ASCII.GetBytes(report), report.Length);
             }
         }
     }

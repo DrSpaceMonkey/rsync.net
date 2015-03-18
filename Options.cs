@@ -299,7 +299,7 @@ namespace NetSync
                             options.BindAddress = args[++i];
                             break;
                         case "--port":
-                            options.rsyncPort = Convert.ToInt32(args[++i]);
+                            options.RsyncPort = Convert.ToInt32(args[++i]);
                             break;
                         case "--config":
                             options.ConfigFile = args[++i].Trim();
@@ -367,12 +367,12 @@ namespace NetSync
             ServerExcludeList.Add(new ExcludeStruct("server ", 0, 0));
         }
 
-        public DateTime LastIo { get; } = System.DateTime.MinValue;
+        public DateTime LastIo { get; } = DateTime.MinValue;
         //public static System.IO.StreamReader filesFromFD = null;
         /// <summary>
         /// Seems to be null all the time
         /// </summary>
-        public static System.IO.Stream FilesFromFd = null;
+        public static Stream FilesFromFd = null;
         public static Stats Stats = new Stats();
         /// <summary>
         /// "rsync://"
@@ -382,7 +382,7 @@ namespace NetSync
         /// <summary>
         /// 873
         /// </summary>
-        public int rsyncPort { get; set; } = 873;
+        public int RsyncPort { get; set; } = 873;
 
         /// <summary>
         /// 1024
@@ -546,7 +546,7 @@ namespace NetSync
         public List<ExcludeStruct> ServerExcludeList = new List<ExcludeStruct>();
         public string ExcludePathPrefix = null;
 
-        public DateTime StartTime = System.DateTime.Now;
+        public DateTime StartTime = DateTime.Now;
         public string BackupSuffix = null;
         public string RsyncPath = null;
         public string PasswordFile = null;
